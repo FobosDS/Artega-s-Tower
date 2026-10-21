@@ -2,10 +2,13 @@ import pygame
 import math
 from Settings import *
 from Map import create_map
+from Sprites import z_buffer, render_sprites
+
 
 map = create_map()
 
-def ray_casting(player, screen):
+
+def ray_casting(player, screen, sprites=None):
 
     x, y = player.x, player.y
     angle = player.angle - halfFov
@@ -37,6 +40,8 @@ def ray_casting(player, screen):
         if depth < 0.0001:
             depth = 0.0001
 
+        z_buffer[ray] = depth
+
         wall_h = min(projCoeff / depth, height * 20)
         top = half_height - wall_h / 2
         wall_x = ray * scale
@@ -46,3 +51,6 @@ def ray_casting(player, screen):
 
         pygame.draw.rect(screen, color, (wall_x, top, scale + 1, wall_h))
         angle += deltaAngle
+
+    if sprites:
+        render_sprites(player, screen, sprites)

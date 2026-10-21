@@ -2,6 +2,7 @@ import pygame
 from Settings import *
 from Player_Control import Player
 from Ray_Casting import ray_casting
+from Sprites import Sprite
 
 def main():
 
@@ -15,6 +16,10 @@ def main():
     pygame.event.set_grab(True)
 
     clock = pygame.time.Clock()
+
+    sprites_list = [
+        Sprite(600, 400, sprites_folder + "pedestal.png", 0.6),
+    ]
 
     player = Player()
 
@@ -39,7 +44,7 @@ def main():
         pygame.draw.rect(screen, light_black, (0, 0, width, half_height))
         pygame.draw.rect(screen, dark_gray, (0, half_height, width, half_height))
 
-        ray_casting(player, screen)  
+        ray_casting(player, screen, sprites_list)  
 
         pygame.display.flip()
 

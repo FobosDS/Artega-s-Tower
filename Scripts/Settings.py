@@ -32,6 +32,10 @@ dist = numRays / (2 * math.tan(halfFov))
 projCoeff = dist * tile_size * 5
 scale = width / numRays
 
+#sprites settings
+sprites_folder = "Assets/Sprites/"
+sprites_scale = 1
+
 #controls settings
 mouse_sensitivity = 0.007
 
