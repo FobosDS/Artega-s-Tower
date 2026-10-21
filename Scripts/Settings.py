@@ -14,7 +14,7 @@ pl_angle = 0
 pl_size = 20
 pl_speed = 290
 pl_rotation_speed = 5
-pl_rect = (half_height, half_width, pl_size, pl_size)
+pl_rect = (half_width, half_height, pl_size, pl_size)
 #dash
 dash_speed_multiplier = 2.5
 dash_duration = 0.08

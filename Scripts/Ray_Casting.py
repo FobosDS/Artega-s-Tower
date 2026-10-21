@@ -3,14 +3,11 @@ import math
 from Settings import *
 from Map import create_map
 
-
 map = create_map()
-
 
 def ray_casting(player, screen):
 
     x, y = player.x, player.y
-
     angle = player.angle - halfFov
 
     for ray in range(numRays):
@@ -42,12 +39,10 @@ def ray_casting(player, screen):
 
         wall_h = min(projCoeff / depth, height * 20)
         top = half_height - wall_h / 2
-
         wall_x = ray * scale
 
         shade = max(0.15, 1.0 - depth / maxDepth)
         color = (int(light_gray[0] * shade), int(light_gray[1] * shade), int(light_gray[2] * shade))
 
         pygame.draw.rect(screen, color, (wall_x, top, scale + 1, wall_h))
-
         angle += deltaAngle
