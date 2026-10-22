@@ -12,13 +12,13 @@ tile_size = 50
 pl_pos = (half_width, half_height)
 pl_angle = 0
 pl_size = 20
-pl_speed = 290
+pl_speed = 100
 pl_rotation_speed = 5
 pl_rect = (half_width, half_height, pl_size, pl_size)
 #dash
-dash_speed_multiplier = 2.5
+dash_speed_multiplier = 3.5
 dash_duration = 0.08
-dash_cooldown = 0.2
+dash_cooldown = 0.5
 #run
 sprint_speed_multiplier = 1.8
 
@@ -32,7 +32,7 @@ dist = numRays / (2 * math.tan(halfFov))
 projCoeff = dist * tile_size * 5
 scale = width / numRays
 
-#sprites settings
+#objects settings
 sprites_folder = "Assets/Sprites/"
 sprites_scale = 1
 

@@ -2,7 +2,7 @@ import pygame
 import math
 from Settings import *
 from Map import create_map
-from Sprites import z_buffer, render_sprites
+from Objects import z_buffer, render_sprites
 
 
 map = create_map()

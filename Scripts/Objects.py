@@ -5,8 +5,7 @@ from Settings import *
 z_buffer = [0.0] * numRays
 
 class Sprite:
-
-    def __init__(self, x, y, image_path, scale=1.0):
+    def __init__(self, x, y, image_path, scale=1.0, collision_radius=0):
         self.x = x
         self.y = y
         self.image = pygame.image.load(image_path).convert_alpha()
@@ -14,6 +13,19 @@ class Sprite:
         
         self.img_w, self.img_h = self.image.get_size()
         self.aspect = self.img_w / self.img_h
+        
+        self.rect = pygame.Rect(
+            self.x - collision_radius,
+            self.y - collision_radius,
+            collision_radius * 2,
+            collision_radius * 2
+        )
+
+def check_object_collision(test_rect, sprites):
+    for sprite in sprites:
+        if test_rect.colliderect(sprite.rect):
+            return True
+    return False
 
 
 def render_sprites(player, screen, sprites):
@@ -50,7 +62,7 @@ def render_sprites(player, screen, sprites):
         wall_height_at_sprite = abs(int(projCoeff / transform_y))
         floor_level = half_height + wall_height_at_sprite // 2
         draw_start_y = floor_level - sprite_height
-        
+
         draw_start_x = -sprite_width // 2 + sprite_screen_x
 
         center_stripe = max(0, min(width - 1, sprite_screen_x))

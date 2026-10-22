@@ -2,6 +2,7 @@ import pygame
 import math
 from Settings import *
 from Map import create_map
+from Objects import check_object_collision
 
 
 class Player():
@@ -12,6 +13,7 @@ class Player():
         self.angle = pl_angle
         self.rect = pygame.Rect(pl_rect)
         self.map = create_map()
+        self.objects = []
 
         self.dash_time_left = 0.0
         self.dash_cooldown_left = 0.0
@@ -22,6 +24,10 @@ class Player():
         for wall in self.map:
             if test_rect.colliderect(wall):
                 return True
+    
+        if check_object_collision(test_rect, self.objects):
+            return True
+            
         return False
 
     def move_with_collision(self, dx, dy):
