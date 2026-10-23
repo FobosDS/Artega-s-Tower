@@ -25,5 +25,8 @@ class Input_Manager:
                 if event.button == 1:
                     if self.weapon.attack():
                         print("Удар")
+                elif event.button == 3:
+                    if self.weapon.block():
+                        print("Блок")
 
         return True

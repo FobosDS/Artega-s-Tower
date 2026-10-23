@@ -17,13 +17,14 @@ pl_rotation_speed = 5
 pl_rect = (half_width, half_height, pl_size, pl_size)
 #dash
 dash_speed_multiplier = 3.5
-dash_duration = 0.08
-dash_cooldown = 1.1
+dash_duration = 0.09
+dash_cooldown = 1
 #run
 sprint_speed_multiplier = 1.8
 #attack
-frame_duration = 0.1
+animation_duration = 0.1
 reload_time = 0.35
+block_duration = 0.3
 
 #status settings
 #max status

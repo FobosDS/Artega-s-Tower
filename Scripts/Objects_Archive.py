@@ -25,10 +25,11 @@ SSD = {
 
 #weapon sprites dictionary
 WSD = {
-    "sword":[
+    "sword_attack":[
         sprites_folder + "sword/" + "stand.png",
         sprites_folder + "sword/" + "attack1.png",
         sprites_folder + "sword/" + "attack2.png",
         sprites_folder + "sword/" + "attack3.png"
-    ]
+    ],
+    "sword_block": sprites_folder + "sword/" + "block.png"
 }
