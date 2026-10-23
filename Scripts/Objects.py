@@ -30,4 +30,4 @@ class Interactive_Sprite(Sprite):
 
     def perform_action(self):
         #object action
-        print("Interacted with object")
+        print("Взаимодействие")

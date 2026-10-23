@@ -7,6 +7,7 @@ from Interactions import Interaction_Manager
 from Renderer import render_scene
 from Controls import Input_Manager
 from Weapon import Weapon
+from UI import draw_hud
 
 def main():
     pygame.init()
@@ -28,7 +29,7 @@ def main():
     all_objects_list = objects_list + interactive_objects_list
 
     player = Player()
-    weapon = Weapon()
+    weapon = Weapon(player.stats)
 
     interaction_manager = Interaction_Manager()
     interaction_manager.interactive_objects = interactive_objects_list
@@ -43,12 +44,13 @@ def main():
             running = False
         
         player.movement(dt, all_objects_list)
+        
         player.stats.update_effects(dt)
-        weapon.update(dt)
+        weapon.update(dt, (player.x, player.y), player.is_sprinting)
 
         render_scene(player, screen, objects_list, interactive_objects_list)
-
         weapon.draw(screen)
+        draw_hud(screen, player.stats)
 
         pygame.display.flip()
 

@@ -1,4 +1,5 @@
 import pygame
+from Settings import *
 
 class Input_Manager:
     def __init__(self, player, interaction_manager, weapon):
@@ -14,12 +15,14 @@ class Input_Manager:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return False
-                if event.key == pygame.K_e:
-                    self.interaction_manager.handle_input(self.player.rect, {pygame.K_e: True})
-                if event.key == pygame.K_f:
-                    self.player.stats.use_potion()
-                if event.key == pygame.K_r:
+                if event.key == interact_key:
+                    self.interaction_manager.handle_input(self.player.rect, {interact_key: True})
+                if event.key == potion_key:
+                    self.player.stats.base.use_potion()
+                if event.key == scroll_key:
                     self.player.stats.use_scroll()
+                if event.key == damage_key:
+                    self.player.stats.base.take_damage(20)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:

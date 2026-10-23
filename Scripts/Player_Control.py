@@ -15,6 +15,7 @@ class Player:
         self.dash_cooldown_left = 0.0
         self.dash_dir = pygame.Vector2(0, 0)
         self.stats = Player_Stats()
+        self.is_sprinting = False
 
     def collides(self, test_rect, objects):
         return check_collision(test_rect, self.map, objects)
@@ -48,9 +49,10 @@ class Player:
         
         #start dash
         if keys[pygame.K_SPACE] and self.dash_cooldown_left <= 0 and self.dash_time_left <= 0:
-            self.dash_dir = move if move.length_squared() > 0 else forward
-            self.dash_time_left = dash_duration
-            self.dash_cooldown_left = dash_cooldown
+            if self.stats.base.use_sp(sp_cost_dash):
+                self.dash_dir = move if move.length_squared() > 0 else forward
+                self.dash_time_left = dash_duration
+                self.dash_cooldown_left = dash_cooldown
 
         #active dash
         if self.dash_time_left > 0:
@@ -93,6 +95,9 @@ class Player:
         #normalize movement
         if move.length_squared() > 0:
             move = move.normalize()
+
+        want_sprint = keys[pygame.K_LSHIFT] and move.length_squared() > 0
+        self.is_sprinting = want_sprint and self.stats.base.use_sp(sp_cost_sprint_per_sec * dt)
 
         #frame displacement
         dx, dy = self.dash(dt, move, forward)

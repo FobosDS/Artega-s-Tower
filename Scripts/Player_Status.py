@@ -3,7 +3,7 @@ from Settings import *
 class Base_Stats:
     def __init__(self):
         self.hp = base_hp
-        self.sp = base_sp
+        self.sp = base_sp + sp_bonus
         self.gold = base_gold
         self.potions = base_potions
         self.scrolls = base_scrolls
@@ -12,9 +12,14 @@ class Base_Stats:
         self.sp_level = 1
 
         self.max_hp = base_hp * self.hp_level
-        self.max_sp = base_sp * self.sp_level
+        self.max_sp = base_sp + self.sp_level * sp_bonus
         self.max_potions = base_potions * self.hp_level
         self.amount = self.max_hp * potion_heal_percent
+
+        self.sp_regen = base_sp_regen + self.sp_level * sp_regen_bonus
+        self.sp_regen_delay = base_sp_regen_delay - self.sp_level * sp_regen_delay_bonus
+        self.sp_regen_timer = 0
+
 
     def heal(self, amount):
         if self.is_dead():
@@ -44,12 +49,30 @@ class Base_Stats:
         self.hp = self.max_hp
         return True
 
+    def has_sp(self, amount):
+        return self.sp >= amount
+
+    def use_sp(self, amount):
+        if self.sp >= amount:
+            self.sp -= amount
+            self.sp_regen_timer = self.sp_regen_delay
+            return True
+        return False
+
+    def regen_sp(self, dt):
+        if self.sp_regen_timer > 0:
+            self.sp_regen_timer -= dt
+        else:
+            self.sp = min(self.sp + self.sp_regen * dt, self.max_sp)
+
     def level_up_sp(self):
         if self.sp_level >= max_sp_level:
             return False
         self.sp_level += 1
-        self.max_sp = base_sp * self.sp_level
+        self.max_sp = base_sp + self.sp_level * sp_bonus
         self.sp = self.max_sp
+        self.sp_regen = base_sp_regen + self.sp_level * sp_regen_bonus
+        self.sp_regen_delay = base_sp_regen_delay - self.sp_level * sp_regen_delay_bonus
         return True
 
 
@@ -165,3 +188,4 @@ class Player_Stats:
     def update_effects(self, dt):
         self.effects.update(dt, self.base)
         self.combat.update_enchantment(dt)
+        self.base.regen_sp(dt)
