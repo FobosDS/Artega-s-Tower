@@ -2,7 +2,7 @@ import pygame
 from Settings import *
 from Player_Control import Player
 from Objects import Sprite, Interactive_Sprite
-from Objects_Archive import ESD, ISD, SSD
+from Objects_Archive import ESD, ISD, SSD, UIED
 from Interactions import Interaction_Manager
 from Renderer import render_scene
 
@@ -10,7 +10,8 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("Artega's Tower")
-
+    
+    #endless mouse
     pygame.mouse.set_visible(False)
     pygame.event.set_grab(True)
 
@@ -45,6 +46,7 @@ def main():
 
         screen.fill(black)
         
+        #cell and floor
         pygame.draw.rect(screen, light_black, (0, 0, width, half_height))
         pygame.draw.rect(screen, dark_gray, (0, half_height, width, half_height))
 
@@ -52,8 +54,10 @@ def main():
 
         pygame.display.flip()
 
+    #release mouse
     pygame.event.set_grab(False)
     pygame.mouse.set_visible(True)
+
     pygame.quit()
 
 main()

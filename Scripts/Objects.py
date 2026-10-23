@@ -8,6 +8,7 @@ class Sprite:
         self.scale = scale
         self.img_w, self.img_h = self.image.get_size()
         self.aspect = self.img_w / self.img_h
+        #sprite hitbox
         self.rect = pygame.Rect(
             self.x - collision_radius,
             self.y - collision_radius,
@@ -18,6 +19,7 @@ class Sprite:
 class Interactive_Sprite(Sprite):
     def __init__(self, x, y, image_path, scale=1.0, collision_radius=0, interactive_zone_scale=1.2):
         super().__init__(x, y, image_path, scale, collision_radius)
+        #interaction zone
         self.interactive_rect = pygame.Rect(
             self.x - collision_radius * interactive_zone_scale,
             self.y - collision_radius * interactive_zone_scale,
@@ -27,4 +29,5 @@ class Interactive_Sprite(Sprite):
         self.is_interactive = True
 
     def perform_action(self):
-        print("Взаимодействие с объектом")
+        #object action
+        print("Interacted with object")

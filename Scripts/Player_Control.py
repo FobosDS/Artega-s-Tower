@@ -15,15 +15,18 @@ class Player:
         self.dash_dir = pygame.Vector2(0, 0)
 
     def collides(self, test_rect, objects):
+        # Check collisions
         return check_collision(test_rect, self.map, objects)
 
     def move_with_collision(self, dx, dy, objects):
+        #move along X
         if dx != 0:
             self.x += dx
             self.rect.center = (self.x, self.y)
             if self.collides(self.rect, objects):
                 self.x -= dx
                 self.rect.center = (self.x, self.y)
+        #move along Y
         if dy != 0:
             self.y += dy
             self.rect.center = (self.x, self.y)
@@ -38,10 +41,12 @@ class Player:
 
     def dash(self, dt, move, forward):
         keys = pygame.key.get_pressed()
+        #start dash
         if keys[pygame.K_SPACE] and self.dash_cooldown_left <= 0 and self.dash_time_left <= 0:
             self.dash_dir = move if move.length_squared() > 0 else forward
             self.dash_time_left = dash_duration
             self.dash_cooldown_left = dash_cooldown
+        #active dash
         if self.dash_time_left > 0:
             self.dash_time_left = max(0.0, self.dash_time_left - dt)
             speed = pl_speed * dash_speed_multiplier
@@ -53,6 +58,7 @@ class Player:
                 speed *= sprint_speed_multiplier
             dx = move.x * speed * dt
             dy = move.y * speed * dt
+        #dash cooldown
         if self.dash_cooldown_left > 0:
             self.dash_cooldown_left = max(0.0, self.dash_cooldown_left - dt)
         return dx, dy
@@ -60,16 +66,20 @@ class Player:
     def movement(self, dt, objects):
         self.rotate_to_mouse()
         keys = pygame.key.get_pressed()
+        #direction vectors
         cos_a = math.cos(self.angle)
         sin_a = math.sin(self.angle)
         forward = pygame.Vector2(cos_a, sin_a)
         right = pygame.Vector2(-sin_a, cos_a)
         move = pygame.Vector2(0, 0)
+        #WASD input
         if keys[pygame.K_w]: move += forward
         if keys[pygame.K_s]: move -= forward
         if keys[pygame.K_d]: move += right
         if keys[pygame.K_a]: move -= right
+        #normalize movement
         if move.length_squared() > 0:
             move = move.normalize()
+        #frame displacement
         dx, dy = self.dash(dt, move, forward)
         self.move_with_collision(dx, dy, objects)

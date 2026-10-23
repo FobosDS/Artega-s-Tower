@@ -23,3 +23,6 @@ ISD = {
 SSD = {
 }
 
+#UI elements dictionary
+UIED = {
+}
