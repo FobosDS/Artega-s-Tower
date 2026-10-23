@@ -23,6 +23,12 @@ ISD = {
 SSD = {
 }
 
-#UI elements dictionary
-UIED = {
+#weapon sprites dictionary
+WSD = {
+    "sword":[
+        sprites_folder + "sword/" + "stand.png",
+        sprites_folder + "sword/" + "attack1.png",
+        sprites_folder + "sword/" + "attack2.png",
+        sprites_folder + "sword/" + "attack3.png"
+    ]
 }

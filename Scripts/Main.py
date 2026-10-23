@@ -2,10 +2,11 @@ import pygame
 from Settings import *
 from Player_Control import Player
 from Objects import Sprite, Interactive_Sprite
-from Objects_Archive import ESD, ISD, SSD, UIED
+from Objects_Archive import ESD, ISD, SSD
 from Interactions import Interaction_Manager
 from Renderer import render_scene
 from Controls import Input_Manager
+from Weapon import Weapon
 
 def main():
     pygame.init()
@@ -27,11 +28,12 @@ def main():
     all_objects_list = objects_list + interactive_objects_list
 
     player = Player()
+    weapon = Weapon()
 
     interaction_manager = Interaction_Manager()
     interaction_manager.interactive_objects = interactive_objects_list
 
-    input = Input_Manager(player, interaction_manager)
+    input = Input_Manager(player, interaction_manager, weapon)
 
     running = True
     while running:
@@ -42,8 +44,11 @@ def main():
         
         player.movement(dt, all_objects_list)
         player.stats.update_effects(dt)
+        weapon.update(dt)
 
         render_scene(player, screen, objects_list, interactive_objects_list)
+
+        weapon.draw(screen)
 
         pygame.display.flip()
 

@@ -21,6 +21,9 @@ dash_duration = 0.08
 dash_cooldown = 1.1
 #run
 sprint_speed_multiplier = 1.8
+#attack
+frame_duration = 0.1
+reload_time = 0.35
 
 #status settings
 #max status

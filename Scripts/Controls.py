@@ -1,9 +1,10 @@
 import pygame
 
 class Input_Manager:
-    def __init__(self, player, interaction_manager):
+    def __init__(self, player, interaction_manager, weapon):
         self.player = player
         self.interaction_manager = interaction_manager
+        self.weapon = weapon
 
     def handle_events(self, events):
         for event in events:
@@ -13,16 +14,16 @@ class Input_Manager:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return False
-
                 if event.key == pygame.K_e:
-                    self.interaction_manager.handle_input(
-                        self.player.rect, {pygame.K_e: True}
-                    )
-
+                    self.interaction_manager.handle_input(self.player.rect, {pygame.K_e: True})
                 if event.key == pygame.K_f:
-                    self.player.stats.base.use_potion()
-
+                    self.player.stats.use_potion()
                 if event.key == pygame.K_r:
                     self.player.stats.use_scroll()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    if self.weapon.attack():
+                        print("Удар")
 
         return True
