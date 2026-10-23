@@ -20,7 +20,7 @@ class Input_Manager:
                     )
 
                 if event.key == pygame.K_f:
-                    self.player.stats.use_potion()
+                    self.player.stats.base.use_potion()
 
                 if event.key == pygame.K_r:
                     self.player.stats.use_scroll()

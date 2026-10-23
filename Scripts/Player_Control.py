@@ -71,7 +71,7 @@ class Player:
         return dx, dy
 
     def movement(self, dt, objects):
-        if self.stats.is_paraliched:
+        if self.stats.effects.is_paralyzed:
             return
         
         self.rotate_to_mouse()

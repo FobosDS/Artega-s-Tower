@@ -43,8 +43,8 @@ potion_heal_percent = 0.5
 poison_damage_percent = 0.01
 poison_interval = 0.5
 poison_duration = 12
-#paralich
-paralich_duration = 5
+#paralysis
+paralysis_duration = 5
 #enchantment
 enchantment_duration = 10
 enchantment_multiplier = 1.5
