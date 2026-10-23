@@ -6,6 +6,11 @@ from Map import create_map
 map = create_map()
 z_buffer = [0.0] * numRays
 
+def render_background(screen):
+    #ceiling and floor
+    pygame.draw.rect(screen, light_black, (0, 0, width, half_height))
+    pygame.draw.rect(screen, dark_gray, (0, half_height, width, half_height))
+
 def render_walls(player, screen):
     #render walls
     x, y = player.x, player.y
@@ -82,5 +87,7 @@ def render_sprites(player, screen, sprites):
             screen.blit(scaled, (draw_start_x, draw_start_y))
 
 def render_scene(player, screen, objects, interactive_objects):
+    screen.fill(black)
+    render_background(screen)
     render_walls(player, screen)
     render_sprites(player, screen, objects + interactive_objects)
