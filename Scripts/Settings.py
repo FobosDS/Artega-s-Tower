@@ -18,7 +18,7 @@ pl_rect = (half_width, half_height, pl_size, pl_size)
 #dash
 dash_speed_multiplier = 3.5
 dash_duration = 0.08
-dash_cooldown = 0.5
+dash_cooldown = 1.1
 #run
 sprint_speed_multiplier = 1.8
 

@@ -22,3 +22,4 @@ ISD = {
 #static sprites dictionary
 SSD = {
 }
+
