@@ -2,6 +2,16 @@ import pygame
 from Settings import *
 import math
 
+def load_ui_sprite(scale_factor):
+    try:
+        sprite = pygame.image.load(sprites_folder + "interface.png").convert_alpha()
+        width, height = sprite.get_size()
+        new_width = int(width * scale_factor)
+        new_height = int(height * scale_factor)
+        return pygame.transform.scale(sprite, (new_width, new_height))
+    except:
+        return None
+
 def draw_circle_bar(screen, cx, cy, radius, value, max_value, fill_color, bg_color, hl_color, hl_offset_x):
     #background
     pygame.draw.circle(screen, bg_color, (cx, cy), radius)
@@ -30,7 +40,7 @@ def draw_status_indicators(screen, stats):
 
     #enchantment
     color = enchant_on if stats.combat.is_enchanted else enchant_off
-    pygame.draw.circle(screen, color, (indicator_x, indicator_y - 60), indicator_radius)
+    pygame.draw.circle(screen, color, (indicator_x, indicator_y - 42), indicator_radius)
 
 def draw_hud(screen, stats):
     #hp
@@ -50,4 +60,9 @@ def draw_hud(screen, stats):
         fill_color=sp_green, bg_color=(0, 80, 0),
         hl_color=sp_highlight, hl_offset_x=-0.35
     )
+
     draw_status_indicators(screen, stats)
+
+    ui_sprite = load_ui_sprite(interface_scale)
+    if ui_sprite:
+        screen.blit(ui_sprite, (interface_x, interface_y))

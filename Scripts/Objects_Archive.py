@@ -33,3 +33,8 @@ WSD = {
     ],
     "sword_block": sprites_folder + "sword/" + "block.png"
 }
+
+#icons dictionary
+ID = {
+    
+}

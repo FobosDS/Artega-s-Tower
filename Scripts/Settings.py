@@ -61,7 +61,7 @@ base_sp = 100 - sp_bonus
 base_durability = 80          
 base_potions = 1
 base_gold = 0  
-base_scrolls = 0   
+base_scrolls = 1   
 base_attack_damage = 10       
 potion_heal_percent = 0.5 
 base_sp_regen = 14 - sp_regen_bonus
@@ -82,7 +82,7 @@ poison_duration = 14
 paralysis_duration = 6
 
 #enchantment
-enchantment_duration = 10
+enchantment_duration = 30
 enchantment_multiplier = 1.5
 #==================================
 
@@ -90,16 +90,21 @@ enchantment_multiplier = 1.5
 #HUD settings
 #==================================
 #stats
-hud_x = 375
-hud_y = 710
-hud_radius = 80
-hud_spacing = 450
+hud_x = 305
+hud_y = 741
+hud_radius = 50
+hud_spacing = 489
 
 #effects indicators
-indicator_radius = 20
-indicator_spacing = 60
-indicator_x = half_width
-indicator_y = 700
+indicator_radius = 26
+indicator_spacing = 32
+indicator_x = 550
+indicator_y = 720
+
+#interface
+interface_x = 170
+interface_y = 636
+interface_scale = 0.71
 
 #sword
 weapon_base_x = 470
