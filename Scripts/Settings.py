@@ -61,7 +61,7 @@ base_sp = 100 - sp_bonus
 base_durability = 80          
 base_potions = 1
 base_gold = 0  
-base_scrolls = 2   
+base_scrolls = 0   
 base_attack_damage = 10       
 potion_heal_percent = 0.5 
 base_sp_regen = 14 - sp_regen_bonus
@@ -74,12 +74,12 @@ durability_loss = 1
 #effects
 #==================================
 #poison
-poison_damage_percent = 0.01
+poison_damage_percent = 0.028
 poison_interval = 0.5
-poison_duration = 12
+poison_duration = 14
 
 #paralysis
-paralysis_duration = 5
+paralysis_duration = 6
 
 #enchantment
 enchantment_duration = 10
@@ -94,6 +94,12 @@ hud_x = 375
 hud_y = 710
 hud_radius = 80
 hud_spacing = 450
+
+#effects indicators
+indicator_radius = 20
+indicator_spacing = 60
+indicator_x = half_width
+indicator_y = 700
 
 #sword
 weapon_base_x = 470
@@ -155,4 +161,12 @@ light_gray = (220, 220, 220)
 gray = (138, 138, 138)
 dark_gray = (50, 50, 50)
 light_black = (22, 22, 22)
+
+#indicators colors
+poison_off = (8, 46, 17)
+poison_on = (44, 226, 49)
+paralysis_off = (18, 36, 33)
+paralysis_on = (190, 223, 221)
+enchant_off = (9, 25, 60)
+enchant_on = (19, 165, 236)
 #==================================

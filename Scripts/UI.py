@@ -1,5 +1,6 @@
 import pygame
 from Settings import *
+import math
 
 def draw_circle_bar(screen, cx, cy, radius, value, max_value, fill_color, bg_color, hl_color, hl_offset_x):
     #background
@@ -17,6 +18,19 @@ def draw_circle_bar(screen, cx, cy, radius, value, max_value, fill_color, bg_col
     hl_y = cy - int(radius * 0.35)
     hl_radius = max(1, int(radius * 0.18))
     pygame.draw.circle(screen, hl_color, (hl_x, hl_y), hl_radius)
+
+def draw_status_indicators(screen, stats):
+    #poison
+    color = poison_on if stats.effects.is_poisoned else poison_off
+    pygame.draw.circle(screen, color, (indicator_x - indicator_spacing, indicator_y), indicator_radius)
+
+    #paralysis
+    color = paralysis_on if stats.effects.is_paralyzed else paralysis_off
+    pygame.draw.circle(screen, color, (indicator_x + indicator_spacing, indicator_y), indicator_radius)
+
+    #enchantment
+    color = enchant_on if stats.combat.is_enchanted else enchant_off
+    pygame.draw.circle(screen, color, (indicator_x, indicator_y - 60), indicator_radius)
 
 def draw_hud(screen, stats):
     #hp
@@ -36,3 +50,4 @@ def draw_hud(screen, stats):
         fill_color=sp_green, bg_color=(0, 80, 0),
         hl_color=sp_highlight, hl_offset_x=-0.35
     )
+    draw_status_indicators(screen, stats)

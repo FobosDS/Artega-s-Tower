@@ -32,13 +32,6 @@ class Base_Stats:
     def is_dead(self):
         return self.hp <= 0
 
-    def use_potion(self):
-        if self.potions > 0:
-            self.heal(self.amount)
-            self.potions = max(self.potions - 1, 0)
-            return True
-        return False
-
     def level_up_hp(self):
         if self.hp_level >= max_hp_level:
             return False
@@ -177,6 +170,25 @@ class Player_Stats:
         self.is_hall_key = False
         self.is_chest_key1 = False
         self.is_chest_key2 = False
+
+    def use_potion(self):
+        if self.base.potions > 0:
+            if not self.effects.is_poisoned and not self.effects.is_paralyzed:
+                self.base.heal(self.base.amount)
+
+            else:
+                if self.effects.is_poisoned:
+                    self.effects.is_poisoned = False
+                    self.effects.poison_time_left = 0
+                    self.effects.poison_tick_timer = 0
+
+                if self.effects.is_paralyzed:
+                    self.effects.is_paralyzed = False
+                    self.effects.paralysis_time_left = 0
+
+            self.base.potions = max(self.base.potions - 1, 0)
+            return True
+        return False
 
     def use_scroll(self):
         if self.base.scrolls > 0 and not self.combat.is_enchanted:

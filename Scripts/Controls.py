@@ -18,11 +18,12 @@ class Input_Manager:
                 if event.key == interact_key:
                     self.interaction_manager.handle_input(self.player.rect, {interact_key: True})
                 if event.key == potion_key:
-                    self.player.stats.base.use_potion()
+                    self.player.stats.use_potion()
                 if event.key == scroll_key:
                     self.player.stats.use_scroll()
                 if event.key == damage_key:
-                    self.player.stats.base.take_damage(20)
+                    self.player.stats.effects.apply_poison()
+                    self.player.stats.effects.apply_paralysis()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
