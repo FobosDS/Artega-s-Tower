@@ -1,7 +1,7 @@
 import pygame
 
 class Sprite:
-    def __init__(self, x, y, image_path, scale=1.0, collision_radius=0):
+    def __init__(self, x, y, image_path, scale=1, collision_radius=0):
         self.x = x
         self.y = y
         self.image = pygame.image.load(image_path).convert_alpha()

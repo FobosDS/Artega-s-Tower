@@ -42,6 +42,7 @@ block_duration = 0.3
 #max status
 max_durability = 100
 max_scrolls = 2
+max_whetstones = 3
 max_weapon_level = 3
 max_hp_level = 4
 max_sp_level = 3
@@ -58,14 +59,18 @@ sp_regen_delay_bonus = 0.11
 #base stats
 base_hp = 100         
 base_sp = 100 - sp_bonus
-base_durability = 80          
+base_durability = 0         
 base_potions = 1
 base_gold = 0  
-base_scrolls = 1   
+base_scrolls = 0
+base_whetstones = 1   
 base_attack_damage = 10       
 potion_heal_percent = 0.5 
 base_sp_regen = 14 - sp_regen_bonus
 base_sp_regen_delay = 0.45 + sp_regen_delay_bonus
+base_hp_level = 1
+base_sp_level = 1
+base_weapon_level = 1
 
 #weapon
 durability_loss = 1
@@ -87,6 +92,14 @@ enchantment_multiplier = 1.5
 #==================================
 
 
+#objects settings
+#==================================
+sprites_folder = "Assets/Sprites/"
+sprites_scale = 1
+icons_folder = "Assets/Sprites/Icons/"
+#==================================
+
+
 #HUD settings
 #==================================
 #stats
@@ -105,6 +118,39 @@ indicator_y = 720
 interface_x = 170
 interface_y = 636
 interface_scale = 0.71
+
+#potion slot
+slot_potion_x = 366
+slot_potion_y = 648
+
+#left column
+slot_scroll_x = 365
+slot_whetstone_x = 420
+slot_gold_x = 365
+slot_weapon_x = 420
+slot_left_y = 702
+
+#right column levels
+slot_hp_lvl_x = 633
+slot_sp_lvl_x = 636
+slot_hp_lvl_y = 696
+slot_sp_lvl_y = 747
+
+#right column keys
+slot_chest_key1_x = 695
+slot_chest_key2_x = 696
+slot_floor_key_x = 693
+slot_keys_y = 652
+
+#key icons
+floor_key_icons = [
+    icons_folder + "dungeon_key.png",
+    icons_folder + "mausoleum_key.png",
+    icons_folder + "archive_key.png",
+    icons_folder + "hall_key.png"
+]
+
+slot_size = 40
 
 #sword
 weapon_base_x = 470
@@ -134,20 +180,13 @@ scale = width / numRays
 #==================================
 
 
-#objects settings
-#==================================
-sprites_folder = "Assets/Sprites/"
-sprites_scale = 1
-#==================================
-
-
 #controls settings
 #==================================
 mouse_sensitivity = 0.007
 interact_key = pygame.K_e
 potion_key = pygame.K_f
-scroll_key = pygame.K_r
-damage_key = pygame.K_q
+scroll_key = pygame.K_q
+whetstone_key = pygame.K_r
 #==================================
 
 

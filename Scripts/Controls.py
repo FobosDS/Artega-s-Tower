@@ -21,16 +21,13 @@ class Input_Manager:
                     self.player.stats.use_potion()
                 if event.key == scroll_key:
                     self.player.stats.use_scroll()
-                if event.key == damage_key:
-                    self.player.stats.effects.apply_poison()
-                    self.player.stats.effects.apply_paralysis()
+                if event.key == whetstone_key:
+                    self.player.stats.combat.use_whetstone()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    if self.weapon.attack():
-                        print("Удар")
+                    self.weapon.attack()
                 elif event.button == 3:
-                    if self.weapon.block():
-                        print("Блок")
+                    self.weapon.block()
 
         return True

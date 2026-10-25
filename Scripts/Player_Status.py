@@ -8,8 +8,8 @@ class Base_Stats:
         self.potions = base_potions
         self.scrolls = base_scrolls
 
-        self.hp_level = 1
-        self.sp_level = 1
+        self.hp_level = base_hp_level
+        self.sp_level = base_sp_level
 
         self.max_hp = base_hp * self.hp_level
         self.max_sp = base_sp + self.sp_level * sp_bonus
@@ -71,8 +71,9 @@ class Base_Stats:
 
 class Combat_Stats:
     def __init__(self):
-        self.weapon_level = 1
+        self.weapon_level = base_weapon_level
         self.durability = base_durability
+        self.whetstones = base_whetstones
         self.default_attack_damage = base_attack_damage * self.weapon_level
         self.attack_damage = self.default_attack_damage
 
@@ -80,18 +81,28 @@ class Combat_Stats:
         self.enchantment_time_left = 0
 
     def get_attack_damage(self):
-        if self.durability <= 0:
-            return 0
-        factor = self.durability / base_durability
+        factor = self.durability / max_durability
+        if factor > 0.94:
+            factor = 1
+        if factor < 0.1:
+            factor = 0.1
         return int(self.attack_damage * factor)
-
+    
     def use_weapon(self):
         damage = self.get_attack_damage()
         self.durability = max(self.durability - durability_loss, 0)
         return damage
 
-    def repair_weapon(self, amount):
-        self.durability = min(self.durability + amount, base_durability)
+    def repair_weapon(self):
+        self.durability = max_durability
+
+    def use_whetstone(self):
+        if self.whetstones > 0:
+            self.repair_weapon()
+            self.whetstones = max(self.whetstones - 1, 0)
+            return True
+        return False
+
 
     def apply_enchantment(self):
         if not self.is_enchanted:
@@ -164,12 +175,11 @@ class Player_Stats:
         self.combat = Combat_Stats()
         self.effects = Effects()
 
-        self.is_dungeon_key = False
-        self.is_mausoleum_key = False
-        self.is_archive_key = False
-        self.is_hall_key = False
+        self.is_floor_key = False
         self.is_chest_key1 = False
         self.is_chest_key2 = False
+
+        self.current_floor = 2
 
     def use_potion(self):
         if self.base.potions > 0:

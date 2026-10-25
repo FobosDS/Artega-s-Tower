@@ -44,6 +44,9 @@ class Weapon:
         self.target_amp = 0.0
 
         self.player_stats = player_stats
+        
+        self.current_attack_damage = 0
+        self.has_dealt_damage = False
 
     def attack(self):
         if not self.is_attacking and not self.is_blocking and not self.is_reloading:
@@ -51,9 +54,12 @@ class Weapon:
                 self.is_attacking = True
                 self.current_frame = 0
                 self.attack_timer = 0.0
+                
+                self.has_dealt_damage = False
+                
                 return True
         return False
-
+    
     def block(self):
         if not self.is_attacking and not self.is_blocking and not self.is_reloading:
             if self.player_stats.base.use_sp(sp_cost_block):
@@ -93,12 +99,18 @@ class Weapon:
             if self.attack_timer >= animation_duration:
                 self.attack_timer = 0.0
                 self.current_frame += 1
+                
+                if self.current_frame == 3 and not self.has_dealt_damage:
+                    self.current_attack_damage = self.player_stats.combat.use_weapon()
+                    self.deal_damage()
+
+                    self.has_dealt_damage = True
+                
                 if self.current_frame >= len(self.attack_frames):
                     self.current_frame = 0
                     self.is_attacking = False
                     self.is_reloading = True
                     self.reload_timer = 0.0
-
         #block
         if self.is_blocking:
             self.block_timer += dt
@@ -135,3 +147,6 @@ class Weapon:
 
     def check_block(self):
         return self.block_active
+
+    def deal_damage(self):
+        print(f"Нанесено урона: {self.current_attack_damage}")

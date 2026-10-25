@@ -2,12 +2,72 @@ import pygame
 from Settings import *
 import math
 
-def load_ui_sprite(scale_factor):
+class Icon:
+    def __init__(self, path, x, y, scale=0.5):
+        self.base_image = pygame.image.load(path).convert_alpha()
+        self.scale = scale
+        
+        w, h = self.base_image.get_size()
+        self.image = pygame.transform.scale(self.base_image, (int(w * scale), int(h * scale)))
+        self.w, self.h = self.image.get_size()
+        
+        self.x = x
+        self.y = y
+        self.font = pygame.font.Font(None, 17)
+        
+        self._last_floor = -1
+    def change_image(self, new_path):
+        self.base_image = pygame.image.load(new_path).convert_alpha()
+        w, h = self.base_image.get_size()
+        self.image = pygame.transform.scale(self.base_image, (int(w * self.scale), int(h * self.scale)))
+        self.w, self.h = self.image.get_size()
+
+    def draw(self, screen, text_list=None, active=True):
+        if not active:
+            return
+
+        offset_x = (slot_size - self.w) // 2
+        offset_y = (slot_size - self.h) // 2
+        draw_x = self.x + offset_x
+        draw_y = self.y + offset_y
+        
+        screen.blit(self.image, (draw_x, draw_y))
+
+        if text_list:
+            text_x = draw_x + self.w + 5  
+            text_y = draw_y + self.h - (len(text_list) * 15)
+            for text in text_list:
+                if text:
+                    surf = self.font.render(str(text), True, white)
+                    rect = surf.get_rect(topright=(text_x, text_y))
+                    screen.blit(surf, rect)
+                    text_y += 15
+
+def create_icons():
+    icons = {}
+    
+    icons["potion"] = Icon(icons_folder + "potion.png", slot_potion_x, slot_potion_y)
+    
+    icons["scroll"] = Icon(icons_folder + "scroll.png", slot_scroll_x, slot_left_y,scale=0.3)
+    icons["whetstone"] = Icon(icons_folder + "whetstone.png", slot_whetstone_x, slot_left_y, scale=0.55)
+    icons["gold"] = Icon(icons_folder + "gold.png", slot_gold_x, slot_left_y + 48, scale=0.4)
+    icons["weapon"] = Icon(icons_folder + "lv1_sword.png", slot_weapon_x, slot_left_y + 46, scale=0.32) 
+    
+    icons["hp_lvl"] = Icon(icons_folder + "heart.png", slot_hp_lvl_x, slot_hp_lvl_y, scale=0.45)
+    icons["sp_lvl"] = Icon(icons_folder + "lungs.png", slot_sp_lvl_x, slot_sp_lvl_y, scale=0.4)
+    
+    icons["chest_key1"] = Icon(icons_folder + "chest_key1.png", slot_chest_key1_x, slot_keys_y + 44, scale=0.44)
+    icons["chest_key2"] = Icon(icons_folder + "chest_key2.png", slot_chest_key2_x, slot_keys_y + 92, scale=0.44)
+    icons["floor_key"] = Icon(floor_key_icons[0], slot_floor_key_x, slot_keys_y, scale=0.44)
+    
+    return icons
+      
+def load_interface(scale_factor):
     try:
         sprite = pygame.image.load(sprites_folder + "interface.png").convert_alpha()
-        width, height = sprite.get_size()
-        new_width = int(width * scale_factor)
-        new_height = int(height * scale_factor)
+        img_w, img_h = sprite.get_size()
+        new_width = int(img_w * scale_factor)
+        new_height = int(img_h * scale_factor)
         return pygame.transform.scale(sprite, (new_width, new_height))
     except:
         return None
@@ -42,7 +102,7 @@ def draw_status_indicators(screen, stats):
     color = enchant_on if stats.combat.is_enchanted else enchant_off
     pygame.draw.circle(screen, color, (indicator_x, indicator_y - 42), indicator_radius)
 
-def draw_hud(screen, stats):
+def draw_hud(screen, stats, icons, interface):
     #hp
     draw_circle_bar(
         screen, cx=hud_x, cy=hud_y,
@@ -63,6 +123,38 @@ def draw_hud(screen, stats):
 
     draw_status_indicators(screen, stats)
 
-    ui_sprite = load_ui_sprite(interface_scale)
-    if ui_sprite:
-        screen.blit(ui_sprite, (interface_x, interface_y))
+    if interface:
+        screen.blit(interface, (interface_x, interface_y))
+
+    icons["potion"].draw(screen, text_list=[stats.base.potions])
+    
+    #left panel
+    icons["scroll"].draw(screen, text_list=[stats.base.scrolls])
+    icons["whetstone"].draw(screen, text_list=[stats.combat.whetstones])
+    icons["gold"].draw(screen, text_list=[stats.base.gold])
+    
+    #weapon
+    if not hasattr(icons["weapon"], "_last_weapon_lvl") or icons["weapon"]._last_weapon_lvl != stats.combat.weapon_level:
+        if stats.combat.weapon_level == 1:
+            icons["weapon"].change_image(icons_folder + "lv1_sword.png")
+        elif stats.combat.weapon_level == 2:
+            icons["weapon"].change_image(icons_folder + "lv2_sword.png")
+        elif stats.combat.weapon_level == 3:
+            icons["weapon"].change_image(icons_folder + "lv3_sword.png")
+        icons["weapon"]._last_weapon_lvl = stats.combat.weapon_level
+        
+    icons["weapon"].draw(screen, text_list=[stats.combat.durability, stats.combat.weapon_level])
+
+    #right panel
+    icons["hp_lvl"].draw(screen, text_list=[stats.base.hp_level])
+    icons["sp_lvl"].draw(screen, text_list=[stats.base.sp_level])
+
+    #keys
+    icons["chest_key1"].draw(screen, active=stats.is_chest_key1)
+    icons["chest_key2"].draw(screen, active=stats.is_chest_key2)
+    floor_index = max(0, min(stats.current_floor - 1, len(floor_key_icons) - 1))
+    if icons["floor_key"]._last_floor != floor_index:
+        icons["floor_key"].change_image(floor_key_icons[floor_index])
+        icons["floor_key"]._last_floor = floor_index
+    icons["floor_key"].draw(screen, active=stats.is_floor_key)
+    

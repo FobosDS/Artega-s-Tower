@@ -2,13 +2,12 @@ import pygame
 from Settings import *
 from Player_Control import Player
 from Objects import Sprite, Interactive_Sprite
-from Objects_Archive import ESD, ISD, SSD
+from Objects_Archive import ESD, ISD
 from Interactions import Interaction_Manager
 from Renderer import render_scene
 from Controls import Input_Manager
 from Weapon import Weapon
-from UI import draw_hud
-
+from UI import draw_hud, create_icons, load_interface
 def main():
     pygame.init()
     screen = pygame.display.set_mode((width, height))
@@ -23,9 +22,14 @@ def main():
     objects_list = [
         Sprite(*ESD["artega_states"]["cast"])
     ]
+
     interactive_objects_list = [
         Interactive_Sprite(*ISD["pedestal"])
     ]
+
+    interface = load_interface(interface_scale)
+    icons = create_icons()
+
     all_objects_list = objects_list + interactive_objects_list
 
     player = Player()
@@ -50,7 +54,7 @@ def main():
 
         render_scene(player, screen, objects_list, interactive_objects_list)
         weapon.draw(screen)
-        draw_hud(screen, player.stats)
+        draw_hud(screen, player.stats, icons, interface)
 
         pygame.display.flip()
 

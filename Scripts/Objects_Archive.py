@@ -1,4 +1,4 @@
-from Settings import sprites_folder
+from Settings import sprites_folder, icons_folder
 
 #entity sprites dictionary
 ESD ={
@@ -32,9 +32,4 @@ WSD = {
         sprites_folder + "sword/" + "attack3.png"
     ],
     "sword_block": sprites_folder + "sword/" + "block.png"
-}
-
-#icons dictionary
-ID = {
-    
 }
