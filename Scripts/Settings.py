@@ -9,6 +9,7 @@ half_width = width // 2
 half_height = height // 2
 FPS = 60
 tile_size = 50
+texture_size = 64
 #==================================
 
 
@@ -59,10 +60,10 @@ sp_regen_delay_bonus = 0.11
 #base stats
 base_hp = 100         
 base_sp = 100 - sp_bonus
-base_durability = 0         
-base_potions = 1
+base_durability = 80        
+base_potions = 2
 base_gold = 0  
-base_scrolls = 0
+base_scrolls = 1
 base_whetstones = 1   
 base_attack_damage = 10       
 potion_heal_percent = 0.5 
@@ -171,11 +172,11 @@ weapon_moving_threshold = 0.25
 #==================================
 fov = math.pi / 3
 halfFov = fov / 2
-numRays = width // 4
+numRays = width // 6
 maxDepth = 800
 deltaAngle = fov / numRays
 dist = numRays / (2 * math.tan(halfFov))
-projCoeff = dist * tile_size * 5
+projCoeff = dist * tile_size * 6
 scale = width / numRays
 #==================================
 

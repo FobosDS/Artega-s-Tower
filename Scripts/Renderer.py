@@ -5,6 +5,10 @@ from Map import create_map
 
 map = create_map()
 z_buffer = [0.0] * numRays
+try:
+    wall_texture = pygame.image.load("Assets/Sprites/wall_64.png")
+except:
+    wall_texture = None
 
 def render_background(screen):
     #ceiling and floor
@@ -12,9 +16,9 @@ def render_background(screen):
     pygame.draw.rect(screen, dark_gray, (0, half_height, width, half_height))
 
 def render_walls(player, screen):
-    #render walls
     x, y = player.x, player.y
     angle = player.angle - halfFov
+    
     for ray in range(numRays):
         sin_a = math.sin(angle)
         cos_a = math.cos(angle)
@@ -22,7 +26,10 @@ def render_walls(player, screen):
         if abs(cos_a) < 1e-9: cos_a = 1e-9
 
         depth = maxDepth
-        #find wall hit
+        hit_x = 0
+        hit_y = 0
+        is_vertical = False
+
         for wall in map:
             tx1 = (wall.left - x) / cos_a
             tx2 = (wall.right - x) / cos_a
@@ -30,25 +37,63 @@ def render_walls(player, screen):
             ty2 = (wall.bottom - y) / sin_a
             t_enter = max(min(tx1, tx2), min(ty1, ty2))
             t_exit = min(max(tx1, tx2), max(ty1, ty2))
+            
             if t_enter <= t_exit and t_exit >= 0:
                 t = t_enter if t_enter > 0 else t_exit
                 if t < depth:
                     depth = t
+                    hit_x = x + cos_a * t
+                    hit_y = y + sin_a * t
+                    
+                    if min(tx1, tx2) > min(ty1, ty2):
+                        is_vertical = True
+                    else:
+                        is_vertical = False
 
-        #fish-eye correction
         depth *= math.cos(player.angle - angle)
-        if depth < 0.0001: depth = 0.0001
+        
+        if depth < 30:
+            depth = 30
+            
         z_buffer[ray] = depth
 
-        #height and color
-        wall_h = min(projCoeff / depth, height * 20)
+        wall_h = projCoeff / depth
+        if wall_h > height:
+            wall_h = height
+            
         top = half_height - wall_h / 2
         wall_x = ray * scale
-        shade = max(0.15, 1.0 - depth / maxDepth)
-        color = (int(light_gray[0] * shade), int(light_gray[1] * shade), int(light_gray[2] * shade))
-        pygame.draw.rect(screen, color, (wall_x, top, scale + 1, wall_h))
-        angle += deltaAngle
 
+        if wall_texture:
+            if is_vertical:
+                wall_hit_pos = hit_y % tile_size
+            else:
+                wall_hit_pos = hit_x % tile_size
+                
+            texture_x = int((wall_hit_pos / tile_size) * texture_size)
+            texture_x = max(0, min(texture_size - 1, texture_x))
+
+            texture_slice = wall_texture.subsurface((texture_x, 0, 1, texture_size))
+            
+            texture_slice = pygame.transform.scale(texture_slice, (int(scale) + 1, int(wall_h)))
+            
+            shade = max(0.15, 1.0 - depth / maxDepth)
+            if not is_vertical:
+                shade *= 0.7
+            
+            if shade < 0.99:
+                dark_surface = pygame.Surface(texture_slice.get_size(), pygame.SRCALPHA)
+                dark_surface.fill((0, 0, 0, int(255 * (1 - shade))))
+                texture_slice.blit(dark_surface, (0, 0))
+            
+            screen.blit(texture_slice, (wall_x, top))
+            
+        else:
+            shade = max(0.15, 1.0 - depth / maxDepth)
+            color = (int(light_gray[0] * shade), int(light_gray[1] * shade), int(light_gray[2] * shade))
+            pygame.draw.rect(screen, color, (wall_x, top, scale + 1, wall_h))
+
+        angle += deltaAngle
 def render_sprites(player, screen, sprites):
     #render sprites
     sorted_sprites = sorted(sprites, key=lambda s: (s.x - player.x)**2 + (s.y - player.y)**2, reverse=True)
