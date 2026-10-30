@@ -1,7 +1,7 @@
 import openpyxl
 
 EXCEL_FILE = "Assets/levels.xlsx"  
-SHEET_NAME = "level1"                  
+SHEET_NAME = "test"                  
 OUTPUT_FILE = "Scripts/Map.py"             
 
 COLORS = {

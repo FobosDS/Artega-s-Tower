@@ -79,15 +79,6 @@ def render_walls(player, screen):
                 hit = True
                 hit_symbol = "H"
             
-            #for wall in walls_rects:
-            #    if wall.collidepoint(map_x * tile_size, map_y * tile_size):
-            #        hit = True
-            #        break
-            #if map_x < 0 or map_x >= 24 or map_y < 0 or map_y >= 16:
-            #    hit = True
-            #    side_dist_x = maxDepth
-            #    break
-
         pos_x = x / tile_size
         pos_y = y / tile_size
 
@@ -166,6 +157,10 @@ def render_sprites(player, screen, sprites):
 
         draw_start_y = half_height - sprite_height // 2
         draw_start_y += int(sprite_height * 0.2)
+
+        if hasattr(sprite, 'flight_height'):
+            draw_start_y -= sprite.flight_height
+            
         draw_start_x = -sprite_width // 2 + sprite_screen_x
 
         center_stripe = max(0, min(width - 1, sprite_screen_x))

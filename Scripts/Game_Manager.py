@@ -31,6 +31,8 @@ class MapManager:
                     self.walls.append(pygame.Rect(x, y, tile, tile))
                 elif ch == "1":
                     self.enemy_spawns.append(("ghoul", center_x, center_y))
+                elif ch == "2":
+                    self.enemy_spawns.append(("gargoyle", center_x, center_y))
                 elif ch == "P":
                     self.player_spawn = (center_x, center_y)
                 
@@ -73,11 +75,13 @@ class Game:
         self.interactive_objects = self.map_manager.interactive_objects
         
         from Ghoul import Ghoul
+        from Gargoyle import Gargoyle
         for enemy_type, ex, ey in self.map_manager.enemy_spawns:
             if enemy_type == "ghoul":
-                self.enemy_manager.add_enemy(
-                    Ghoul(ex, ey, "Assets/Sprites/Enemies/Ghoul/gh_front_stand.png", 0.8, 30)
-                )
+                self.enemy_manager.add_enemy(Ghoul(ex, ey, "Assets/Sprites/Enemies/Ghoul/gh_front_stand.png", 0.8, 30))
+
+            if enemy_type == "gargoyle":
+                self.enemy_manager.add_enemy(Gargoyle(ex, ey, "Assets/Sprites/Enemies/Gargoyle/ga_front2.png", 0.8, 30))
 
     def update(self, dt):
         self.player.movement(dt, [])

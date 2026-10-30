@@ -5,7 +5,7 @@ from Map import drawed_map
 from random import randint
 
 class Enemy(Sprite):
-    def __init__(self, x, y, image_path, scale=1.0, collision_radius=15):
+    def __init__(self, x, y, image_path, scale=1.0, collision_radius=12):
         super().__init__(x, y, image_path, scale, collision_radius)
         
         self.hp = 30

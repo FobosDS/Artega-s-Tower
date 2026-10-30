@@ -7,13 +7,14 @@ from Sprites_Archive import ESD
 from random import randint
 
 class Ghoul(Enemy):
-    def __init__(self, x, y, image_path, scale=1.0, collision_radius=15):
+    def __init__(self, x, y, image_path, scale=1.0, collision_radius=12):
         super().__init__(x, y, image_path, scale, collision_radius)
         
         self.hp = 60
-        self.speed = 12
-        self.attack_range = 15
+        self.speed = 11
+        self.attack_range = 25
         self.attack_damage = 19
+        self.gold_dropped = (2, 5)
 
         self.state = "chase"
         self.state_timer = 0
@@ -24,7 +25,7 @@ class Ghoul(Enemy):
         self.windup_time = 0.5
         self.attack_time = 0.3
         self.recovery_time = 1.5
-        self.shoot_cooldown = 5
+        self.shoot_cooldown = 12
         self.shoot_timer = 0
         self.projectiles = []
         
@@ -85,7 +86,7 @@ class Ghoul(Enemy):
 
     def update(self, dt, player, all_enemies):
         if self.is_dead:
-            self.drop_gold((2, 5))
+            self.drop_gold(self.gold_dropped)
 
             self.image = self.img_death
             return
@@ -152,14 +153,14 @@ class Ghoul(Enemy):
                 self.is_aggro = True
                 
             if self.is_aggro:
-                if 35 < distance < 15 and self.dash_timer <= 0:
+                if 20 < distance < 150 and self.dash_timer <= 0:
                     self.state = "dash"
                     self.state_timer = 0.3
                     self.dash_timer = self.dash_cooldown
                     self.attack_direction = target_angle
                     self.image = sprites["dash"][0]
             
-                elif 35 < distance < 125 and self.shoot_timer <= 0:
+                elif 60 < distance < 125 and self.shoot_timer <= 0:
                     self.state = "shoot"
                     self.state_timer = 0.4
                     self.shoot_timer = self.shoot_cooldown
@@ -225,7 +226,7 @@ class Ghoul(Enemy):
             if angle_diff_attack > math.pi:
                 angle_diff_attack = 2 * math.pi - angle_diff_attack
                 
-            if distance <= self.attack_range + 30 and angle_diff_attack < math.pi / 4:
+            if distance <= self.attack_range + 25 and angle_diff_attack < math.pi / 4:
                 player.stats.base.take_damage(self.attack_damage * self.dash_attack_multiplier)
                     
             self.state = "recovery"
