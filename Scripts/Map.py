@@ -1,28 +1,34 @@
-import pygame
-from Settings import tile_size
 drawed_map = [
-"HHHHHHHHHHHHHHHHHHHHHHHH",
-"H......H.H.H...........H",
-"H..H...H...H......H....H",
-"H..H..............H....H",
-"H..HH......H...........H",
-"H......HH..H......HHH..H",
-"H..H...H...H........H..H",
-"HHHHHHHHHH.....H....HHHH",
-"H......H.......H.......H",
-"H......H...............H",
-"H..H...H...HHHH........H",
-"H..H..........H....HHHHH",
-"H..HH......HHHH........H",
-"H......H...H...........H",
-"H..H...H...H...........H",
-"HHHHHHHHHHHHHHHHHHHHHHHH"
+    "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH",
+    "H...H...1H1H.....................HHH...........H",
+    "H.P.H.HHHH.H.....................H.H...........H",
+    "H...H.HRR..H.....................H.H...........H",
+    "H.HHH.H....H...................HHHHHHH.........H",
+    "H.....H....H...................H.....H.........H",
+    "H.HHHHHHH..H........HHHHHHHHHHHH.....H.........H",
+    "H...H.1....HHHH.....H.....1..RHH..2..H.........H",
+    "H...H.........H.....H.1....HHHHH1...1H.........H",
+    "H.1.H...HHHH..H...HHH.....1H...H.....H.........H",
+    "H..........H.1H...H...HHHHHH...H.....H.........H",
+    "HHHHH..HHH.H..H...H.1...H......HHH.HHH.........H",
+    "H.1.H..H..1...H...H.....H........H.RH..........H",
+    "H......H......H...H.....H.HHHH...H.RH..........H",
+    "H.H....HHHHHHHHHHHHHHH..HHH.1HHHHH..H..........H",
+    "H.H....H.1..........................H..........H",
+    "H.H....H...HHHHHHHHHHH.H.........1..H..........H",
+    "H.HHH..H......H......H.H.H.HHHHHHHHHH..........H",
+    "H.H....H...H..H......H.H.H...H.................H",
+    "H.HHHHHHHH.H.1H......H.H.H..RH.................H",
+    "H...1..H...H..H......H.HHH...H.................H",
+    "H1.....H...H..H......H.......H.................H",
+    "H.....1H......H......H.HHH...H.................H",
+    "H...R..H.HHH..H......H.H.HHHHH.................H",
+    "HHH.HHHH......H......H.H.......................H",
+    "H.H.H....HHHHHH......H.H.......................H",
+    "H...H....H.RRRH......H.H.......................H",
+    "H...H....H....HHHHHHHH.H.......................H",
+    "H...HHH................H.......................H",
+    "H.............HHHHHHHHHH.......................H",
+    "H........H....H................................H",
+    "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH",
 ]
-
-def create_map(tile = tile_size):
-    real_map = []
-    for row, line in enumerate(drawed_map):
-        for col, ch in enumerate(line):
-            if ch == "H":
-                real_map.append(pygame.Rect(col * tile, row * tile, tile, tile))
-    return real_map

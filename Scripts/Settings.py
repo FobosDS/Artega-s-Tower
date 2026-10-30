@@ -8,7 +8,7 @@ height = 800
 half_width = width // 2
 half_height = height // 2
 FPS = 60
-tile_size = 50
+tile_size = 25
 texture_size = 64
 #==================================
 
@@ -18,8 +18,8 @@ texture_size = 64
 #movement
 pl_pos = (half_width, half_height)
 pl_angle = 0
-pl_size = 20
-pl_speed = 90
+pl_size = 10
+pl_speed = 40
 pl_rotation_speed = 5
 pl_rect = (half_width, half_height, pl_size, pl_size)
 
@@ -42,6 +42,7 @@ block_duration = 0.3
 #==================================
 #max status
 max_durability = 100
+max_gold = 599
 max_scrolls = 2
 max_whetstones = 3
 max_weapon_level = 3
@@ -49,10 +50,10 @@ max_hp_level = 4
 max_sp_level = 3
 
 #sp
-sp_cost_dash = 25          
-sp_cost_sprint_per_sec = 11
-sp_cost_attack = 12       
-sp_cost_block = 30
+sp_cost_dash = 10          
+sp_cost_sprint_per_sec = 8
+sp_cost_attack = 30    
+sp_cost_block = 20
 sp_bonus = 16
 sp_regen_bonus = 6
 sp_regen_delay_bonus = 0.11
@@ -96,8 +97,9 @@ enchantment_multiplier = 1.5
 #objects settings
 #==================================
 sprites_folder = "Assets/Sprites/"
-sprites_scale = 1
+sprites_scale = 50
 icons_folder = "Assets/Sprites/Icons/"
+walls_folder = "Assets/Sprites/Levels/Walls/"
 #==================================
 
 
@@ -172,11 +174,10 @@ weapon_moving_threshold = 0.25
 #==================================
 fov = math.pi / 3
 halfFov = fov / 2
-numRays = width // 6
+numRays = width // 4
 maxDepth = 800
 deltaAngle = fov / numRays
 dist = numRays / (2 * math.tan(halfFov))
-projCoeff = dist * tile_size * 6
 scale = width / numRays
 #==================================
 

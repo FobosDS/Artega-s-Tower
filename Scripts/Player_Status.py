@@ -22,12 +22,13 @@ class Base_Stats:
 
 
     def heal(self, amount):
-        if self.is_dead():
-            return
         self.hp = min(self.hp + amount, self.max_hp)
 
     def take_damage(self, damage):
         self.hp = max(self.hp - damage, 0)
+
+    def add_gold(self, count):
+        self.gold = min(self.gold + count, max_gold)
 
     def is_dead(self):
         return self.hp <= 0
@@ -57,6 +58,9 @@ class Base_Stats:
             self.sp_regen_timer -= dt
         else:
             self.sp = min(self.sp + self.sp_regen * dt, self.max_sp)
+
+    def add_sp(self, amount):
+        self.sp = min(self.sp + amount, self.max_sp)
 
     def level_up_sp(self):
         if self.sp_level >= max_sp_level:
@@ -104,10 +108,10 @@ class Combat_Stats:
         return False
 
 
-    def apply_enchantment(self):
+    def apply_enchantment(self, duration):
         if not self.is_enchanted:
             self.is_enchanted = True
-            self.enchantment_time_left = enchantment_duration
+            self.enchantment_time_left = duration
             self.attack_damage = int(self.default_attack_damage * enchantment_multiplier)
 
     def level_up_weapon(self):
@@ -202,7 +206,7 @@ class Player_Stats:
 
     def use_scroll(self):
         if self.base.scrolls > 0 and not self.combat.is_enchanted:
-            self.combat.apply_enchantment()
+            self.combat.apply_enchantment(enchantment_duration)
             self.base.scrolls = max(self.base.scrolls - 1, 0)
             return True
         return False

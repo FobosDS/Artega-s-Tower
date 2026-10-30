@@ -1,11 +1,10 @@
 import pygame
 import math
 from Settings import *
-from Objects_Archive import WSD
+from Sprites_Archive import WSD
 
 class Weapon:
     def __init__(self, player_stats):
-        #load attack frames
         self.attack_frames = []
         for path in WSD["sword_attack"]:
             img = pygame.image.load(path).convert_alpha()
@@ -15,7 +14,6 @@ class Weapon:
                 img, (int(w * scale), int(h * scale))
             ))
 
-        #load block frame
         block_path = WSD["sword_block"]
         block_img = pygame.image.load(block_path).convert_alpha()
         w, h = block_img.get_size()
@@ -44,6 +42,7 @@ class Weapon:
         self.target_amp = 0.0
 
         self.player_stats = player_stats
+        self.enemies = [] 
         
         self.current_attack_damage = 0
         self.has_dealt_damage = False
@@ -54,9 +53,7 @@ class Weapon:
                 self.is_attacking = True
                 self.current_frame = 0
                 self.attack_timer = 0.0
-                
                 self.has_dealt_damage = False
-                
                 return True
         return False
     
@@ -69,8 +66,7 @@ class Weapon:
             return True
         return False
 
-    def update(self, dt, pl_pos, is_sprinting=False):
-        #swing
+    def update(self, dt, pl_pos, player_angle, is_sprinting=False):
         if self.last_position is None:
             self.last_position = pl_pos
         dx = pl_pos[0] - self.last_position[0]
@@ -93,7 +89,6 @@ class Weapon:
         self.x = weapon_base_x + x_offset
         self.y = weapon_base_y + y_offset
 
-        #attack
         if self.is_attacking:
             self.attack_timer += dt
             if self.attack_timer >= animation_duration:
@@ -102,16 +97,15 @@ class Weapon:
                 
                 if self.current_frame == 3 and not self.has_dealt_damage:
                     self.current_attack_damage = self.player_stats.combat.use_weapon()
-                    self.deal_damage()
-
+                    self.deal_damage(pl_pos[0], pl_pos[1], player_angle)
                     self.has_dealt_damage = True
                 
                 if self.current_frame >= len(self.attack_frames):
                     self.current_frame = 0
                     self.is_attacking = False
                     self.is_reloading = True
-                    self.reload_timer = 0.0
-        #block
+                    self.reload_timer = 0
+
         if self.is_blocking:
             self.block_timer += dt
             if self.block_timer >= block_duration:
@@ -120,7 +114,6 @@ class Weapon:
                 self.is_reloading = True
                 self.reload_timer = 0.0
 
-        #reload
         if self.is_reloading:
             self.reload_timer += dt
             if self.reload_timer >= reload_time:
@@ -148,5 +141,38 @@ class Weapon:
     def check_block(self):
         return self.block_active
 
-    def deal_damage(self):
-        print(f"Нанесено урона: {self.current_attack_damage}")
+    def deal_damage(self, player_x, player_y, player_angle):
+        for enemy in self.enemies:
+            if enemy.is_dead:
+                continue
+                
+            dist = math.hypot(enemy.x - player_x, enemy.y - player_y)
+            
+            if dist < 45:
+                angle_to_enemy = math.atan2(enemy.y - player_y, enemy.x - player_x)
+                angle_diff = abs(player_angle - angle_to_enemy)
+                
+                if angle_diff > math.pi:
+                    angle_diff = 2 * math.pi - angle_diff
+                
+                if angle_diff < math.pi / 3:
+                    enemy.take_damage(self.current_attack_damage)
+
+    def try_absorb_projectile(self, projectile, player_x, player_y, player_angle):
+        if not self.check_block():
+            return False
+            
+        dist = math.hypot(projectile.x - player_x, projectile.y - player_y)
+        
+        if dist < 40:
+            angle_to_proj = math.atan2(projectile.y - player_y, projectile.x - player_x)
+            angle_diff = abs(player_angle - angle_to_proj)
+            
+            if angle_diff > math.pi:
+                angle_diff = 2 * math.pi - angle_diff
+                
+            if angle_diff < math.pi / 2: 
+                self.player_stats.base.add_sp(25) 
+                self.player_stats.combat.apply_enchantment(2) 
+                return True
+        return False

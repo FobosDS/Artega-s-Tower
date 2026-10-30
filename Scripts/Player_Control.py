@@ -1,16 +1,16 @@
 import pygame
 import math
 from Settings import *
-from Map import create_map
 from Collisions import check_collision
 from Player_Status import Player_Stats
+from Game_Manager import MapManager
 
 class Player:
     def __init__(self):
         self.x, self.y = pl_pos
         self.angle = pl_angle
         self.rect = pygame.Rect(pl_rect)
-        self.map = create_map()
+        self.map = MapManager().walls
         self.dash_time_left = 0.0
         self.dash_cooldown_left = 0.0
         self.dash_dir = pygame.Vector2(0, 0)

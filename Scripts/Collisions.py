@@ -1,5 +1,3 @@
-import pygame
-
 def check_walls_collision(test_rect, walls):
     for wall in walls:
         if test_rect.colliderect(wall):
