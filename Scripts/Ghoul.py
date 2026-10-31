@@ -10,7 +10,7 @@ class Ghoul(Enemy):
     def __init__(self, x, y, image_path, scale=1.0, collision_radius=12):
         super().__init__(x, y, image_path, scale, collision_radius)
         
-        self.hp = 60
+        self.hp = 36
         self.speed = 11
         self.attack_range = 25
         self.attack_damage = 19

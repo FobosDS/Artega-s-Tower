@@ -11,7 +11,7 @@ class Gargoyle(Enemy):
         super().__init__(x, y, image_path, scale, collision_radius)
         
         # --- ХАРАКТЕРИСТИКИ ---
-        self.hp = 65
+        self.hp = 80
         self.speed = 18
         self.attack_range = 25
         self.attack_damage = 11
@@ -55,7 +55,7 @@ class Gargoyle(Enemy):
         
         # --- СТАТУЯ (ФАЗА 2) ---
         self.is_statue = False
-        self.statue_trigger_hp = self.max_hp * 0.6
+        self.statue_trigger_hp = self.max_hp * 0.18
         self.statue_duration = 2.0
         self.fall_damage = 100
         self.fall_radius = 100
@@ -331,16 +331,22 @@ class Gargoyle(Enemy):
 
         elif self.state == "stone":
             self.image = self.img_statue
-            # Висит над землей
             if self.state_timer <= 0:
-                # Падение и урон
+                # Переход в падение
+                self.state = "falling"
+                self.state_timer = 0.5  # Время падения (или 0, если сразу)
+                self.image = self.img_fall  # <--- Спрайт падения
+                self.attack_direction = target_angle
+                
+        elif self.state == "falling":
+            self.image = self.img_fall  # <--- Держим спрайт падения
+            if self.state_timer <= 0:
+                # Наносим урон по площади и умираем
                 if distance <= self.fall_radius:
                     player.stats.base.take_damage(self.fall_damage)
                 
-                # Если не добили, то она падает и умирает (деньги не падают)
                 self.is_dead = True
                 self.state = "dead"
-                # Золото не дропаем, так как это "самоубийство"
 
     def can_see_player(self, player):
         dx = player.x - self.x

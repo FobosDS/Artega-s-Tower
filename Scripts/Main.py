@@ -11,7 +11,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("Artega's Tower")
-    
+        
     pygame.mouse.set_visible(False)
     pygame.event.set_grab(True)
     clock = pygame.time.Clock()

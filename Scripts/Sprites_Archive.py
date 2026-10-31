@@ -123,11 +123,24 @@ ESD ={
 
 #interactive sprites dictionary
 ISD = {
-    "pedestal": sprites_folder + "pedestal.png"
+    "merchant":{
+        "merchant1":"Assets/Sprites/Levels/Interactive/mercahnt1.png",
+        "merchant2":"Assets/Sprites/Levels/Interactive/mercahnt2.png"
+    },
+    "rare_chest":{
+        "close":"Assets/Sprites/Levels/Interactive/chest_close.png",
+        "open":"Assets/Sprites/Levels/Interactive/chest_open.png"
+    }
 }
 
 #static sprites dictionary
 SSD = {
+    "barrel":"Assets/Sprites/Levels/Objects/barrel.png",
+    "box":"Assets/Sprites/Levels/Objects/box.png",
+    "cell_break":"Assets/Sprites/Levels/Objects/cell_break.png",
+    "cell_ghoul":"Assets/Sprites/Levels/Objects/cell_ghoul.png",
+    "cell":"Assets/Sprites/Levels/Objects/cell.png",
+    "chains":"Assets/Sprites/Levels/Objects/chains.png"
 }
 
 #weapon sprites dictionary
@@ -143,16 +156,25 @@ WSD = {
 
 #walls textures dictionary
 WTD = {
+    #any letters except: C, D, E, F, G, J, M, P, R, S
+    #shelfs
+    "A":"Assets/Sprites/Levels/Walls/shelfs/shelf1.png",
+    "B":"Assets/Sprites/Levels/Walls/shelfs/shelf2.png",
+    "H":"Assets/Sprites/Levels/Walls/shelfs/shelf3.png",
+    "I":"Assets/Sprites/Levels/Walls/shelfs/shelf4.png",
+    "K":"Assets/Sprites/Levels/Walls/shelfs/shelf5.png",
+    "L":"Assets/Sprites/Levels/Walls/shelfs/shelf6.png",
+
     #dungeon
-    "R":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_grate.png",
-    "L":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_ghoul_grate.png",
-    "N":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_simple1.png",
-    "H":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_simple2.png",
-    "T":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_torch.png",
+    "N":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_grate.png",
+    "O":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_simple2.png",
+    "Q":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_simple1.png",
+    "T":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_ghoul_grate.png",
+    "U":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_torch.png",
 
     #mausoleum
-    "I":"Assets/Sprites/Levels/Walls/2lv_mausoleum/2w_simple.png",
-    "D":"Assets/Sprites/Levels/Walls/2lv_mausoleum/2w_decor1.png",
-    "C":"Assets/Sprites/Levels/Walls/2lv_mausoleum/2w_decor2.png",
-    "S":"Assets/Sprites/Levels/Walls/2lv_mausoleum/2w_statue.png"
+    "V":"Assets/Sprites/Levels/Walls/2lv_mausoleum/2w_simple.png",
+    "W":"Assets/Sprites/Levels/Walls/2lv_mausoleum/2w_decor1.png",
+    "X":"Assets/Sprites/Levels/Walls/2lv_mausoleum/2w_decor2.png",
+    "Y":"Assets/Sprites/Levels/Walls/2lv_mausoleum/2w_statue.png"
 }
