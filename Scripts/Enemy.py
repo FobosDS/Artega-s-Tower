@@ -3,6 +3,7 @@ from Settings import *
 from Objects import Sprite
 from Map import drawed_map
 from random import randint
+from Sprites_Archive import WTD
 
 class Enemy(Sprite):
     def __init__(self, x, y, image_path, scale=1.0, collision_radius=12):
@@ -25,14 +26,15 @@ class Enemy(Sprite):
         
         if row < 0 or row >= len(drawed_map) or col < 0 or col >= len(drawed_map[0]):
             return True
-        return drawed_map[row][col] == "H"
+        return drawed_map[row][col] == WTD
 
     def move_towards(self, target_x, target_y, speed, dt, all_enemies):
         dx = target_x - self.x
         dy = target_y - self.y
         dist = math.hypot(dx, dy)
         
-        if dist < 1:
+        min_dist = self.radius + 15
+        if dist < min_dist:
             return
 
         move_x = (dx / dist) * speed * dt

@@ -2,7 +2,7 @@ import pygame
 from Settings import *
 from Projectile import ProjectileManager
 from Map import drawed_map
-from Objects import Sprite, Interactive_Sprite
+from Objects import Rare_Chest, Merchant, Decoration
 from Sprites_Archive import ISD, WTD
 
 class MapManager:
@@ -35,6 +35,12 @@ class MapManager:
                     self.enemy_spawns.append(("gargoyle", center_x, center_y))
                 elif ch == "P":
                     self.player_spawn = (center_x, center_y)
+                elif ch == "R":
+                    self.interactive_objects.append(Rare_Chest(center_x, center_y))
+                elif ch == "M":
+                    self.interactive_objects.append(Merchant(center_x, center_y))
+                elif ch == "D":
+                    self.objects.append(Decoration(center_x, center_y))
                 
             self.walls_grid.append(grid_row)
 
@@ -84,7 +90,7 @@ class Game:
                 self.enemy_manager.add_enemy(Gargoyle(ex, ey, "Assets/Sprites/Enemies/Gargoyle/ga_front2.png", 0.8, 30))
 
     def update(self, dt):
-        self.player.movement(dt, [])
+        self.player.movement(dt, self.objects + self.interactive_objects)
         self.player.stats.update_effects(dt)
         self.enemy_manager.update(dt, self.player)
         self.enemy_manager.projectile_manager.update(dt, self.player, self.weapon)

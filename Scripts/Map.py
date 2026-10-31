@@ -4,7 +4,7 @@ drawed_map = [
     "O.P.......HO",
     "O...UOTOO..N",
     "OD..OD.II.DN",
-    "U...N......O",
+    "U...N.1....O",
     "O.L....M.O.N",
     "O........U.O",
     "U.NNNTN.DO.T",
