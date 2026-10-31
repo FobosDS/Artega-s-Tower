@@ -26,7 +26,7 @@ class Enemy(Sprite):
         
         if row < 0 or row >= len(drawed_map) or col < 0 or col >= len(drawed_map[0]):
             return True
-        return drawed_map[row][col] == WTD
+        return drawed_map[row][col] in WTD
 
     def move_towards(self, target_x, target_y, speed, dt, all_enemies):
         dx = target_x - self.x

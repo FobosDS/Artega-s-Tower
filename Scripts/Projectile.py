@@ -2,6 +2,7 @@ import math
 from Settings import *
 from Objects import Sprite
 from Map import drawed_map
+from Sprites_Archive import WTD
 
 class Projectile(Sprite):
     def __init__(self, x, y, target_x, target_y, image_path, speed=200):
@@ -41,7 +42,7 @@ class ProjectileManager:
             
             if (row < 0 or row >= len(drawed_map) or 
                 col < 0 or col >= len(drawed_map[0]) or 
-                drawed_map[row][col] == "H"):
+                drawed_map[row][col] in WTD):
                 self.projectiles.remove(proj)
                 continue
             

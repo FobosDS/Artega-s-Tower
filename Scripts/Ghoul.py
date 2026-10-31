@@ -226,7 +226,7 @@ class Ghoul(Enemy):
             if angle_diff_attack > math.pi:
                 angle_diff_attack = 2 * math.pi - angle_diff_attack
                 
-            if distance <= self.attack_range + 25 and angle_diff_attack < math.pi / 4:
+            if distance <= self.attack_range + 10 and angle_diff_attack < math.pi / 4:
                 player.stats.base.take_damage(self.attack_damage * self.dash_attack_multiplier)
                     
             self.state = "recovery"
