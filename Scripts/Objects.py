@@ -56,6 +56,13 @@ class Merchant(Interactive_Sprite):
     def perform_action(self):
         print("Торговец: 'Что желаешь купить?'")
 
+class Shelf(Interactive_Sprite):
+    def __init__(self, x, y):
+        image_path = SSD["box"]
+        super().__init__(x, y, image_path, scale=1.0, collision_radius=14)
+    
+    def perform_action(self):
+        print("Вы осмотрели полку. На ней пыльные книги и старые склянки.")
 
 class Decoration(Sprite):
     def __init__(self, x, y):

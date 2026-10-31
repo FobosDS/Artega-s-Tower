@@ -11,7 +11,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("Artega's Tower")
-        
+
     pygame.mouse.set_visible(False)
     pygame.event.set_grab(True)
     clock = pygame.time.Clock()
@@ -25,6 +25,8 @@ def main():
     input_manager = Input_Manager(player, interaction_manager, weapon)
     
     game = Game(screen, player, weapon, interface, icons)
+
+    interaction_manager.interactive_objects = game.interactive_objects
     
     weapon.enemies = game.enemy_manager.enemies
 

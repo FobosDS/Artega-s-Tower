@@ -2,7 +2,7 @@ import pygame
 from Settings import *
 from Projectile import ProjectileManager
 from Map import drawed_map
-from Objects import Rare_Chest, Merchant, Decoration
+from Objects import Rare_Chest, Merchant, Shelf, Decoration
 from Sprites_Archive import ISD, WTD
 
 class MapManager:
@@ -29,6 +29,8 @@ class MapManager:
                 
                 if ch in WTD:
                     self.walls.append(pygame.Rect(x, y, tile, tile))
+                    if ch in "ABHIKL":
+                        self.interactive_objects.append(Shelf(center_x, center_y))
                 elif ch == "1":
                     self.enemy_spawns.append(("ghoul", center_x, center_y))
                 elif ch == "2":
