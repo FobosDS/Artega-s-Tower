@@ -63,7 +63,7 @@ class EnemyManager:
                     self.projectile_manager.add_projectile(proj)
                 enemy.projectiles.clear()
                 
-        self.enemies = [e for e in self.enemies if not e.is_dead]
+        self.enemies[:] = [e for e in self.enemies if not e.is_dead]
 
 class Game:
     def __init__(self, screen, player, weapon, interface, icons):

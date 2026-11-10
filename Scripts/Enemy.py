@@ -8,14 +8,16 @@ from Sprites_Archive import WTD
 class Enemy(Sprite):
     def __init__(self, x, y, image_path, scale=1.0, collision_radius=12):
         super().__init__(x, y, image_path, scale, collision_radius)
-        
+
         self.hp = 30
-        self.max_hp = 30
+        self.max_hp = self.hp
         self.is_dead = False
         self.radius = collision_radius
         self.speed = 30
         
         self.player = None 
+
+        self.has_dropped = False
 
     def update(self, dt, player, all_enemies):
         pass
@@ -66,5 +68,11 @@ class Enemy(Sprite):
             self.is_dead = True
 
     def drop_gold(self, diap, count=0):
+        if self.has_dropped == True:
+            return
+        if self.player is None:
+            return
+        self.has_dropped = True
+        
         count =randint(*diap)
         self.player.stats.base.add_gold(count)

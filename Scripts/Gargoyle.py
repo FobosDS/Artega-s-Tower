@@ -10,32 +10,27 @@ class Gargoyle(Enemy):
     def __init__(self, x, y, image_path, scale=1.0, collision_radius=20):
         super().__init__(x, y, image_path, scale, collision_radius)
         
-        # --- ХАРАКТЕРИСТИКИ ---
         self.hp = 80
         self.speed = 18
         self.attack_range = 25
         self.attack_damage = 11
         self.gold_dropped = (18, 24)
         
-        # --- СОСТОЯНИЯ ---
         self.state = "idle"
         self.state_timer = 0
         self.attack_timer = 0
         self.attack_direction = 0
         self.locked_view = None
         
-        # --- ПАТРУЛИРОВАНИЕ (IDLE) ---
         self.idle_center = (x, y)
         self.idle_radius = 60
         self.idle_angle = random.uniform(0, 2 * math.pi)
         self.idle_speed = 15
         
-        # --- БЛИЖНИЙ БОЙ ---
         self.windup_time = 0.5
         self.attack_time = 0.3
         self.recovery_time = 1.0
         
-        # --- ПИКИРОВАНИЕ ---
         self.dive_cooldown = 10
         self.dive_timer = 0
         self.dive_prep_time = 0.4
@@ -44,7 +39,6 @@ class Gargoyle(Enemy):
         self.dive_speed = 250
         self.dive_damage = 1
         
-        # --- ЭХО-ВОЛНЫ ---
         self.projectiles = []
         self.echo_cooldown = 20
         self.echo_timer = 0
@@ -53,19 +47,16 @@ class Gargoyle(Enemy):
         self.echo_projectile_count = 8
         self.echo_spread = 2 * math.pi / self.echo_projectile_count
         
-        # --- СТАТУЯ (ФАЗА 2) ---
         self.is_statue = False
-        self.statue_trigger_hp = self.max_hp * 0.18
+        self.statue_trigger_hp = self.max_hp * 0.2
         self.statue_duration = 2.0
         self.fall_damage = 100
         self.fall_radius = 100
         
-        # --- ВИДИМОСТЬ ---
         self.aggro_range = 150
         self.is_aggro = False
         self.flight_height = 90
         
-        # --- СПРАЙТЫ ---
         g_data = ESD["gargoyle"]
         
         def load_scaled(path):
@@ -105,7 +96,6 @@ class Gargoyle(Enemy):
         
         self.image = self.sprites["front"]["stand"]
         
-        # --- АНИМАЦИЯ ---
         self.current_move_frame = 0
         self.anim_timer = 0
         self.anim_speed = 0.25
@@ -121,7 +111,6 @@ class Gargoyle(Enemy):
         dy = player.y - self.y
         distance = math.hypot(dx, dy)
 
-        # Обновление таймеров
         if self.attack_timer > 0: self.attack_timer -= dt
         if self.state_timer > 0: self.state_timer -= dt
         if self.hit_timer > 0: self.hit_timer -= dt
@@ -131,7 +120,6 @@ class Gargoyle(Enemy):
 
         target_angle = math.atan2(dy, dx)
         
-        # --- ОПРЕДЕЛЕНИЕ РАКУРСА ---
         if self.state in ["windup", "attack", "dive_prep", "diving", "echo_prep", "echo_attack"]:
             current_angle = self.attack_direction
             if self.locked_view is None:
@@ -161,12 +149,10 @@ class Gargoyle(Enemy):
             
         sprites = self.sprites[view]
 
-        # Моргание при уроне
         if self.hit_timer > 0:
             self.image = self.img_hit
             return
 
-        # --- ПРОВЕРКА НА СТАТУЮ ---
         if self.hp <= self.statue_trigger_hp and not self.is_statue and not self.is_dead:
             self.state = "stone"
             self.is_statue = True
@@ -174,16 +160,13 @@ class Gargoyle(Enemy):
             self.image = self.img_statue
             return
 
-        # --- ЛОГИКА СОСТОЯНИЙ ---
         if self.state == "idle":
             self.image = sprites["stand"]
-            # Патрулирование (кружит в области)
             self.idle_angle += 0.5 * dt
             target_x = self.idle_center[0] + math.cos(self.idle_angle) * self.idle_radius
             target_y = self.idle_center[1] + math.sin(self.idle_angle) * self.idle_radius
             self.move_towards(target_x, target_y, self.idle_speed, dt, all_enemies)
             
-            # Проверка обнаружения игрока
             if self.can_see_player(player):
                 self.is_aggro = True
                 self.state = "chase"
@@ -197,7 +180,6 @@ class Gargoyle(Enemy):
                     return
             
             if self.is_aggro:
-                # Выбор действия
                 if distance < 100 and self.echo_timer <= 0:
                     self.state = "echo_prep"
                     self.state_timer = 0.5
@@ -214,7 +196,6 @@ class Gargoyle(Enemy):
                     self.state_timer = self.windup_time
                     self.attack_direction = target_angle
                 elif distance > self.attack_range:
-                    # Движение к игроку + анимация
                     self.anim_timer += dt
                     if self.anim_timer >= self.anim_speed:
                         self.anim_timer = 0.0
@@ -260,7 +241,6 @@ class Gargoyle(Enemy):
             self.image = sprites["dive"]
             self.dive_time_left -= dt
             
-            # Движение с проверкой стен
             move_x = math.cos(self.attack_direction) * self.dive_speed * dt
             move_y = math.sin(self.attack_direction) * self.dive_speed * dt
             
@@ -282,7 +262,6 @@ class Gargoyle(Enemy):
                 self.state_timer = self.recovery_time
                 return
 
-            # Урон на протяжении всего пикирования
             if distance <= self.attack_range + 15:
                 player.stats.base.take_damage(self.dive_damage)
             
@@ -293,7 +272,6 @@ class Gargoyle(Enemy):
         elif self.state == "echo_prep":
             self.image = sprites["echo"]
             if self.state_timer <= 0:
-                # Выпуск волны
                 for i in range(self.echo_projectile_count):
                     angle = self.echo_spread * i
                     proj = Projectile(self.x, self.y, 
@@ -312,7 +290,6 @@ class Gargoyle(Enemy):
             self.image = sprites["echo"]
             if self.echo_wave_timer <= 0:
                 if self.echo_waves_left > 0:
-                    # Следующая волна
                     for i in range(self.echo_projectile_count):
                         angle = self.echo_spread * i + (self.echo_waves_left * 0.2)
                         proj = Projectile(self.x, self.y, 
@@ -332,16 +309,14 @@ class Gargoyle(Enemy):
         elif self.state == "stone":
             self.image = self.img_statue
             if self.state_timer <= 0:
-                # Переход в падение
                 self.state = "falling"
-                self.state_timer = 0.5  # Время падения (или 0, если сразу)
-                self.image = self.img_fall  # <--- Спрайт падения
+                self.state_timer = 0.5  
+                self.image = self.img_fall  
                 self.attack_direction = target_angle
                 
         elif self.state == "falling":
-            self.image = self.img_fall  # <--- Держим спрайт падения
+            self.image = self.img_fall  
             if self.state_timer <= 0:
-                # Наносим урон по площади и умираем
                 if distance <= self.fall_radius:
                     player.stats.base.take_damage(self.fall_damage)
                 
@@ -367,12 +342,11 @@ class Gargoyle(Enemy):
 
     def take_damage(self, amount):
         if self.state in ["windup", "attack"]:
-            amount = int(amount * 0) # Защита от спама во время атаки
+            amount = int(amount * 0) 
         
         super().take_damage(amount)
         
         if not self.is_dead:
             self.hit_timer = 0.2
-            # Если добили статую — дропаем золото
             if self.is_statue and self.hp <= 0:
                 self.drop_gold(self.gold_dropped)

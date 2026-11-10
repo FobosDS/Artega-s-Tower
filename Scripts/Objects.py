@@ -10,7 +10,6 @@ class Sprite:
         self.scale = scale
         self.img_w, self.img_h = self.image.get_size()
         self.aspect = self.img_w / self.img_h
-        #sprite hitbox
         self.rect = pygame.Rect(
             self.x - collision_radius,
             self.y - collision_radius,
@@ -29,7 +28,7 @@ class Interactive_Sprite(Sprite):
             collision_radius * 2 * interactive_zone_scale,
             collision_radius * 2 * interactive_zone_scale
         )
-        self.is_interactive = True
+        self.is_action_perfomed = False
 
     def perform_action(self):
         pass
@@ -45,8 +44,9 @@ class Rare_Chest(Interactive_Sprite):
             print("Сундук открыт! Вы нашли золото.")
             self.is_open = True
             self.image = pygame.image.load(ISD["rare_chest"]["open"]).convert_alpha()
-        else:
+        elif not self.is_action_perfomed:
             print("Сундук уже пуст.")
+            self.is_action_perfomed = True
 
 class Merchant(Interactive_Sprite):
     def __init__(self, x, y):
@@ -62,7 +62,9 @@ class Shelf(Interactive_Sprite):
         super().__init__(x, y, image_path, scale=1.0, collision_radius=14)
     
     def perform_action(self):
-        print("Вы осмотрели полку. На ней пыльные книги и старые склянки.")
+        if not self.is_action_perfomed:
+            print("Вы осмотрели полку. На ней пыльные книги и старые склянки.")
+            self.is_action_perfomed = True
 
 class Decoration(Sprite):
     def __init__(self, x, y):

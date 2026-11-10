@@ -42,12 +42,12 @@ block_duration = 0.3
 #==================================
 #max status
 max_durability = 100
-max_gold = 599
-max_scrolls = 2
-max_whetstones = 3
-max_weapon_level = 3
-max_hp_level = 4
-max_sp_level = 3
+max_gold = 999
+max_scrolls = 3
+max_whetstones = 4
+max_weapon_level = 5
+max_hp_level = 6
+max_sp_level = 5
 
 #sp
 sp_cost_dash = 10          
@@ -61,8 +61,8 @@ sp_regen_delay_bonus = 0.11
 #base stats
 base_hp = 100         
 base_sp = 100 - sp_bonus
-base_durability = 80        
-base_potions = 2
+base_durability = 1        
+base_potions = 3
 base_gold = 0  
 base_scrolls = 1
 base_whetstones = 1   

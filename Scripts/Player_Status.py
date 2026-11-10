@@ -20,6 +20,9 @@ class Base_Stats:
         self.sp_regen_delay = base_sp_regen_delay - self.sp_level * sp_regen_delay_bonus
         self.sp_regen_timer = 0
 
+        self.rings = []
+        self.max_rings = 2
+
 
     def heal(self, amount):
         self.hp = min(self.hp + amount, self.max_hp)
@@ -27,8 +30,23 @@ class Base_Stats:
     def take_damage(self, damage):
         self.hp = max(self.hp - damage, 0)
 
+    def add_potion(self, count):
+        self.potions = min(self.potions + count, self.max_potions)
+
+    def add_scroll(self, count):
+        self.scrolls = min(self.scrolls + count, max_scrolls)
+
     def add_gold(self, count):
         self.gold = min(self.gold + count, max_gold)
+
+    def add_ring(self, ring_type):
+        if ring_type in self.rings:
+            return None
+        displaced = None
+        if len(self.rings) >= self.max_rings:
+            self.rings.pop(0)
+        self.rings.append(ring_type)
+        return displaced
 
     def is_dead(self):
         return self.hp <= 0
@@ -106,6 +124,9 @@ class Combat_Stats:
             self.whetstones = max(self.whetstones - 1, 0)
             return True
         return False
+
+    def add_whetstone(self, count):
+        self.whetstones = min(self.whetstones + count, max_whetstones)
 
 
     def apply_enchantment(self, duration):

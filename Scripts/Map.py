@@ -9,6 +9,6 @@ drawed_map = [
     "O........U.O",
     "U.NNNTN.DO.T",
     "O.D..D...O.O",
-    "O....1...J.O",
+    "O........J.O",
     "OTNOTOUTNNNO",
 ]

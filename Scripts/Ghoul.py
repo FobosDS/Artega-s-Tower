@@ -4,7 +4,6 @@ from Settings import *
 from Enemy import Enemy
 from Projectile import Projectile
 from Sprites_Archive import ESD
-from random import randint
 
 class Ghoul(Enemy):
     def __init__(self, x, y, image_path, scale=1.0, collision_radius=12):
@@ -29,7 +28,7 @@ class Ghoul(Enemy):
         self.shoot_timer = 0
         self.projectiles = []
         
-        self.dash_cooldown = 7
+        self.dash_cooldown = 9
         self.dash_timer = 0
         self.dash_duration = 0.6
         self.dash_time_left = 0

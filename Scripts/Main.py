@@ -31,6 +31,7 @@ def main():
     weapon.enemies = game.enemy_manager.enemies
 
     running = True
+    
     while running:
         dt = min(clock.tick(FPS) / 1000, 0.05)
 

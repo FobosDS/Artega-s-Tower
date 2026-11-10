@@ -16,7 +16,7 @@ class Input_Manager:
                 if event.key == pygame.K_ESCAPE:
                     return False
                 if event.key == interact_key:
-                    self.interaction_manager.handle_input(self.player.rect, {interact_key: True})
+                    self.interaction_manager.handle_input(self.player.rect, {interact_key: True}, self.player.stats)
                 if event.key == potion_key:
                     self.player.stats.use_potion()
                 if event.key == scroll_key:

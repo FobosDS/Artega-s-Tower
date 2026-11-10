@@ -126,12 +126,12 @@ def draw_hud(screen, stats, icons, interface):
     if interface:
         screen.blit(interface, (interface_x, interface_y))
 
-    icons["potion"].draw(screen, text_list=[stats.base.potions])
+    icons["potion"].draw(screen, text_list=[str(stats.base.potions)])
     
     #left panel
-    icons["scroll"].draw(screen, text_list=[stats.base.scrolls])
-    icons["whetstone"].draw(screen, text_list=[stats.combat.whetstones])
-    icons["gold"].draw(screen, text_list=[stats.base.gold])
+    icons["scroll"].draw(screen, text_list=[str(stats.base.scrolls)])
+    icons["whetstone"].draw(screen, text_list=[str(stats.combat.whetstones)])
+    icons["gold"].draw(screen, text_list=[str(stats.base.gold)])
     
     #weapon
     if not hasattr(icons["weapon"], "_last_weapon_lvl") or icons["weapon"]._last_weapon_lvl != stats.combat.weapon_level:
@@ -139,11 +139,11 @@ def draw_hud(screen, stats, icons, interface):
             icons["weapon"].change_image(icons_folder + "lv1_sword.png")
         elif stats.combat.weapon_level == 2:
             icons["weapon"].change_image(icons_folder + "lv2_sword.png")
-        elif stats.combat.weapon_level == 3:
+        elif stats.combat.weapon_level == 3 or stats.combat.weapon_level == 4 or stats.combat.weapon_level == 5:
             icons["weapon"].change_image(icons_folder + "lv3_sword.png")
         icons["weapon"]._last_weapon_lvl = stats.combat.weapon_level
         
-    icons["weapon"].draw(screen, text_list=[stats.combat.durability, stats.combat.weapon_level])
+    icons["weapon"].draw(screen, text_list=[str(stats.combat.durability), stats.combat.weapon_level])
 
     #right panel
     icons["hp_lvl"].draw(screen, text_list=[stats.base.hp_level])
