@@ -13,7 +13,8 @@ class Ghoul(Enemy):
         self.speed = 11
         self.attack_range = 25
         self.attack_damage = 19
-        self.gold_dropped = (2, 5)
+        self.gold_drop = ghoul_gold_drop
+        self.enemy_type = "ghoul"
 
         self.state = "chase"
         self.state_timer = 0
@@ -85,7 +86,7 @@ class Ghoul(Enemy):
 
     def update(self, dt, player, all_enemies):
         if self.is_dead:
-            self.drop_gold(self.gold_dropped)
+            self.drop_loot()
 
             self.image = self.img_death
             return

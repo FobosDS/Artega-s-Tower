@@ -14,7 +14,8 @@ class Gargoyle(Enemy):
         self.speed = 18
         self.attack_range = 25
         self.attack_damage = 11
-        self.gold_dropped = (18, 24)
+        self.gold_drop = gargoyle_gold_drop
+        self.enemy_type = "gargoyle"
         
         self.state = "idle"
         self.state_timer = 0
@@ -103,6 +104,7 @@ class Gargoyle(Enemy):
 
     def update(self, dt, player, all_enemies):
         if self.is_dead:
+            self.drop_loot()
             self.image = self.img_death
             return
 
@@ -319,7 +321,7 @@ class Gargoyle(Enemy):
             if self.state_timer <= 0:
                 if distance <= self.fall_radius:
                     player.stats.base.take_damage(self.fall_damage)
-                
+                self.drop_loot()
                 self.is_dead = True
                 self.state = "dead"
 
@@ -348,5 +350,3 @@ class Gargoyle(Enemy):
         
         if not self.is_dead:
             self.hit_timer = 0.2
-            if self.is_statue and self.hp <= 0:
-                self.drop_gold(self.gold_dropped)

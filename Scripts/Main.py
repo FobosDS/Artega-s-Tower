@@ -27,6 +27,8 @@ def main():
     game = Game(screen, player, weapon, interface, icons)
 
     interaction_manager.interactive_objects = game.interactive_objects
+
+    interaction_manager.give_ring = game.give_ring_to_player
     
     weapon.enemies = game.enemy_manager.enemies
 

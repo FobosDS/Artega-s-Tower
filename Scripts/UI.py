@@ -2,6 +2,46 @@ import pygame
 from Settings import *
 import math
 
+class ToastMessage:
+    def __init__(self, x, y, font_size=22):
+        self.x = x
+        self.y = y
+        self.font = pygame.font.Font(None, font_size)
+        self.pending = []
+        self.current = ""
+        self.timer = 0.0
+        self.duration = 3
+        self.fade_time = 0.5
+        self.fast_fade = 0.25
+
+    def set_message(self, text):
+        if text:
+            self.pending.append(text)
+
+    def update(self, dt):
+        if self.pending and self.current and self.timer > self.fast_fade:
+            self.timer = self.fast_fade
+
+        if self.timer > 0:
+            self.timer -= dt
+
+        if self.timer <= 0 and self.pending:
+            self.current = self.pending.pop(0)
+            self.timer = self.duration + self.fade_time
+        elif self.timer <= 0:
+            self.current = ""
+
+    def draw(self, screen):
+        if self.timer <= 0 or not self.current:
+            return
+        alpha = 255
+        if self.timer < self.fade_time:
+            alpha = int(255 * (self.timer / self.fade_time))
+        surf = self.font.render(self.current, True, white)
+        surf.set_alpha(alpha)
+        rect = surf.get_rect(midleft=(self.x, self.y))
+        screen.blit(surf, rect)
+
 class Icon:
     def __init__(self, path, x, y, scale=0.5):
         self.base_image = pygame.image.load(path).convert_alpha()

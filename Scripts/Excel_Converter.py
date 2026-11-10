@@ -23,6 +23,20 @@ COLORS = {
     "FF002060": "D"#decoration
 }
 
+RARE_CHEST_NUMBERS = {
+    "1": "r",
+    "2": "s",
+    "3": "t",
+    "4": "u"
+}
+
+MERCHANT_NUMBERS = {
+    "1": "m",
+    "2": "n",
+    "3": "o",
+    "4": "p"
+}
+
 SHELF_NUMBERS = {
     "1": "A", "2": "B", "3": "H", "4": "I", "5": "K", "6": "L"
 }
@@ -90,6 +104,12 @@ def color_to_symbol(fill, cell_value=None):
         
         if symbol == "O" and value_str in WALL_NUMBERS:
             return WALL_NUMBERS[value_str]
+
+        if symbol == "R" and value_str in RARE_CHEST_NUMBERS:
+            return RARE_CHEST_NUMBERS[value_str]
+
+        if symbol == "M" and value_str in MERCHANT_NUMBERS:
+            return MERCHANT_NUMBERS[value_str]
         
         return symbol
     

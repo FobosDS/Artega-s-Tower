@@ -4,6 +4,7 @@ from Objects import Sprite
 from Map import drawed_map
 from random import randint
 from Sprites_Archive import WTD
+import Items_Hub
 
 class Enemy(Sprite):
     def __init__(self, x, y, image_path, scale=1.0, collision_radius=12):
@@ -11,12 +12,14 @@ class Enemy(Sprite):
 
         self.hp = 30
         self.max_hp = self.hp
+        self.gold_drop = (1, 2)
         self.is_dead = False
         self.radius = collision_radius
-        self.speed = 30
+        self.speed = 10
         
         self.player = None 
 
+        self.enemy_type = "ghoul"
         self.has_dropped = False
 
     def update(self, dt, player, all_enemies):
@@ -66,13 +69,19 @@ class Enemy(Sprite):
         if self.hp <= 0:
             self.hp = 0
             self.is_dead = True
-
-    def drop_gold(self, diap, count=0):
-        if self.has_dropped == True:
+    
+    def drop_loot(self):
+        if self.has_dropped:
             return
         if self.player is None:
             return
         self.has_dropped = True
-        
-        count =randint(*diap)
-        self.player.stats.base.add_gold(count)
+
+        amount = randint(*self.gold_drop)
+        self.player.stats.base.add_gold(amount)
+
+        item = Items_Hub.roll_enemy_loot(self.enemy_type)
+        if item is not None:
+            msg = self.player.stats.give_item(item)
+            if msg:
+                self.player.stats.notify(msg)

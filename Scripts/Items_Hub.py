@@ -25,13 +25,14 @@ item_names = {
     weapon_crate:"Оружейный ящик Андре",
     chest_key_base:"Ключ от сундука",
     chest_key_rare:"Ключ от тайника Артеги",
-    floor_key:"Ключ от этажа"
+    floor_key:"Ключ от этажа",
+    ring: "Кольцо"
 }
 
 #loot tables
 shelf_loot = [
-    (None, 20), (gold, 30), (potion, 18), (scroll, 15), 
-    (whetstone, 9), (chest_key_base, 5), (chest_key_rare, 3)
+    (None, 40), (gold, 24), (potion, 14), (scroll, 8), 
+    (whetstone, 6), (chest_key_base, 5), (chest_key_rare, 3)
 ]
 
 enemy_loot = {
@@ -78,4 +79,40 @@ cell_unique_items = {
     3: weapon_crate,
     4: ring
 }
+
+def roll_weighted(table):
+    if not table:
+        return None
+    total = sum(w for _, w in table)
+    r = random.uniform(0, total)
+    upto = 0
+    for item, weight in table:
+        upto += weight
+        if upto >= r:
+            return item
+    return table[-1][0]
+
+def get_item_name(item):
+    if item == ring:
+        return "Случайное кольцо"
+    return item_names.get(item, "?")
+
+def roll_enemy_loot(enemy_type):
+    return roll_weighted(enemy_loot.get(enemy_type, enemy_loot["ghoul"]))
+
+def roll_shelf_loot():
+    return roll_weighted(shelf_loot)
+
+def roll_chest_base_loot():
+    return roll_weighted(chest_base_loot)
+
+floor_rings = {
+    1: ["ring_fugitive", "ring_merchant"],
+    2: ["ring_dragon", "ring_dreamer"],
+    3: ["ring_genius", "ring_murderer"],
+    4: ["ring_warrior", "ring_aristocrat"],
+}
+
+def get_floor_rings(floor):
+    return floor_rings.get(floor, [])
 

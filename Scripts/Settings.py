@@ -61,9 +61,9 @@ sp_regen_delay_bonus = 0.11
 #base stats
 base_hp = 100         
 base_sp = 100 - sp_bonus
-base_durability = 1        
+base_durability = 70       
 base_potions = 3
-base_gold = 0  
+base_gold = 500 
 base_scrolls = 1
 base_whetstones = 1   
 base_attack_damage = 10       
@@ -100,6 +100,21 @@ sprites_folder = "Assets/Sprites/"
 sprites_scale = 50
 icons_folder = "Assets/Sprites/Icons/"
 walls_folder = "Assets/Sprites/Levels/Walls/"
+#==================================
+
+
+#items settings
+#==================================
+#gold drop
+shelf_gold_drop = (4, 16)
+chest_gold_drop = (25, 38)
+ghoul_gold_drop = (2, 5)
+gargoyle_gold_drop = (18, 36)
+vampire_gold_drop = (40,70)
+
+#merchant
+price_buy_growth = 1.4
+price_level_growth = 1.15
 #==================================
 
 

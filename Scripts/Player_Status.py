@@ -1,4 +1,7 @@
 from Settings import *
+from Sprites_Archive import RD
+import Items_Hub
+
 
 class Base_Stats:
     def __init__(self):
@@ -204,7 +207,9 @@ class Player_Stats:
         self.is_chest_key1 = False
         self.is_chest_key2 = False
 
-        self.current_floor = 2
+        self.current_floor = 1
+
+        self.pending_messages = []
 
     def use_potion(self):
         if self.base.potions > 0:
@@ -236,3 +241,69 @@ class Player_Stats:
         self.effects.update(dt, self.base)
         self.combat.update_enchantment(dt)
         self.base.regen_sp(dt)
+
+    def notify(self, msg):
+        if msg:
+            self.pending_messages.append(msg)
+
+    def give_item(self, item, amount=1, give_ring=None):
+        if item is None:
+            return ""
+        if item == "potion":
+            self.base.add_potion(amount)
+            return "Зелье жизни"
+        if item == "scroll":
+            self.base.add_scroll(amount)
+            return "Свиток тьмы"
+        if item == "whetstone":
+            self.combat.add_whetstone(amount)
+            return "Точильный камень"
+        if item == "gold":
+            return ""
+        if item == "heart":
+            if self.base.level_up_hp():
+                return "Сердце монстраю Оскар сожрал его и стал крепче!"
+            return ""
+        if item == "lungs":
+            if self.base.level_up_sp():
+                return "Легкие вампира. Оскар сожрал их и стал выносливее!"
+            return ""
+        if item == "weapon_crate":
+            if self.combat.level_up_weapon():
+                return "Оружейный ящик Андре. Чертежи и инструменты старого кузнеца помогли Оскару улучшить свое оружие!"
+            return ""
+        if item == "chest_key_base":
+            if not self.is_chest_key1:
+                self.is_chest_key1 = True
+                return "Ключ от сундука"
+            return ""
+        if item == "chest_key_rare":
+            if not self.is_chest_key2:
+                self.is_chest_key2 = True
+                return "Ключ от тайника Артеги"
+            return ""
+        if item == "floor_key":
+            if not self.is_floor_key:
+                self.is_floor_key = True
+                return "Ключ от этажа"
+            return ""
+        if item == "ring":
+            return self.give_ring(give_ring)
+        return "Кольцо"
+
+    def give_ring(self, give_ring):
+        chosen = None
+        for r in Items_Hub.get_floor_rings(self.current_floor):
+            if r not in self.base.rings:
+                chosen = r
+                break
+        if chosen is None:
+            available = [r for r in RD.keys() if r not in self.base.rings]
+            if not available:
+                return ""
+            chosen = available[0]
+        if give_ring is not None:
+            give_ring(chosen)
+        else:
+            self.base.add_ring(chosen)
+        return f"{RD[chosen]['name']}"
