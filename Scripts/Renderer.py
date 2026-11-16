@@ -158,6 +158,12 @@ def render_sprites(player, screen, sprites):
         draw_start_y = half_height - sprite_height // 2
         draw_start_y += int(sprite_height * 0.2)
 
+        if getattr(sprite, 'on_floor', False):
+            floor_y = half_height + int(height * tile_size / (2 * transform_y))
+            sink = int(sprite_height * getattr(sprite, 'floor_sink', 0))
+            draw_start_y = floor_y - sprite_height + sink
+            draw_start_y += int(getattr(sprite, 'bob_offset', 0))
+
         if hasattr(sprite, 'flight_height'):
             draw_start_y -= sprite.flight_height
             

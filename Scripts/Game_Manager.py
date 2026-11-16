@@ -3,9 +3,11 @@ from Settings import *
 from Projectile import ProjectileManager
 from Map import drawed_map
 from Objects import Rare_Chest, Merchant, Shelf, Decoration, RingPickup
-from Sprites_Archive import ISD, WTD
+from Sprites_Archive import ISD, WTD, RD   
 import Items_Hub
+import math                                
 from UI import ToastMessage
+
 
 class MapManager:
     def __init__(self):
@@ -106,6 +108,8 @@ class Game:
         self.interactive_objects = self.map_manager.interactive_objects
 
         self.toast = ToastMessage(half_width - 420, height - 180)
+
+        self.rings_to_drop = []
         
         from Ghoul import Ghoul
         from Gargoyle import Gargoyle
@@ -115,13 +119,19 @@ class Game:
 
             if enemy_type == "gargoyle":
                 self.enemy_manager.add_enemy(Gargoyle(ex, ey, "Assets/Sprites/Enemies/Gargoyle/ga_front2.png", 0.8, 30))
+                
+    def spawn_ring_pickup(self, ring_type, x, y, needs_manual=True):
+        pickup = RingPickup(x, y, ring_type)
+        self.interactive_objects.append(pickup)
+        self.objects.append(pickup) 
+        return pickup
 
     def give_ring_to_player(self, ring_type):
-        displaced = self.player.stats.base.add_ring(ring_type)
-        if displaced:
-            pickup = RingPickup(self.player.x + 30, self.player.y, displaced)
-            self.interactive_objects.append(pickup)
-        return displaced
+        return self.player.stats.base.add_ring(ring_type)  
+
+    def drop_ring(self, ring_type, x, y):
+        self.spawn_ring_pickup(ring_type, x, y)
+        self.player.stats.notify(f"Оскар уронил на пол: {RD[ring_type]['name']}")
 
     def update(self, dt):
         while self.player.stats.pending_messages:
@@ -141,6 +151,34 @@ class Game:
             if not self.player.stats.is_floor_key:
                 self.player.stats.is_floor_key = True
                 self.toast.set_message("Потеряв всякую надежду выбраться из башни, Оскар находит на трупе врага...Ключ от этажа!")
+
+        while self.rings_to_drop:
+            ring_type = self.rings_to_drop.pop(0)
+            self.spawn_ring_pickup(ring_type, self.player.x + 30, self.player.y)
+
+        displaced = self.player.stats.last_displaced_ring
+
+        if displaced is not None:
+            self.player.stats.last_displaced_ring = None
+            drop_x = self.player.x + math.cos(self.player.angle) * 30
+            drop_y = self.player.y + math.sin(self.player.angle) * 30
+            hitbox = pygame.Rect(drop_x - 5, drop_y - 5, 10, 10)
+            if any(hitbox.colliderect(w) for w in self.map_manager.walls):
+                drop_x, drop_y = self.player.x, self.player.y   
+            self.drop_ring(displaced, drop_x, drop_y)
+
+        for obj in self.interactive_objects[:]:
+            if not isinstance(obj, RingPickup):
+                continue
+            obj.update(dt)
+            if not obj.taken:
+                continue
+            if obj.displaced is not None:
+                self.drop_ring(obj.displaced, obj.x, obj.y)     
+                obj.displaced = None
+            self.interactive_objects.remove(obj)
+            if obj in self.objects:
+                self.objects.remove(obj)
 
     def draw(self):
         from Renderer import render_scene

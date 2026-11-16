@@ -49,11 +49,9 @@ class Base_Stats:
             return None
         displaced = None
         if len(self.rings) >= self.max_rings:
-            displaced = self.rings.pop(0)
-            self.on_ring_removed(displaced)
+            displaced = self.rings.pop(0)  
         self.rings.append(ring_type)
-        self.on_ring_added(ring_type)
-        return displaced
+        return displaced  
 
     def is_dead(self):
         return self.hp <= 0
@@ -303,6 +301,8 @@ class Player_Stats:
         self.berserk_cooldown_left = 0.0
         self.berserk_weapon_gain = 0
 
+        self.last_displaced_ring = None
+
     def get_speed_multiplier(self):
         mult = 1.0
         for r in self.base.rings:
@@ -490,7 +490,7 @@ class Player_Stats:
                 return ""
             chosen = available[0]
         if give_ring is not None:
-            give_ring(chosen)
+            self.last_displaced_ring = give_ring(chosen)
         else:
-            self.base.add_ring(chosen)
+            self.last_displaced_ring = self.base.add_ring(chosen)
         return f"{RD[chosen]['name']}"

@@ -55,7 +55,7 @@ class Rare_Chest(Interactive_Sprite):
     
 class Merchant(Interactive_Sprite):
     def __init__(self, x, y, unique_item=None):
-        super().__init__(x, y, ISD["merchant"]["merchant1"], scale=0.9, collision_radius=14)
+        super().__init__(x, y, ISD["merchant"]["merchant1"], scale=0.9, collision_radius=10)
         self.unique_item = unique_item
         self.trades_done = 0
         if unique_item == Items_Hub.ring:
@@ -122,7 +122,7 @@ class Shelf(Interactive_Sprite):
         if item == Items_Hub.gold:
             amount = random.randint(*shelf_gold_drop)
             player_stats.base.add_gold(amount)
-            return f"На полке завлялось несколько монет. Оскар получил {amount} золота"
+            return f"На полке завалялось несколько монет. Оскар получил {amount} золота"
         if item is None:
             return random.choice(self.empty_shelf_msg)
         msg = player_stats.give_item(item, give_ring=give_ring)
@@ -131,15 +131,36 @@ class Shelf(Interactive_Sprite):
 class RingPickup(Interactive_Sprite):
     def __init__(self, x, y, ring_type):
         image_path = RD[ring_type]["sprite"]
-        super().__init__(x, y, image_path, scale=0.2, collision_radius=8)
+        super().__init__(x, y, image_path, scale=0.2, collision_radius=0)
         self.ring_type = ring_type
+
+        self.pickup_radius = 20
+        self.rect = pygame.Rect(0, 0, 0, 0)
+        self.rect.center = (x, y)
+        self.interactive_rect = pygame.Rect(
+            x - self.pickup_radius, y - self.pickup_radius,
+            self.pickup_radius * 2, self.pickup_radius * 2)
+
+        self.displaced = None    
+        self.taken = False       
+
+        self.bob_phase = random.random() 
+        self.bob_offset = 0
+
+        self.on_floor = True
+        self.floor_sink = ring_floor_sink
+
+    def update(self, dt):
+        self.bob_phase = (self.bob_phase + dt * ring_bob_speed) % 1.0
+        tri = 1 - abs(2 * self.bob_phase - 1)           
+        self.bob_offset = -int(tri * ring_bob_height)
 
     def perform_action(self, player_stats, give_ring=None):
         if give_ring is not None:
-            give_ring(self.ring_type)
+            self.displaced = give_ring(self.ring_type)
         else:
-            player_stats.base.add_ring(self.ring_type)
-        self.is_action_perfomed = True
+            self.displaced = player_stats.base.add_ring(self.ring_type)
+        self.taken = True
         return f"Оскар подобрал с пола: {RD[self.ring_type]['name']}"
 
 class Decoration(Sprite):
@@ -147,4 +168,4 @@ class Decoration(Sprite):
         random_key = random.choice(list(SSD.keys()))
         image_path = SSD[random_key]
 
-        super().__init__(x, y, image_path, scale=0.7, collision_radius=10)
+        super().__init__(x, y, image_path, scale=0.7, collision_radius=6)

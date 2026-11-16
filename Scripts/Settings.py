@@ -63,7 +63,7 @@ base_hp = 100
 base_sp = 100 - sp_bonus
 base_durability = 70       
 base_potions = 3
-base_gold = 500 
+base_gold = 800 
 base_scrolls = 1
 base_whetstones = 1   
 base_attack_damage = 10       
@@ -115,6 +115,11 @@ vampire_gold_drop = (40,70)
 #merchant
 price_buy_growth = 1.4
 price_level_growth = 1.15
+
+#ring pickups
+ring_floor_sink = 0.5
+ring_bob_speed = 0.2
+ring_bob_height = 26
 #==================================
 
 

@@ -3,44 +3,47 @@ from Settings import *
 import math
 
 class ToastMessage:
-    def __init__(self, x, y, font_size=22):
+    def __init__(self, x, y, font_size=22, max_lines=3):
         self.x = x
         self.y = y
         self.font = pygame.font.Font(None, font_size)
-        self.pending = []
-        self.current = ""
-        self.timer = 0.0
+        self.line_height = self.font.get_height() + 6  
+        self.max_lines = max_lines
+
+        self.pending = []   
+        self.active = []    
         self.duration = 3
         self.fade_time = 0.5
-        self.fast_fade = 0.25
 
     def set_message(self, text):
-        if text:
+        if not text:
+            return
+        if len(self.active) < self.max_lines:
+            self.active.append({"text": text, "timer": self.duration + self.fade_time})
+        else:
             self.pending.append(text)
 
     def update(self, dt):
-        if self.pending and self.current and self.timer > self.fast_fade:
-            self.timer = self.fast_fade
+        for m in self.active:
+            m["timer"] -= dt
+        self.active[:] = [m for m in self.active if m["timer"] > 0]
 
-        if self.timer > 0:
-            self.timer -= dt
-
-        if self.timer <= 0 and self.pending:
-            self.current = self.pending.pop(0)
-            self.timer = self.duration + self.fade_time
-        elif self.timer <= 0:
-            self.current = ""
+        while self.pending and len(self.active) < self.max_lines:
+            self.active.append({"text": self.pending.pop(0),
+                                "timer": self.duration + self.fade_time})
 
     def draw(self, screen):
-        if self.timer <= 0 or not self.current:
-            return
-        alpha = 255
-        if self.timer < self.fade_time:
-            alpha = int(255 * (self.timer / self.fade_time))
-        surf = self.font.render(self.current, True, white)
-        surf.set_alpha(alpha)
-        rect = surf.get_rect(midleft=(self.x, self.y))
-        screen.blit(surf, rect)
+        newest_index = len(self.active) - 1
+        for i, m in enumerate(self.active):
+            alpha = 255
+            if m["timer"] < self.fade_time:
+                alpha = int(255 * (m["timer"] / self.fade_time))
+            surf = self.font.render(m["text"], True, white)
+            surf.set_alpha(alpha)
+            line_y = self.y - (newest_index - i) * self.line_height
+            rect = surf.get_rect(midleft=(self.x, line_y))
+            screen.blit(surf, rect)
+
 
 class Icon:
     def __init__(self, path, x, y, scale=0.5):
