@@ -204,6 +204,7 @@ interact_key = pygame.K_e
 potion_key = pygame.K_f
 scroll_key = pygame.K_q
 whetstone_key = pygame.K_r
+berserk_key = pygame.K_g
 #==================================
 
 

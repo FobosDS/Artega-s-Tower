@@ -52,7 +52,7 @@ class Weapon:
             if self.player_stats.base.use_sp(sp_cost_attack):
                 self.is_attacking = True
                 self.current_frame = 0
-                self.attack_timer = 0.0
+                self.attack_timer = 0
                 self.has_dealt_damage = False
                 return True
         return False
@@ -62,7 +62,7 @@ class Weapon:
             if self.player_stats.base.use_sp(sp_cost_block):
                 self.is_blocking = True
                 self.block_active = True
-                self.block_timer = 0.0
+                self.block_timer = 0
             return True
         return False
 
@@ -74,25 +74,25 @@ class Weapon:
         is_moving = (dx*dx + dy*dy) > 0.25
         self.last_position = pl_pos
 
-        self.target_amp = 1.0 if is_moving else 0.0
+        self.target_amp = 1.0 if is_moving else 0
         self.walk_amp += (self.target_amp - self.walk_amp) * min(1.0, weapon_amp_lerp * dt)
 
         if self.walk_amp > 0.01:
             freq = weapon_walk_freq * (weapon_sprint_freq_multiplier if is_sprinting else 1.0)
             self.phase += freq * dt * self.walk_amp
         else:
-            self.phase = 0.0
+            self.phase = 0
 
         x_offset = math.sin(self.phase) * weapon_max_swing_x * self.walk_amp
-        y_offset = math.cos(self.phase * 2.0) * weapon_max_swing_y * self.walk_amp * 0.5
+        y_offset = math.cos(self.phase * 2) * weapon_max_swing_y * self.walk_amp * 0.5
 
         self.x = weapon_base_x + x_offset
         self.y = weapon_base_y + y_offset
 
         if self.is_attacking:
             self.attack_timer += dt
-            if self.attack_timer >= animation_duration:
-                self.attack_timer = 0.0
+            if self.attack_timer >= animation_duration / self.player_stats.get_attack_speed_multiplier():
+                self.attack_timer = 0
                 self.current_frame += 1
                 
                 if self.current_frame == 3 and not self.has_dealt_damage:
@@ -112,7 +112,7 @@ class Weapon:
                 self.is_blocking = False
                 self.block_active = False
                 self.is_reloading = True
-                self.reload_timer = 0.0
+                self.reload_timer = 0
 
         if self.is_reloading:
             self.reload_timer += dt
@@ -142,13 +142,14 @@ class Weapon:
         return self.block_active
 
     def deal_damage(self, player_x, player_y, player_angle):
+        reach = 45 * self.player_stats.get_attack_range_multiplier()
         for enemy in self.enemies:
             if enemy.is_dead:
                 continue
                 
             dist = math.hypot(enemy.x - player_x, enemy.y - player_y)
             
-            if dist < 45:
+            if dist < reach:
                 angle_to_enemy = math.atan2(enemy.y - player_y, enemy.x - player_x)
                 angle_diff = abs(player_angle - angle_to_enemy)
                 

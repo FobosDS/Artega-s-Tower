@@ -26,6 +26,8 @@ class Base_Stats:
         self.rings = []
         self.max_rings = 2
 
+        self.combat_ref = None
+        self.owner = None
 
     def heal(self, amount):
         self.hp = min(self.hp + amount, self.max_hp)
@@ -47,8 +49,10 @@ class Base_Stats:
             return None
         displaced = None
         if len(self.rings) >= self.max_rings:
-            self.rings.pop(0)
+            displaced = self.rings.pop(0)
+            self.on_ring_removed(displaced)
         self.rings.append(ring_type)
+        self.on_ring_added(ring_type)
         return displaced
 
     def is_dead(self):
@@ -62,6 +66,7 @@ class Base_Stats:
         self.max_potions = base_potions * self.hp_level
         self.amount = self.max_hp * potion_heal_percent
         self.hp = self.max_hp
+        self.recalc_limits()
         return True
 
     def has_sp(self, amount):
@@ -93,6 +98,62 @@ class Base_Stats:
         self.sp_regen_delay = base_sp_regen_delay - self.sp_level * sp_regen_delay_bonus
         return True
 
+    def recalc_limits(self):
+        bonus_hp = 0
+        for r in self.rings:
+            eff = Items_Hub.ring_effects.get(r, {})
+            if eff.get("type") == "hp_fullheal":
+                bonus_hp += eff.get("hp_levels", 0)
+            if eff.get("type") == "flat_levels":
+                bonus_hp += eff.get("hp", 0)
+        self.max_hp = base_hp * (self.hp_level + bonus_hp)
+        self.max_potions = base_potions * (self.hp_level + bonus_hp)
+        self.amount = self.max_hp * potion_heal_percent
+        self.hp = min(self.hp, self.max_hp)
+
+    def on_ring_added(self, ring_type):
+        eff = Items_Hub.ring_effects.get(ring_type, {})
+        if eff.get("type") == "flat_levels":
+            for _ in range(eff.get("weapon", 0)):
+                self._force_level_up_weapon()
+            for _ in range(eff.get("sp", 0)):
+                self._force_level_up_sp()
+        self.recalc_limits()
+
+    def on_ring_removed(self, ring_type):
+        eff = Items_Hub.ring_effects.get(ring_type, {})
+        if eff.get("type") == "flat_levels":
+            for _ in range(eff.get("weapon", 0)):
+                self._force_level_down_weapon()
+            for _ in range(eff.get("sp", 0)):
+                self._force_level_down_sp()
+        self.recalc_limits()
+
+    def force_level_up_weapon(self):
+        if self.combat_ref is not None:
+            self.combat_ref.level_up_weapon()
+
+    def force_level_down_weapon(self):
+        if self.combat_ref is not None and self.combat_ref.weapon_level > base_weapon_level:
+            self.combat_ref.weapon_level -= 1
+            self.combat_ref.default_attack_damage = base_attack_damage * self.combat_ref.weapon_level
+            if self.combat_ref.is_enchanted:
+                self.combat_ref.attack_damage = int(self.combat_ref.default_attack_damage * enchantment_multiplier)
+            else:
+                self.combat_ref.attack_damage = self.combat_ref.default_attack_damage
+
+    def force_level_up_sp(self):
+        if self.sp_level < max_sp_level:
+            self.level_up_sp()
+
+    def force_level_down_sp(self):
+        if self.sp_level > base_sp_level:
+            self.sp_level -= 1
+            self.max_sp = base_sp + self.sp_level * sp_bonus
+            self.sp = min(self.sp, self.max_sp)
+            self.sp_regen = base_sp_regen + self.sp_level * sp_regen_bonus
+            self.sp_regen_delay = base_sp_regen_delay - self.sp_level * sp_regen_delay_bonus
+
 
 class Combat_Stats:
     def __init__(self):
@@ -112,7 +173,7 @@ class Combat_Stats:
         if factor < 0.1:
             factor = 0.1
         return int(self.attack_damage * factor)
-    
+
     def use_weapon(self):
         damage = self.get_attack_damage()
         self.durability = max(self.durability - durability_loss, 0)
@@ -131,12 +192,16 @@ class Combat_Stats:
     def add_whetstone(self, count):
         self.whetstones = min(self.whetstones + count, max_whetstones)
 
-
     def apply_enchantment(self, duration):
         if not self.is_enchanted:
             self.is_enchanted = True
             self.enchantment_time_left = duration
             self.attack_damage = int(self.default_attack_damage * enchantment_multiplier)
+
+    def force_apply_enchantment(self, duration):
+        self.is_enchanted = True
+        self.enchantment_time_left = duration
+        self.attack_damage = int(self.default_attack_damage * enchantment_multiplier)
 
     def level_up_weapon(self):
         if self.weapon_level >= max_weapon_level:
@@ -157,6 +222,7 @@ class Combat_Stats:
                 self.enchantment_time_left = 0
                 self.attack_damage = self.default_attack_damage
 
+
 class Effects:
     def __init__(self):
         self.is_poisoned = False
@@ -165,6 +231,26 @@ class Effects:
 
         self.is_paralyzed = False
         self.paralysis_time_left = 0
+
+    def try_apply_poison(self, stats):
+        if self._status_shield_block(stats):
+            return False
+        self.apply_poison()
+        return True
+
+    def try_apply_paralysis(self, stats):
+        if self._status_shield_block(stats):
+            return False
+        self.apply_paralysis()
+        return True
+
+    def status_shield_block(self, stats):
+        if not any(Items_Hub.ring_effects.get(r, {}).get("type") == "status_shield" for r in stats.base.rings):
+            return False
+        if stats.ring_shield_cd > 0:
+            return False
+        stats.ring_shield_cd = Items_Hub.ring_effects["ring_dragon"]["recharge"]
+        return True
 
     def apply_poison(self):
         self.is_poisoned = True
@@ -176,7 +262,6 @@ class Effects:
         self.paralysis_time_left = paralysis_duration
 
     def update(self, dt, base_stats):
-        # poison
         if self.is_poisoned:
             self.poison_time_left -= dt
             self.poison_tick_timer -= dt
@@ -189,7 +274,6 @@ class Effects:
                 self.poison_time_left = 0
                 self.poison_tick_timer = 0
 
-        # paralysis
         if self.is_paralyzed:
             self.paralysis_time_left -= dt
             if self.paralysis_time_left <= 0:
@@ -203,6 +287,9 @@ class Player_Stats:
         self.combat = Combat_Stats()
         self.effects = Effects()
 
+        self.base.combat_ref = self.combat
+        self.base.owner = self
+
         self.is_floor_key = False
         self.is_chest_key1 = False
         self.is_chest_key2 = False
@@ -211,28 +298,120 @@ class Player_Stats:
 
         self.pending_messages = []
 
+        self.ring_shield_cd = 0.0
+        self.berserk_time_left = 0.0
+        self.berserk_cooldown_left = 0.0
+        self.berserk_weapon_gain = 0
+
+    def get_speed_multiplier(self):
+        mult = 1.0
+        for r in self.base.rings:
+            eff = Items_Hub.ring_effects.get(r, {})
+            if eff.get("type") in ("speed_sp", "speed_range"):
+                mult *= eff.get("speed", 1.0)
+        if self.berserk_time_left > 0:
+            mult *= Items_Hub.ring_effects["ring_murderer"]["speed"]
+        return mult
+
+    def get_sp_cost_multiplier(self):
+        for r in self.base.rings:
+            eff = Items_Hub.ring_effects.get(r, {})
+            if eff.get("type") == "speed_sp":
+                return eff.get("sp", 1.0)
+        return 1.0
+
+    def get_price_multiplier(self):
+        for r in self.base.rings:
+            eff = Items_Hub.ring_effects.get(r, {})
+            if eff.get("type") == "trade_loot":
+                return eff.get("price", 1.0)
+        return 1.0
+
+    def get_loot_bonus(self):
+        for r in self.base.rings:
+            eff = Items_Hub.ring_effects.get(r, {})
+            if eff.get("type") == "trade_loot":
+                return eff.get("loot", 1.0)
+        return 1.0
+
+    def get_effect_duration_multiplier(self):
+        mult = 1.0
+        for r in self.base.rings:
+            eff = Items_Hub.ring_effects.get(r, {})
+            if eff.get("type") == "duration_x":
+                mult *= eff.get("mult", 1.0)
+        return mult
+
+    def get_attack_range_multiplier(self):
+        mult = 1.0
+        for r in self.base.rings:
+            eff = Items_Hub.ring_effects.get(r, {})
+            if eff.get("type") == "speed_range":
+                mult *= eff.get("range", 1.0)
+        return mult
+
+    def get_attack_speed_multiplier(self):
+        if self.berserk_time_left > 0:
+            return Items_Hub.ring_effects["ring_murderer"]["attack_speed"]
+        return 1.0
+
+    def try_activate_berserk(self):
+        if "ring_murderer" not in self.base.rings:
+            return False
+        if self.berserk_cooldown_left > 0 or self.berserk_time_left > 0:
+            return False
+        eff = Items_Hub.ring_effects["ring_murderer"]
+        if self.base.hp < self.base.max_hp * 0.9:
+            return False
+
+        self.base.take_damage(int(self.base.max_hp * 0.9))
+        self.berserk_time_left = eff["duration"]
+        self.berserk_cooldown_left = eff["cooldown"]
+
+        self.combat.force_apply_enchantment(eff["duration"] * self.get_effect_duration_multiplier())
+
+        self.berserk_weapon_gain = 0
+        for _ in range(eff["weapon_levels"]):
+            if self.combat.level_up_weapon():
+                self.berserk_weapon_gain += 1
+
+        self.notify("Оскар впал в кровавую ярость!")
+        return True
+
+    def end_berserk(self):
+        for _ in range(self.berserk_weapon_gain):
+            if self.combat.weapon_level > base_weapon_level:
+                self.combat.weapon_level -= 1
+                self.combat.default_attack_damage = base_attack_damage * self.combat.weapon_level
+                if self.combat.is_enchanted:
+                    self.combat.attack_damage = int(self.combat.default_attack_damage * enchantment_multiplier)
+                else:
+                    self.combat.attack_damage = self.combat.default_attack_damage
+        self.berserk_weapon_gain = 0
+
     def use_potion(self):
         if self.base.potions > 0:
             if not self.effects.is_poisoned and not self.effects.is_paralyzed:
-                self.base.heal(self.base.amount)
-
+                if any(Items_Hub.ring_effects.get(r, {}).get("type") == "hp_fullheal" for r in self.base.rings):
+                    self.base.hp = self.base.max_hp
+                else:
+                    self.base.heal(self.base.amount)
             else:
                 if self.effects.is_poisoned:
                     self.effects.is_poisoned = False
                     self.effects.poison_time_left = 0
                     self.effects.poison_tick_timer = 0
-
                 if self.effects.is_paralyzed:
                     self.effects.is_paralyzed = False
                     self.effects.paralysis_time_left = 0
-
             self.base.potions = max(self.base.potions - 1, 0)
             return True
         return False
 
     def use_scroll(self):
         if self.base.scrolls > 0 and not self.combat.is_enchanted:
-            self.combat.apply_enchantment(enchantment_duration)
+            dur = enchantment_duration * self.get_effect_duration_multiplier()
+            self.combat.apply_enchantment(dur)
             self.base.scrolls = max(self.base.scrolls - 1, 0)
             return True
         return False
@@ -241,6 +420,14 @@ class Player_Stats:
         self.effects.update(dt, self.base)
         self.combat.update_enchantment(dt)
         self.base.regen_sp(dt)
+        if self.ring_shield_cd > 0:
+            self.ring_shield_cd = max(0.0, self.ring_shield_cd - dt)
+        if self.berserk_cooldown_left > 0:
+            self.berserk_cooldown_left = max(0.0, self.berserk_cooldown_left - dt)
+        if self.berserk_time_left > 0:
+            self.berserk_time_left = max(0.0, self.berserk_time_left - dt)
+            if self.berserk_time_left <= 0:
+                self._end_berserk()
 
     def notify(self, msg):
         if msg:
@@ -262,7 +449,7 @@ class Player_Stats:
             return ""
         if item == "heart":
             if self.base.level_up_hp():
-                return "Сердце монстраю Оскар сожрал его и стал крепче!"
+                return "Сердце монстра. Оскар сожрал его и стал крепче!"
             return ""
         if item == "lungs":
             if self.base.level_up_sp():

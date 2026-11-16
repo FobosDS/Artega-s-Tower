@@ -72,13 +72,14 @@ class Merchant(Interactive_Sprite):
         return base[self.trades_done % len(base)][0]
 
     def perform_action(self, player_stats, give_ring=None):
-        if self.price > max_gold:
+        price = int(self.price * player_stats.get_price_multiplier())
+        if price > max_gold:
             return "Торговец стал настолько алчным, что его товары Оскару больше не по карману!"
-        if player_stats.base.gold < self.price:
+        if player_stats.base.gold < price:
             return "Оскару не хватает золота"
-        
+
         item = self._current_offer()
-        player_stats.base.gold -= self.price
+        player_stats.base.gold -= price
         msg = player_stats.give_item(item, give_ring=give_ring)
         if self.unique_item is not None:
             self.unique_item = None
@@ -92,24 +93,45 @@ class Shelf(Interactive_Sprite):
     def __init__(self, x, y):
         super().__init__(x, y, SSD["box"], scale=1.0, collision_radius=14.5)
 
+        self.empty_shelf_msg = [
+            "Полка пуста",
+            "Кроме глупых любовных записок на полке ничего нет",
+            "Оскар нашел книгу об основах магии тьмы, написанную самим Тьерри! И выкинул ее, так как не умеет читать...",
+            "Оскар нашел на полке несколько монет...фальшивых...",
+            "Кроме старых склянок на полке ничего нет",
+            "На этой очень пыльной и грязной полке ничего не оказалось",
+            "Кажется, здесь раньше стояло что-то важное. Обидно",
+            "Полка оказалась гнилой и сломалась от прикосновения...На ней ничего не оказалось",
+            "Оскар нашел на полке тайник подручного Артеги! Он пуст...",
+            "Все ценное с полки давным давно расстаскали",
+            "На полке Оскар нашел только пыльный след от какого-то предмета",
+            "Кто-то выцарапал на дне полки фразу: «Оставь надежду, всяк сюда входящий». Оскар ничего не смог прочесть",
+            "На полке лежать лишь чьи-то высохшие пальцы...жуть...",
+            "Единственное богатство здесь — пыль. Пыль ценой в золото...Вот бы она могла стать золотом!",
+            "Полка выглядит так, будто её уже обыскивал гуль. Дважды",
+            "Оскар осмотрел полку, она пуста...Полка победила",
+            "Ни еды, ни воды, ни оружия",
+            "Тупая пустота, будто снова ночью где-то пропадаю в поисках того, что не найти..."
+        ]
+
     def perform_action(self, player_stats, give_ring=None):
         if self.is_action_perfomed:
             return "Полка пуста"
         self.is_action_perfomed = True
-        item = Items_Hub.roll_shelf_loot()
+        item = Items_Hub.roll_shelf_loot(player_stats.get_loot_bonus())
         if item == Items_Hub.gold:
             amount = random.randint(*shelf_gold_drop)
             player_stats.base.add_gold(amount)
             return f"На полке завлялось несколько монет. Оскар получил {amount} золота"
         if item is None:
-            return "Полка пуста"
+            return random.choice(self.empty_shelf_msg)
         msg = player_stats.give_item(item, give_ring=give_ring)
         return f"Оскар нашел на полке: {msg}" if msg else "Полка пуста"
 
 class RingPickup(Interactive_Sprite):
     def __init__(self, x, y, ring_type):
         image_path = RD[ring_type]["sprite"]
-        super().__init__(x, y, image_path, scale=1.0, collision_radius=12)
+        super().__init__(x, y, image_path, scale=0.2, collision_radius=8)
         self.ring_type = ring_type
 
     def perform_action(self, player_stats, give_ring=None):

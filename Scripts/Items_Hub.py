@@ -97,20 +97,40 @@ def get_item_name(item):
         return "Случайное кольцо"
     return item_names.get(item, "?")
 
-def roll_enemy_loot(enemy_type):
-    return roll_weighted(enemy_loot.get(enemy_type, enemy_loot["ghoul"]))
+def roll_enemy_loot(enemy_type, bonus=1.0):
+    return roll_weighted(boost_table(enemy_loot.get(enemy_type, enemy_loot["ghoul"]), bonus))
 
-def roll_shelf_loot():
-    return roll_weighted(shelf_loot)
+def roll_shelf_loot(bonus=1.0):
+    return roll_weighted(boost_table(shelf_loot, bonus))
 
-def roll_chest_base_loot():
-    return roll_weighted(chest_base_loot)
+def boost_table(table, bonus):
+    if bonus <= 1.0:
+        return table
+    result = []
+    for item, weight in table:
+        if item is None:
+            result.append((item, max(1, weight / bonus)))
+        else:
+            result.append((item, weight * bonus))
+    return result
 
 floor_rings = {
     1: ["ring_fugitive", "ring_merchant"],
     2: ["ring_dragon", "ring_dreamer"],
     3: ["ring_genius", "ring_murderer"],
     4: ["ring_warrior", "ring_aristocrat"],
+}
+
+ring_effects = {
+    "ring_fugitive":  {"type": "speed_sp",        "speed": 1.7, "sp": 0.7},
+    "ring_merchant":  {"type": "trade_loot",      "price": 0.6,  "loot": 1.25},
+    "ring_dragon":    {"type": "status_shield",   "recharge": 60},
+    "ring_dreamer":   {"type": "hp_fullheal",     "hp_levels": 1},
+    "ring_genius":    {"type": "duration_x",      "mult": 2.5},
+    "ring_murderer":  {"type": "berserk",         "hp_cost": 0.9, "duration": 12, "cooldown": 480,
+                       "speed": 1.3, "attack_speed": 1.5, "weapon_levels": 1},
+    "ring_warrior":   {"type": "flat_levels",     "hp": 1, "sp": 1, "weapon": 1},
+    "ring_aristocrat":{"type": "speed_range",     "speed": 1.15, "range": 1.35},
 }
 
 def get_floor_rings(floor):

@@ -80,7 +80,7 @@ class Enemy(Sprite):
         amount = randint(*self.gold_drop)
         self.player.stats.base.add_gold(amount)
 
-        item = Items_Hub.roll_enemy_loot(self.enemy_type)
+        item = Items_Hub.roll_enemy_loot(self.enemy_type, self.player.stats.get_loot_bonus())
         if item is not None:
             msg = self.player.stats.give_item(item)
             if msg:

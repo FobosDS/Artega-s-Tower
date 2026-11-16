@@ -57,11 +57,11 @@ class Player:
         #active dash
         if self.dash_time_left > 0:
             self.dash_time_left = max(0.0, self.dash_time_left - dt)
-            speed = pl_speed * dash_speed_multiplier
+            speed = pl_speed * dash_speed_multiplier * self.stats.get_speed_multiplier()
             dx = self.dash_dir.x * speed * dt
             dy = self.dash_dir.y * speed * dt
         else:
-            speed = pl_speed
+            speed = pl_speed * self.stats.get_speed_multiplier()
             if keys[pygame.K_LSHIFT]:
                 speed *= sprint_speed_multiplier
             dx = move.x * speed * dt
@@ -97,7 +97,8 @@ class Player:
             move = move.normalize()
 
         want_sprint = keys[pygame.K_LSHIFT] and move.length_squared() > 0
-        self.is_sprinting = want_sprint and self.stats.base.use_sp(sp_cost_sprint_per_sec * dt)
+        sp_cost = sp_cost_sprint_per_sec * self.stats.get_sp_cost_multiplier() * dt
+        self.is_sprinting = want_sprint and self.stats.base.use_sp(sp_cost)
 
         #frame displacement
         dx, dy = self.dash(dt, move, forward)
