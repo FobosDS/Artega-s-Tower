@@ -24,7 +24,9 @@ def main():
     interaction_manager = Interaction_Manager()
     input_manager = Input_Manager(player, interaction_manager, weapon)
     
-    game = Game(screen, player, weapon, interface, icons)
+    game = Game(screen, player, weapon, interface, icons, interaction_manager)
+
+    game = Game(screen, player, weapon, interface, icons, interaction_manager)
 
     interaction_manager.interactive_objects = game.interactive_objects
 

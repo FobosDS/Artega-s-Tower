@@ -91,7 +91,7 @@ class EnemyManager:
         self.enemies[:] = [e for e in self.enemies if not e.is_dead]
 
 class Game:
-    def __init__(self, screen, player, weapon, interface, icons):
+    def __init__(self, screen, player, weapon, interface, icons, interaction_manager):
         self.screen = screen
         self.player = player
         self.weapon = weapon
@@ -110,6 +110,8 @@ class Game:
         self.toast = ToastMessage(half_width - 420, height - 180)
 
         self.rings_to_drop = []
+
+        self.interaction_manager = interaction_manager
 
         from UI import Tab_Overlay
         self.tab_overlay = Tab_Overlay(self)
@@ -137,6 +139,7 @@ class Game:
         self.player.stats.notify(f"Оскар уронил на пол: {RD[ring_type]['name']}")
 
     def update(self, dt):
+        self.interaction_manager.update_prompt(self.player.rect, self.player.stats)
         while self.player.stats.pending_messages:
             self.toast.set_message(self.player.stats.pending_messages.pop(0))
 
@@ -187,9 +190,10 @@ class Game:
         )
         self.weapon.draw(self.screen)
         
-        from UI import draw_hud
+        from UI import draw_hud, draw_prompt
         draw_hud(self.screen, self.player.stats, self.icons, self.interface)
         self.toast.draw(self.screen)
+        draw_prompt(self.screen, self.interaction_manager.current_prompt)
 
         self.tab_overlay.draw_rings_panel(self.screen)
         self.tab_overlay.draw_map_panel(self.screen)

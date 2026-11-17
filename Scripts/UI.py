@@ -109,6 +109,14 @@ class Tab_Overlay:
                                       offset_y + row_i * cell,
                                       max(1, cell - 1), max(1, cell - 1)))
 
+def draw_prompt(screen, text):
+    if not text:
+        return
+    font = pygame.font.Font(None, 28)
+    surf = font.render(text, True, white)
+    rect = surf.get_rect(midbottom=(half_width, half_height+100))
+    screen.blit(surf, rect)
+
 class ToastMessage:
     def __init__(self, x, y, font_size=22, max_lines=3):
         self.x = x

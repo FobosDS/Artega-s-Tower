@@ -28,7 +28,7 @@ class Input_Manager:
                 if event.key == whetstone_key:
                     self.player.stats.combat.use_whetstone()
                 if event.key == berserk_key:
-                    self.player.stats.try_activate_berserk()
+                    self.player.stats._try_activate_berserk()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:

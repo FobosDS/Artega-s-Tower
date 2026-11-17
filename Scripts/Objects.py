@@ -35,6 +35,9 @@ class Interactive_Sprite(Sprite):
     def perform_action(self, player_stats, give_ring=None):
         return ""
 
+    def get_prompt(self, player_stats):
+        return None
+
 class Rare_Chest(Interactive_Sprite):
     def __init__(self, x, y, unique_item=None):
         image_path = ISD["rare_chest"]["close"]
@@ -88,6 +91,14 @@ class Merchant(Interactive_Sprite):
         self.trades_done += 1
         self.price = int(self.price * price_buy_growth)
         return f"Оскар купил у жадного торгаша: {msg}"
+
+    def get_prompt(self, player_stats):
+        price = int(self.price * player_stats.get_price_multiplier())
+        item = self._current_offer()
+        name = Items_Hub.get_item_name(item)
+        if price > max_gold:
+            return "Товары вам больше не по карману"
+        return f"{name}: {price} золота"
 
 class Shelf(Interactive_Sprite):
     def __init__(self, x, y):

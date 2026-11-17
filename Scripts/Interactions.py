@@ -5,6 +5,14 @@ class Interaction_Manager:
     def __init__(self):
         self.interactive_objects = []
         self.give_ring = None
+        self.current_prompt = None
+
+    def update_prompt(self, player_rect, player_stats):
+        self.current_prompt = None
+        for obj in self.interactive_objects:
+            if obj.interactive_rect.colliderect(player_rect):
+                self.current_prompt = obj.get_prompt(player_stats)
+                return
 
     def handle_input(self, player_rect, keys, player_stats):
         if not keys[pygame.K_e]:
