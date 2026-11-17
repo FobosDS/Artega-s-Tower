@@ -134,7 +134,7 @@ class RingPickup(Interactive_Sprite):
         super().__init__(x, y, image_path, scale=0.2, collision_radius=0)
         self.ring_type = ring_type
 
-        self.pickup_radius = 20
+        self.pickup_radius = 36
         self.rect = pygame.Rect(0, 0, 0, 0)
         self.rect.center = (x, y)
         self.interactive_rect = pygame.Rect(
@@ -156,13 +156,16 @@ class RingPickup(Interactive_Sprite):
         self.bob_offset = -int(tri * ring_bob_height)
 
     def perform_action(self, player_stats, give_ring=None):
+        player_stats.last_displaced_ring = None
+        chosen = self.ring_type
         if give_ring is not None:
-            self.displaced = give_ring(self.ring_type)
+            displaced = give_ring(chosen)
         else:
-            self.displaced = player_stats.base.add_ring(self.ring_type)
+            displaced = player_stats.base.add_ring(chosen)
+        player_stats.last_displaced_ring = displaced
         self.taken = True
-        return f"Оскар подобрал с пола: {RD[self.ring_type]['name']}"
-
+        return f"Оскар подобрал с пола: {RD[chosen]['name']}"
+        
 class Decoration(Sprite):
     def __init__(self, x, y):
         random_key = random.choice(list(SSD.keys()))

@@ -6,9 +6,13 @@ class Input_Manager:
         self.player = player
         self.interaction_manager = interaction_manager
         self.weapon = weapon
+        self.tab_overlay = None
 
     def handle_events(self, events):
         for event in events:
+            if self.tab_overlay is not None and self.tab_overlay.handle_event(event):
+                continue
+
             if event.type == pygame.QUIT:
                 return False
 

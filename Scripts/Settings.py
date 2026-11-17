@@ -13,6 +13,20 @@ texture_size = 64
 #==================================
 
 
+#tab overlay settings
+#==================================
+rings_panel_x = 20
+rings_panel_y = 20
+rings_panel_w = 400
+rings_panel_h = 500
+
+map_panel_x = width - 540         
+map_panel_y = 20
+map_panel_w = 520
+map_panel_h = 480
+#==================================
+
+
 #player settings
 #==================================
 #movement
@@ -236,4 +250,9 @@ paralysis_off = (18, 36, 33)
 paralysis_on = (190, 223, 221)
 enchant_off = (9, 25, 60)
 enchant_on = (19, 165, 236)
+
+#tab overlay
+panel_bg = (55, 55, 58)
+panel_border = (120, 90, 90)      
+map_wall_color = (120, 120, 130)
 #==================================

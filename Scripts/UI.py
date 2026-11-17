@@ -1,6 +1,113 @@
 import pygame
 from Settings import *
+from Sprites_Archive import RD, WTD, floor_names
 import math
+
+class Tab_Overlay:
+    def __init__(self, game):
+        self.game = game
+        self.visible = False
+
+        self.header_font = pygame.font.Font(None, 30)
+        self.name_font = pygame.font.Font(None, 24)
+        self.desc_font = pygame.font.Font(None, 18)
+
+        self.left_rect = pygame.Rect(rings_panel_x, rings_panel_y, rings_panel_w, rings_panel_h)
+        self.right_rect = pygame.Rect(map_panel_x, map_panel_y, map_panel_w, map_panel_h)
+        self.icon_size = 36
+
+        self.ring_icons = {}
+        for r, data in RD.items():
+            img = pygame.image.load(data["sprite"]).convert_alpha()
+            self.ring_icons[r] = pygame.transform.scale(img, (self.icon_size, self.icon_size))
+
+    def toggle(self):
+        self.visible = not self.visible
+
+    def handle_event(self, event):
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_TAB and not getattr(event, "repeat", False):
+            self.toggle()
+            return True
+        return False
+
+    def _wrap_text(self, text, font, max_w):
+        words = text.split()
+        lines, line = [], ""
+        for word in words:
+            test = (line + " " + word).strip()
+            if font.size(test)[0] <= max_w:
+                line = test
+            else:
+                if line:
+                    lines.append(line)
+                line = word
+        if line:
+            lines.append(line)
+        return lines
+
+    def draw_rings_panel(self, screen):
+        if not self.visible:
+            return 
+        
+        rect = self.left_rect
+        pygame.draw.rect(screen, panel_bg, rect)
+        pygame.draw.rect(screen, panel_border, rect, 2)
+
+        header = self.header_font.render("Кольца Оскара", True, white)
+        screen.blit(header, (rect.x + 15, rect.y + 12))
+
+        rings = self.game.player.stats.base.rings
+        y = rect.y + 48
+        inner_w = rect.w - 30
+
+        if not rings:
+            note = self.name_font.render("Кольца не надеты", True, white)
+            screen.blit(note, (rect.x + 15, y))
+            return
+
+        for r in rings:
+            data = RD[r]
+            screen.blit(self.ring_icons[r], (rect.x + 15, y - 12))
+
+            name = self.name_font.render(data["name"], True, white)
+            screen.blit(name, (rect.x + 15 + self.icon_size + 10, y))
+
+            desc = data.get("desc", "Описание не найдено")
+            ty = y + 36
+            for line in self._wrap_text(desc, self.desc_font, inner_w):
+                surf = self.desc_font.render(line, True, white)
+                screen.blit(surf, (rect.x + 15, ty))
+                ty += 20
+            y = ty + 14   
+
+    def draw_map_panel(self, screen):
+        if not self.visible: 
+            return
+        
+        rect = self.right_rect
+        pygame.draw.rect(screen, panel_bg, rect)
+        pygame.draw.rect(screen, panel_border, rect, 2)
+
+        floor = self.game.player.stats.current_floor
+        title = floor_names.get(floor, f"Этаж {floor}")
+
+        header = self.header_font.render(title, True, white)
+        screen.blit(header, (rect.x + 15, rect.y + 12))
+
+        walls_grid = self.game.map_manager.walls_grid
+        rows = len(walls_grid)
+        cols = len(walls_grid[0])
+        cell = min((rect.w - 30) / cols, (rect.h - 50) / rows)
+        offset_x = rect.x + (rect.w - cell * cols) // 2
+        offset_y = rect.y + 40 + (rect.h - 50 - cell * rows) // 2
+
+        for row_i, row in enumerate(walls_grid):
+            for col_i, ch in enumerate(row):
+                if ch in WTD:
+                    pygame.draw.rect(screen, map_wall_color,
+                                     (offset_x + col_i * cell,
+                                      offset_y + row_i * cell,
+                                      max(1, cell - 1), max(1, cell - 1)))
 
 class ToastMessage:
     def __init__(self, x, y, font_size=22, max_lines=3):

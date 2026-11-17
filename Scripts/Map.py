@@ -1,7 +1,7 @@
 drawed_map = [
     "ONNNNOOOOOOO",
     "O...SCtFG.BO",
-    "O.P....p..HO",
+    "O.P.......HO",
     "O...UOTOO..N",
     "OD..OD.II..N",
     "U...N......O",
@@ -9,6 +9,6 @@ drawed_map = [
     "O..p.....U.O",
     "U.NNNTN..O.T",
     "O.D..D...O.O",
-    "O.....p..J.O",
+    "O....p...J.O",
     "OTNOTOUTNNNO",
 ]

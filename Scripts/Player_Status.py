@@ -242,7 +242,7 @@ class Effects:
         self.apply_paralysis()
         return True
 
-    def status_shield_block(self, stats):
+    def _status_shield_block(self, stats):
         if not any(Items_Hub.ring_effects.get(r, {}).get("type") == "status_shield" for r in stats.base.rings):
             return False
         if stats.ring_shield_cd > 0:
@@ -355,7 +355,7 @@ class Player_Stats:
             return Items_Hub.ring_effects["ring_murderer"]["attack_speed"]
         return 1.0
 
-    def try_activate_berserk(self):
+    def _try_activate_berserk(self):
         if "ring_murderer" not in self.base.rings:
             return False
         if self.berserk_cooldown_left > 0 or self.berserk_time_left > 0:
@@ -493,4 +493,5 @@ class Player_Stats:
             self.last_displaced_ring = give_ring(chosen)
         else:
             self.last_displaced_ring = self.base.add_ring(chosen)
+        print(f"GIVE_RING: chosen={chosen} displaced={self.last_displaced_ring} rings={self.base.rings}")
         return f"{RD[chosen]['name']}"

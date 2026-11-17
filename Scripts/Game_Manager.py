@@ -110,6 +110,10 @@ class Game:
         self.toast = ToastMessage(half_width - 420, height - 180)
 
         self.rings_to_drop = []
+
+        from UI import Tab_Overlay
+        self.tab_overlay = Tab_Overlay(self)
+        self.tab_overlay.visible = False
         
         from Ghoul import Ghoul
         from Gargoyle import Gargoyle
@@ -123,7 +127,6 @@ class Game:
     def spawn_ring_pickup(self, ring_type, x, y, needs_manual=True):
         pickup = RingPickup(x, y, ring_type)
         self.interactive_objects.append(pickup)
-        self.objects.append(pickup) 
         return pickup
 
     def give_ring_to_player(self, ring_type):
@@ -164,21 +167,15 @@ class Game:
             drop_y = self.player.y + math.sin(self.player.angle) * 30
             hitbox = pygame.Rect(drop_x - 5, drop_y - 5, 10, 10)
             if any(hitbox.colliderect(w) for w in self.map_manager.walls):
-                drop_x, drop_y = self.player.x, self.player.y   
+                drop_x, drop_y = self.player.x, self.player.y  
             self.drop_ring(displaced, drop_x, drop_y)
 
         for obj in self.interactive_objects[:]:
             if not isinstance(obj, RingPickup):
                 continue
-            obj.update(dt)
             if not obj.taken:
                 continue
-            if obj.displaced is not None:
-                self.drop_ring(obj.displaced, obj.x, obj.y)     
-                obj.displaced = None
             self.interactive_objects.remove(obj)
-            if obj in self.objects:
-                self.objects.remove(obj)
 
     def draw(self):
         from Renderer import render_scene
@@ -193,3 +190,6 @@ class Game:
         from UI import draw_hud
         draw_hud(self.screen, self.player.stats, self.icons, self.interface)
         self.toast.draw(self.screen)
+
+        self.tab_overlay.draw_rings_panel(self.screen)
+        self.tab_overlay.draw_map_panel(self.screen)
