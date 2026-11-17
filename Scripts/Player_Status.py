@@ -292,7 +292,7 @@ class Player_Stats:
         self.is_chest_key1 = False
         self.is_chest_key2 = False
 
-        self.current_floor = 1
+        self.current_floor = 4
 
         self.pending_messages = []
 

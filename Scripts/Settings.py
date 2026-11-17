@@ -13,6 +13,17 @@ texture_size = 64
 #==================================
 
 
+#audio settings
+#==================================
+sfx_channels = 16
+sfx_default_volume = 0.7
+music_default_volume = 0.7
+music_fade_in_ms = 1700       
+music_fade_out_ms = 2000      
+music_gap_sec = 12 
+#==================================
+
+
 #tab overlay settings
 #==================================
 rings_panel_x = 20

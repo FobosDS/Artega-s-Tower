@@ -287,3 +287,41 @@ floor_names = {
     4:"Четвертый этаж: Мраморный Зал",
     5:"Последний этаж: Пик Башни"
 }
+
+sfx = {
+
+}
+
+music = {
+   "Dungeon_ND":"Assets/Music/Artega Tower Dungeon no drums.mp3",
+   "Dungeon":"Assets/Music/Artega Tower Dungeon.mp3",
+   "Mausoleum_ND":"Assets/Music/Artega Tower Mausoleum No Drums.mp3",
+   "Mausoleum":"Assets/Music/Artega Tower Mausoleum.mp3",
+   "Archive1":"Assets/Music/Artega Tower Archive.mp3",
+   "Archive2":"Assets/Music/Artega Tower Archive2.mp3",
+   "Marble_Hall":"Assets/Music/Artega Tower Marble Hall.mp3",
+   "Artega1":"Assets/Music/Artega Tower Boss 1 phase.mp3",
+   "Artega2":"Assets/Music/Artega Tower Boss 2 phase.mp3",
+   "Menu":"Assets/Music/Artega Tower Menu.mp3",
+   "Death":"Assets/Music/Artega Tower Death.mp3",
+   "Win":"Assets/Music/Artega Tower Win.mp3"
+}
+
+floor_music = {
+    1:[
+        "Assets/Music/Artega Tower Dungeon no drums.mp3",
+        "Assets/Music/Artega Tower Dungeon.mp3"
+    ],
+
+    2:[
+        "Assets/Music/Artega Tower Mausoleum No Drums.mp3",
+        "Assets/Music/Artega Tower Mausoleum.mp3"
+    ],
+
+    3:[
+        "Assets/Music/Artega Tower Archive.mp3",
+        "Assets/Music/Artega Tower Archive2.mp3"
+    ],
+
+    4:["Assets/Music/Artega Tower Marble Hall.mp3"]
+}

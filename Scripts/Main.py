@@ -6,6 +6,8 @@ from UI import create_icons, load_interface
 from Controls import Input_Manager
 from Interactions import Interaction_Manager
 from Game_Manager import Game
+from Sound_Manager import Sound_Manager
+
 
 def main():
     pygame.init()
@@ -23,10 +25,11 @@ def main():
     
     interaction_manager = Interaction_Manager()
     input_manager = Input_Manager(player, interaction_manager, weapon)
-    
-    game = Game(screen, player, weapon, interface, icons, interaction_manager)
 
-    game = Game(screen, player, weapon, interface, icons, interaction_manager)
+    sound_manager = Sound_Manager()
+    sound_manager.set_floor_music(player.stats.current_floor)
+
+    game = Game(screen, player, weapon, interface, icons, interaction_manager, sound_manager)
 
     interaction_manager.interactive_objects = game.interactive_objects
 
