@@ -109,3 +109,9 @@ class Sound_Manager:
     def set_music_volume(self, v):
         self.music_volume = max(0, min(1, v))
         pygame.mixer.music.set_volume(self.music_volume)
+
+    def change_sfx_volume(self, delta):
+        self.set_sfx_volume(self.sfx_volume + delta)
+
+    def change_music_volume(self, delta):
+        self.set_music_volume(self.music_volume + delta)

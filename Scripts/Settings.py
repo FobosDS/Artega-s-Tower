@@ -92,7 +92,7 @@ sp_cost_dash = 10
 sp_cost_sprint_per_sec = 9
 sp_cost_attack = 30    
 sp_cost_block = 20
-sp_bonus = 16
+sp_bonus = 12
 sp_regen_bonus = 6
 sp_regen_delay_bonus = 0.11
 
@@ -109,7 +109,7 @@ potion_heal_percent = 0.5
 base_sp_regen = 14 - sp_regen_bonus
 base_sp_regen_delay = 0.45 + sp_regen_delay_bonus
 base_hp_level = 1
-base_sp_level = 3
+base_sp_level = 1
 base_weapon_level = 1
 
 #weapon
@@ -144,14 +144,14 @@ walls_folder = "Assets/Sprites/Levels/Walls/"
 #items settings
 #==================================
 #gold drop
-shelf_gold_drop = (4, 16)
-chest_gold_drop = (25, 38)
-ghoul_gold_drop = (2, 5)
+shelf_gold_drop = (4, 20)
+chest_gold_drop = (25, 50)
+ghoul_gold_drop = (2, 7)
 gargoyle_gold_drop = (18, 36)
-vampire_gold_drop = (40,70)
+vampire_gold_drop = (40, 70)
 
 #merchant
-price_buy_growth = 1.4
+price_buy_growth = 1.2
 price_level_growth = 1.15
 
 #ring pickups
@@ -243,11 +243,26 @@ scale = width / numRays
 #controls settings
 #==================================
 mouse_sensitivity = 0.007
-interact_key = pygame.K_e
-potion_key = pygame.K_f
-scroll_key = pygame.K_q
-whetstone_key = pygame.K_r
-berserk_key = pygame.K_g
+
+default_keys = {
+    "interact":pygame.K_e,
+    "potion":pygame.K_f,
+    "scroll":pygame.K_q,
+    "whetstone":pygame.K_r,
+    "berserk":pygame.K_g,
+    "inventory":pygame.K_TAB,
+}
+
+bindings = dict(default_keys)
+
+key_labels = {
+    "interact":"Взаимодействие",
+    "potion":"Использовать зелье",
+    "scroll":"Использовать свиток",
+    "whetstone":"Использовать точильный камень",
+    "berserk":"Впасть в кровавую ярость (при наличии нужного кольца)",
+    "inventory":"Кольца и мини карта",
+}
 #==================================
 
 

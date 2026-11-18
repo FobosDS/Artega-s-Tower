@@ -63,10 +63,10 @@ def main():
 
     sound_manager.set_floor_music(0)    
 
-    menu = MainMenu(screen)
+    menu = MainMenu(screen, sound_manager)
 
     in_menu = True
-    
+
     while in_menu:
         dt = min(clock.tick(FPS) / 1000, 0.05)
         for event in pygame.event.get():

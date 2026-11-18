@@ -15,8 +15,6 @@ class Interaction_Manager:
                 return
 
     def handle_input(self, player_rect, keys, player_stats):
-        if not keys[pygame.K_e]:
-            return None
         for obj in self.interactive_objects:
             if obj.interactive_rect.colliderect(player_rect):
                 msg = obj.perform_action(player_stats, self.give_ring)

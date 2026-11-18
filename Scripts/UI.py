@@ -2,6 +2,7 @@ import pygame
 from Settings import *
 from Sprites_Archive import RD, WTD, floor_names
 import math
+from Settings import bindings, key_labels
 
 fonts = {
     "dispater": "Assets/Fonts/DISPATERVF.ttf",
@@ -337,18 +338,23 @@ def draw_hud(screen, stats, icons, interface):
     icons["floor_key"].draw(screen, active=stats.is_floor_key)
 
 class MainMenu:
-    def __init__(self, screen):
+    def __init__(self, screen, sound_manager):
         self.screen = screen
-        self.title_font = get_font("demonic", 140)
+        self.sound_manager = sound_manager
+        self.title_font = get_font("gothic", 64)
         self.button_font = get_font("gothic", 32)
+        self.small_font = get_font("gothic", 22)
 
         self.buttons = [
-            {"key": "start", "text": "Новая игра"},
+            {"key": "start", "text": "Начать игру"},
             {"key": "settings", "text": "Настройки"},
             {"key": "quit", "text": "Выход"},
         ]
         self.selected = 0
         self.show_settings = False
+
+        self.settings_focus = 0
+        self.rebinding = None   
 
         total_h = len(self.buttons) * menu_button_h + (len(self.buttons) - 1) * menu_button_gap
         self.start_y = half_height - total_h // 2 + 60
@@ -360,27 +366,19 @@ class MainMenu:
 
     def handle_event(self, event):
         if self.show_settings:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                self.show_settings = False
-                return "back"
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                back_rect = pygame.Rect(half_width - 100, height - 100, 200, 50)
-                if back_rect.collidepoint(event.pos):
-                    self.show_settings = False
-                    return "back"
-            return None
+            return self._handle_settings(event)
+        return self._handle_main(event)
 
+    def _handle_main(self, event):
         if event.type == pygame.MOUSEMOTION:
             for i in range(len(self.buttons)):
                 if self._button_rect(i).collidepoint(event.pos):
                     self.selected = i
                     break
-
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             for i, btn in enumerate(self.buttons):
                 if self._button_rect(i).collidepoint(event.pos):
                     return self._activate(btn["key"])
-
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
                 self.selected = (self.selected - 1) % len(self.buttons)
@@ -388,7 +386,6 @@ class MainMenu:
                 self.selected = (self.selected + 1) % len(self.buttons)
             elif event.key == pygame.K_RETURN:
                 return self._activate(self.buttons[self.selected]["key"])
-
         return None
 
     def _activate(self, key):
@@ -396,10 +393,69 @@ class MainMenu:
             return "start"
         if key == "settings":
             self.show_settings = True
+            self.settings_focus = 0
             return None
         if key == "quit":
             return "quit"
         return None
+
+    def _settings_rows(self):
+        rows = [
+            ("music_vol", "Громкость музыки"),
+            ("sfx_vol",   "Громкость звуков"),
+        ]
+        for action in key_labels:
+            rows.append(("bind_" + action, key_labels[action]))
+        rows.append(("back", "Назад"))
+        return rows
+
+    def _handle_settings(self, event):
+        rows = self._settings_rows()
+
+        if self.rebinding is not None:
+            if event.type == pygame.KEYDOWN:
+                bindings[self.rebinding] = event.key
+                self.rebinding = None
+            return None
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                self.show_settings = False
+                return "back"
+            if event.key == pygame.K_UP:
+                self.settings_focus = (self.settings_focus - 1) % len(rows)
+            elif event.key == pygame.K_DOWN:
+                self.settings_focus = (self.settings_focus + 1) % len(rows)
+            elif event.key in (pygame.K_LEFT, pygame.K_RIGHT):
+                delta = 0.1 if event.key == pygame.K_RIGHT else -0.1
+                kind = rows[self.settings_focus][0]
+                if kind == "music_vol":
+                    self.sound_manager.change_music_volume(delta)
+                elif kind == "sfx_vol":
+                    self.sound_manager.change_sfx_volume(delta)
+            elif event.key == pygame.K_RETURN:
+                kind = rows[self.settings_focus][0]
+                if kind.startswith("bind_"):
+                    self.rebinding = kind[5:]
+                elif kind == "back":
+                    self.show_settings = False
+                    return "back"
+
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            for i, (kind, _) in enumerate(rows):
+                rect = self._settings_row_rect(i)
+                if rect.collidepoint(event.pos):
+                    self.settings_focus = i
+                    if kind.startswith("bind_"):
+                        self.rebinding = kind[5:]
+                    elif kind == "back":
+                        self.show_settings = False
+                        return "back"
+        return None
+
+    def _settings_row_rect(self, index):
+        y = 200 + index * 40
+        return pygame.Rect(half_width - 300, y - 12, 600, 34)
 
     def draw(self):
         self.screen.fill(menu_bg)
@@ -409,49 +465,44 @@ class MainMenu:
             self._draw_main()
 
     def _draw_main(self):
-        title = self.title_font.render("БАШНЯ АРТЕГИ", True, menu_title_color)
-        title_rect = title.get_rect(center=(half_width, 120))
-        self.screen.blit(title, title_rect)
-
+        title = self.title_font.render("Artega's Tower", True, menu_title_color)
+        self.screen.blit(title, title.get_rect(center=(half_width, 120)))
         for i, btn in enumerate(self.buttons):
             rect = self._button_rect(i)
             color = menu_button_hover if i == self.selected else menu_button_color
             pygame.draw.rect(self.screen, color, rect, border_radius=6)
             pygame.draw.rect(self.screen, menu_title_color, rect, 2, border_radius=6)
             txt = self.button_font.render(btn["text"], True, menu_button_text)
-            txt_rect = txt.get_rect(center=rect.center)
-            self.screen.blit(txt, txt_rect)
+            self.screen.blit(txt, txt.get_rect(center=rect.center))
 
     def _draw_settings(self):
-        title = self.button_font.render("Управление", True, menu_title_color)
+        title = self.button_font.render("Настройки", True, menu_title_color)
         self.screen.blit(title, title.get_rect(center=(half_width, 120)))
 
-        controls = [
-            "WASD: движение",
-            "Движение мыши: поворот",
-            "ЛКМ: атака",
-            "ПКМ: отражение снарядов",
-            "Пробел: рывок",
-            "Shift: бег",
-            "E: взаимодействие",
-            "F: использовать зелье",
-            "Q: использовать свиток",
-            "R: использовать точильный камень",
-            "G: впасть в кровавую ярость (при наличии нужного кольца)",
-            "Tab: кольца и мини карта",
-            "Esc: выход",
-        ]
-        font = get_font("gothic", 22)
-        start_y = 200
-        for i, line in enumerate(controls):
-            surf = font.render(line, True, menu_button_text)
-            self.screen.blit(surf, (half_width - 220, start_y + i * 30))
+        rows = self._settings_rows()
+        for i, (kind, label) in enumerate(rows):
+            rect = self._settings_row_rect(i)
+            color = menu_button_hover if i == self.settings_focus else menu_button_color
+            pygame.draw.rect(self.screen, color, rect, border_radius=4)
 
-        back_rect = pygame.Rect(half_width - 100, height - 100, 200, 50)
-        pygame.draw.rect(self.screen, menu_button_hover, back_rect, border_radius=6)
-        pygame.draw.rect(self.screen, menu_title_color, back_rect, 2, border_radius=6)
-        txt = self.button_font.render("Назад", True, menu_button_text)
-        self.screen.blit(txt, txt.get_rect(center=back_rect.center))
+            if kind == "music_vol":
+                value = f"{int(self.sound_manager.music_volume * 100)}"
+            elif kind == "sfx_vol":
+                value = f"{int(self.sound_manager.sfx_volume * 100)}"
+            elif kind.startswith("bind_"):
+                action = kind[5:]
+                if self.rebinding == action:
+                    value = "Нажмите клавишу..."
+                else:
+                    value = pygame.key.name(bindings[action])
+            else:
+                value = ""
+
+            name_surf = self.small_font.render(label, True, menu_button_text)
+            self.screen.blit(name_surf, (rect.x + 12, rect.y + 6))
+            if value:
+                val_surf = self.small_font.render(value, True, menu_title_color)
+                self.screen.blit(val_surf, (rect.right - val_surf.get_width() - 12, rect.y + 6))
 
 class IntroScene:
     def __init__(self, screen):
@@ -472,7 +523,7 @@ class IntroScene:
 
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
-            if event.key in (pygame.K_ESCAPE, pygame.K_SPACE):
+            if event.key in (pygame.K_ESCAPE, pygame.K_SPACE, pygame.K_RETURN):
                 self.done = True
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.done = True
