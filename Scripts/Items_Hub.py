@@ -94,7 +94,7 @@ def roll_weighted(table):
 
 def get_item_name(item):
     if item == ring:
-        return "Случайное кольцо"
+        return "Магическое кольцо"
     return item_names.get(item, "?")
 
 def roll_enemy_loot(enemy_type, bonus=1.0):

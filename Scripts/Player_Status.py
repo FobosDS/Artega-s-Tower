@@ -49,8 +49,10 @@ class Base_Stats:
             return None
         displaced = None
         if len(self.rings) >= self.max_rings:
-            displaced = self.rings.pop(0)  
+            displaced = self.rings.pop(0)
+            self.on_ring_removed(displaced)
         self.rings.append(ring_type)
+        self.on_ring_added(ring_type)
         return displaced  
 
     def is_dead(self):
@@ -127,11 +129,11 @@ class Base_Stats:
                 self._force_level_down_sp()
         self.recalc_limits()
 
-    def force_level_up_weapon(self):
+    def _force_level_up_weapon(self):
         if self.combat_ref is not None:
             self.combat_ref.level_up_weapon()
 
-    def force_level_down_weapon(self):
+    def _force_level_down_weapon(self):
         if self.combat_ref is not None and self.combat_ref.weapon_level > base_weapon_level:
             self.combat_ref.weapon_level -= 1
             self.combat_ref.default_attack_damage = base_attack_damage * self.combat_ref.weapon_level
@@ -140,11 +142,11 @@ class Base_Stats:
             else:
                 self.combat_ref.attack_damage = self.combat_ref.default_attack_damage
 
-    def force_level_up_sp(self):
+    def _force_level_up_sp(self):
         if self.sp_level < max_sp_level:
             self.level_up_sp()
 
-    def force_level_down_sp(self):
+    def _force_level_down_sp(self):
         if self.sp_level > base_sp_level:
             self.sp_level -= 1
             self.max_sp = base_sp + self.sp_level * sp_bonus
@@ -292,7 +294,7 @@ class Player_Stats:
         self.is_chest_key1 = False
         self.is_chest_key2 = False
 
-        self.current_floor = 4
+        self.current_floor = 1
 
         self.pending_messages = []
 
@@ -378,7 +380,7 @@ class Player_Stats:
         self.notify("Оскар впал в кровавую ярость!")
         return True
 
-    def end_berserk(self):
+    def _end_berserk(self):
         for _ in range(self.berserk_weapon_gain):
             if self.combat.weapon_level > base_weapon_level:
                 self.combat.weapon_level -= 1
@@ -457,7 +459,7 @@ class Player_Stats:
             return ""
         if item == "weapon_crate":
             if self.combat.level_up_weapon():
-                return "Оружейный ящик Андре. Чертежи и инструменты старого кузнеца помогли Оскару улучшить свое оружие!"
+                return "Оружейный ящик Андре. Инструменты старого кузнеца помогли Оскару улучшить свое оружие!"
             return ""
         if item == "chest_key_base":
             if not self.is_chest_key1:
@@ -493,5 +495,4 @@ class Player_Stats:
             self.last_displaced_ring = give_ring(chosen)
         else:
             self.last_displaced_ring = self.base.add_ring(chosen)
-        print(f"GIVE_RING: chosen={chosen} displaced={self.last_displaced_ring} rings={self.base.rings}")
         return f"{RD[chosen]['name']}"

@@ -13,6 +13,19 @@ texture_size = 64
 #==================================
 
 
+#menu settings
+#==================================
+menu_bg = (12, 4, 6)
+menu_title_color = (200, 40, 40)
+menu_button_color = (60, 16, 20)
+menu_button_hover = (140, 30, 36)
+menu_button_text = (240, 210, 205)
+menu_button_w = 320
+menu_button_h = 60
+menu_button_gap = 20
+#==================================
+
+
 #audio settings
 #==================================
 sfx_channels = 16
@@ -28,8 +41,8 @@ music_gap_sec = 12
 #==================================
 rings_panel_x = 20
 rings_panel_y = 20
-rings_panel_w = 400
-rings_panel_h = 500
+rings_panel_w = 500
+rings_panel_h = 560
 
 map_panel_x = width - 540         
 map_panel_y = 20
@@ -71,12 +84,12 @@ max_gold = 999
 max_scrolls = 3
 max_whetstones = 4
 max_weapon_level = 5
-max_hp_level = 6
+max_hp_level = 4
 max_sp_level = 5
 
 #sp
-sp_cost_dash = 10          
-sp_cost_sprint_per_sec = 8
+sp_cost_dash = 10        
+sp_cost_sprint_per_sec = 9
 sp_cost_attack = 30    
 sp_cost_block = 20
 sp_bonus = 16
@@ -87,16 +100,16 @@ sp_regen_delay_bonus = 0.11
 base_hp = 100         
 base_sp = 100 - sp_bonus
 base_durability = 70       
-base_potions = 3
-base_gold = 800 
-base_scrolls = 1
-base_whetstones = 1   
-base_attack_damage = 10       
+base_potions = 2
+base_gold = 10 
+base_scrolls = 0
+base_whetstones = 0   
+base_attack_damage = 12       
 potion_heal_percent = 0.5 
 base_sp_regen = 14 - sp_regen_bonus
 base_sp_regen_delay = 0.45 + sp_regen_delay_bonus
 base_hp_level = 1
-base_sp_level = 1
+base_sp_level = 3
 base_weapon_level = 1
 
 #weapon

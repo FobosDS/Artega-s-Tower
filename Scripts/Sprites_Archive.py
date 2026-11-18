@@ -308,6 +308,8 @@ music = {
 }
 
 floor_music = {
+    0:["Assets/Music/Artega Tower Menu.mp3"],
+    
     1:[
         "Assets/Music/Artega Tower Dungeon no drums.mp3",
         "Assets/Music/Artega Tower Dungeon.mp3"

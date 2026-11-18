@@ -5,10 +5,10 @@ drawed_map = [
     "O...UOTOO..N",
     "OD..OD.II..N",
     "U...N......O",
-    "O.L....m.O.N",
-    "O..o.....U.O",
+    "O.L....o.O.N",
+    "O........U.O",
     "U.NNNTN..O.T",
     "O.D..D...O.O",
-    "O....n...J.O",
+    "O........J.O",
     "OTNOTOUTNNNO",
 ]

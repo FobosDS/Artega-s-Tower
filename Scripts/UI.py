@@ -3,14 +3,34 @@ from Settings import *
 from Sprites_Archive import RD, WTD, floor_names
 import math
 
+fonts = {
+    "dispater": "Assets/Fonts/DISPATERVF.ttf",
+    "demonic": "Assets/Fonts/MB-Demonic_Tale.ttf",
+    "deutsche": "Assets/Fonts/Wolgadeutsche.ttf",
+    "gothic": "Assets/Fonts/BrahmsGotischCyr.otf",
+    "health": "Assets/Fonts/HealthGoth-Regular.ttf"
+}
+
+font_cache = {}
+
+def get_font(name, size):
+    key = (name, size)
+    if key not in font_cache:
+        path = fonts.get(name)
+        try:
+            font_cache[key] = pygame.font.Font(path, size)
+        except Exception:
+            font_cache[key] = pygame.font.Font(None, size)
+    return font_cache[key]
+
 class Tab_Overlay:
     def __init__(self, game):
         self.game = game
         self.visible = False
 
-        self.header_font = pygame.font.Font(None, 30)
-        self.name_font = pygame.font.Font(None, 24)
-        self.desc_font = pygame.font.Font(None, 18)
+        self.header_font = get_font("demonic", 30)
+        self.name_font = get_font("gothic", 24)
+        self.desc_font = get_font("gothic", 18)
 
         self.left_rect = pygame.Rect(rings_panel_x, rings_panel_y, rings_panel_w, rings_panel_h)
         self.right_rect = pygame.Rect(map_panel_x, map_panel_y, map_panel_w, map_panel_h)
@@ -112,16 +132,16 @@ class Tab_Overlay:
 def draw_prompt(screen, text):
     if not text:
         return
-    font = pygame.font.Font(None, 28)
+    font = get_font("gothic", 28)
     surf = font.render(text, True, white)
     rect = surf.get_rect(midbottom=(half_width, half_height+100))
     screen.blit(surf, rect)
 
 class ToastMessage:
-    def __init__(self, x, y, font_size=22, max_lines=3):
+    def __init__(self, x, y, font_size=20, max_lines=3):
         self.x = x
         self.y = y
-        self.font = pygame.font.Font(None, font_size)
+        self.font = get_font("gothic", font_size)
         self.line_height = self.font.get_height() + 6  
         self.max_lines = max_lines
 
@@ -171,7 +191,7 @@ class Icon:
         
         self.x = x
         self.y = y
-        self.font = pygame.font.Font(None, 17)
+        self.font = get_font("gothic", 14)
         
         self._last_floor = -1
     def change_image(self, new_path):
@@ -315,4 +335,207 @@ def draw_hud(screen, stats, icons, interface):
         icons["floor_key"].change_image(floor_key_icons[floor_index])
         icons["floor_key"]._last_floor = floor_index
     icons["floor_key"].draw(screen, active=stats.is_floor_key)
+
+class MainMenu:
+    def __init__(self, screen):
+        self.screen = screen
+        self.title_font = get_font("demonic", 140)
+        self.button_font = get_font("gothic", 32)
+
+        self.buttons = [
+            {"key": "start", "text": "Новая игра"},
+            {"key": "settings", "text": "Настройки"},
+            {"key": "quit", "text": "Выход"},
+        ]
+        self.selected = 0
+        self.show_settings = False
+
+        total_h = len(self.buttons) * menu_button_h + (len(self.buttons) - 1) * menu_button_gap
+        self.start_y = half_height - total_h // 2 + 60
+
+    def _button_rect(self, index):
+        x = half_width - menu_button_w // 2
+        y = self.start_y + index * (menu_button_h + menu_button_gap)
+        return pygame.Rect(x, y, menu_button_w, menu_button_h)
+
+    def handle_event(self, event):
+        if self.show_settings:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                self.show_settings = False
+                return "back"
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                back_rect = pygame.Rect(half_width - 100, height - 100, 200, 50)
+                if back_rect.collidepoint(event.pos):
+                    self.show_settings = False
+                    return "back"
+            return None
+
+        if event.type == pygame.MOUSEMOTION:
+            for i in range(len(self.buttons)):
+                if self._button_rect(i).collidepoint(event.pos):
+                    self.selected = i
+                    break
+
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            for i, btn in enumerate(self.buttons):
+                if self._button_rect(i).collidepoint(event.pos):
+                    return self._activate(btn["key"])
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                self.selected = (self.selected - 1) % len(self.buttons)
+            elif event.key == pygame.K_DOWN:
+                self.selected = (self.selected + 1) % len(self.buttons)
+            elif event.key == pygame.K_RETURN:
+                return self._activate(self.buttons[self.selected]["key"])
+
+        return None
+
+    def _activate(self, key):
+        if key == "start":
+            return "start"
+        if key == "settings":
+            self.show_settings = True
+            return None
+        if key == "quit":
+            return "quit"
+        return None
+
+    def draw(self):
+        self.screen.fill(menu_bg)
+        if self.show_settings:
+            self._draw_settings()
+        else:
+            self._draw_main()
+
+    def _draw_main(self):
+        title = self.title_font.render("БАШНЯ АРТЕГИ", True, menu_title_color)
+        title_rect = title.get_rect(center=(half_width, 120))
+        self.screen.blit(title, title_rect)
+
+        for i, btn in enumerate(self.buttons):
+            rect = self._button_rect(i)
+            color = menu_button_hover if i == self.selected else menu_button_color
+            pygame.draw.rect(self.screen, color, rect, border_radius=6)
+            pygame.draw.rect(self.screen, menu_title_color, rect, 2, border_radius=6)
+            txt = self.button_font.render(btn["text"], True, menu_button_text)
+            txt_rect = txt.get_rect(center=rect.center)
+            self.screen.blit(txt, txt_rect)
+
+    def _draw_settings(self):
+        title = self.button_font.render("Управление", True, menu_title_color)
+        self.screen.blit(title, title.get_rect(center=(half_width, 120)))
+
+        controls = [
+            "WASD: движение",
+            "Движение мыши: поворот",
+            "ЛКМ: атака",
+            "ПКМ: отражение снарядов",
+            "Пробел: рывок",
+            "Shift: бег",
+            "E: взаимодействие",
+            "F: использовать зелье",
+            "Q: использовать свиток",
+            "R: использовать точильный камень",
+            "G: впасть в кровавую ярость (при наличии нужного кольца)",
+            "Tab: кольца и мини карта",
+            "Esc: выход",
+        ]
+        font = get_font("gothic", 22)
+        start_y = 200
+        for i, line in enumerate(controls):
+            surf = font.render(line, True, menu_button_text)
+            self.screen.blit(surf, (half_width - 220, start_y + i * 30))
+
+        back_rect = pygame.Rect(half_width - 100, height - 100, 200, 50)
+        pygame.draw.rect(self.screen, menu_button_hover, back_rect, border_radius=6)
+        pygame.draw.rect(self.screen, menu_title_color, back_rect, 2, border_radius=6)
+        txt = self.button_font.render("Назад", True, menu_button_text)
+        self.screen.blit(txt, txt.get_rect(center=back_rect.center))
+
+class IntroScene:
+    def __init__(self, screen):
+        self.screen = screen
+        self.quote_font = get_font("gothic", 34)
+        self.author_font = get_font("gothic", 24)
+
+        self.quote = "Исполнение самых сильных наших желаний часто бывает источником величайших наших скорбей"
+        self.author = "Луций Анней Сенека"
+
+        self.phase = "in"
+        self.timer = 0.0
+        self.done = False
+
+        self.fade_in = 2.5
+        self.hold = 4.0
+        self.fade_out = 2.0
+
+    def handle_event(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key in (pygame.K_ESCAPE, pygame.K_SPACE):
+                self.done = True
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self.done = True
+
+    def update(self, dt):
+        if self.done:
+            return
+        self.timer += dt
+
+        if self.phase == "in":
+            if self.timer >= self.fade_in:
+                self.phase = "hold"
+                self.timer = 0.0
+        elif self.phase == "hold":
+            if self.timer >= self.hold:
+                self.phase = "out"
+                self.timer = 0.0
+        elif self.phase == "out":
+            if self.timer >= self.fade_out:
+                self.done = True
+
+    def _alpha(self):
+        if self.phase == "in":
+            return int(255 * min(1.0, self.timer / self.fade_in))
+        if self.phase == "hold":
+            return 255
+        if self.phase == "out":
+            return int(255 * max(0.0, 1.0 - self.timer / self.fade_out))
+        return 0
+
+    def draw(self):
+        self.screen.fill((0, 0, 0))
+
+        alpha = self._alpha()
+        if alpha <= 0:
+            return
+
+        words = self.quote.split()
+        lines = []
+        current = ""
+        max_w = width - 200
+        for w in words:
+            test = (current + " " + w).strip()
+            if self.quote_font.size(test)[0] > max_w:
+                lines.append(current)
+                current = w
+            else:
+                current = test
+        if current:
+            lines.append(current)
+
+        total_h = len(lines) * 40
+        y = half_height - total_h // 2 - 20
+
+        for line in lines:
+            surf = self.quote_font.render(line, True, (220, 220, 220))
+            surf.set_alpha(alpha)
+            rect = surf.get_rect(center=(half_width, y))
+            self.screen.blit(surf, rect)
+            y += 40
+
+        author_surf = self.author_font.render(f" {self.author}", True, (160, 160, 160))
+        author_surf.set_alpha(alpha)
+        rect = author_surf.get_rect(center=(half_width, y + 20))
+        self.screen.blit(author_surf, rect)
     
