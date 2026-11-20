@@ -1,6 +1,7 @@
 import pygame
 from Settings import *
 from Sprites_Archive import floor_music, sfx
+import os 
 
 class Sound_Manager:
     def __init__(self):
@@ -115,3 +116,17 @@ class Sound_Manager:
 
     def change_music_volume(self, delta):
         self.set_music_volume(self.music_volume + delta)
+
+    def play_death_music(self):                                   
+        self.stop_music()
+        try:
+            pygame.mixer.music.load("Assets/Music/Artega Tower Death.mp3")
+            pygame.mixer.music.set_volume(self.music_volume)
+            pygame.mixer.music.play(0)
+        except Exception as e:
+            print("[Sound_Manager] Не загружена музыка смерти")
+
+    def stop_death_music(self):                                   
+        pygame.mixer.music.fadeout(music_fade_out_ms)
+        self.track_playing = False
+        self.gap_left = 0

@@ -106,6 +106,7 @@ class Tab_Overlay:
         shard_text = f"Осколки тьмы: {self.game.player.stats.base.dark_shards} / {max_dark_shards}"
         surf = shard_font.render(shard_text, True, white)
         screen.blit(surf, (rect.x + 15, rect.y + rect.h - 30))
+
     def draw_map_panel(self, screen):
         if not self.visible:
             return
@@ -150,21 +151,26 @@ class ToastMessage:
         self.x = x
         self.y = y
         self.font = get_font("gothic", font_size)
-        self.line_height = self.font.get_height() + 6  
+        self.line_height = self.font.get_height() + 6
         self.max_lines = max_lines
 
-        self.pending = []   
-        self.active = []    
+        self.pending = []
+        self.active = []
         self.duration = 3
         self.fade_time = 0.5
 
     def set_message(self, text):
         if not text:
             return
-        if len(self.active) < self.max_lines:
-            self.active.append({"text": text, "timer": self.duration + self.fade_time})
+        if isinstance(text, str):
+            segments = [(text, white)]
         else:
-            self.pending.append(text)
+            segments = text
+        entry = {"segments": segments, "timer": self.duration + self.fade_time}
+        if len(self.active) < self.max_lines:
+            self.active.append(entry)
+        else:
+            self.pending.append(entry)
 
     def update(self, dt):
         for m in self.active:
@@ -172,8 +178,7 @@ class ToastMessage:
         self.active[:] = [m for m in self.active if m["timer"] > 0]
 
         while self.pending and len(self.active) < self.max_lines:
-            self.active.append({"text": self.pending.pop(0),
-                                "timer": self.duration + self.fade_time})
+            self.active.append(self.pending.pop(0))
 
     def draw(self, screen):
         newest_index = len(self.active) - 1
@@ -181,11 +186,21 @@ class ToastMessage:
             alpha = 255
             if m["timer"] < self.fade_time:
                 alpha = int(255 * (m["timer"] / self.fade_time))
-            surf = self.font.render(m["text"], True, white)
-            surf.set_alpha(alpha)
+
+            total_w = 0
+            rendered = []
+            for text, color in m["segments"]:
+                surf = self.font.render(text, True, color)
+                surf.set_alpha(alpha)
+                rendered.append(surf)
+                total_w += surf.get_width()
+
+            x = self.x
             line_y = self.y - (newest_index - i) * self.line_height
-            rect = surf.get_rect(midleft=(self.x, line_y))
-            screen.blit(surf, rect)
+            for surf in rendered:
+                rect = surf.get_rect(midleft=(x, line_y))
+                screen.blit(surf, rect)
+                x += surf.get_width()
 
 
 class Icon:
@@ -352,9 +367,28 @@ class MainMenu:
         self.button_font = get_font("gothic", 32)
         self.small_font = get_font("gothic", 22)
 
+        self.about_font = get_font("gothic", 20)                   
+        self.about_scroll = 0                                      
+        self.about_dragging = False                                
+        self.about_drag_offset = 0                                 
+        self.about_area = pygame.Rect(half_width - 420, 190, 840,  
+                                      height - 190 - 90)
+        self.about_lines = []                                      
+        self.about_total_h = 0                                    
+        self._build_about_text()      
+
+        try:
+            bg = pygame.image.load("Assets/Sprites/menu2.png").convert()
+            self.background = pygame.transform.scale(bg, (width, height))
+        except Exception as e:
+            print(f"Не удалось загрузить фон меню: {e}")
+            self.background = None
+
         self.buttons = [
             {"key": "start", "text": "Начать игру"},
             {"key": "settings", "text": "Настройки"},
+            {"key": "about", "text": "Об игре"},
+            {"key": "credits", "text": "Авторы"},
             {"key": "quit", "text": "Выход"},
         ]
 
@@ -363,6 +397,8 @@ class MainMenu:
 
         self.selected = 0
         self.show_settings = False
+        self.show_credits = False
+        self.show_about = False   
 
         self.settings_focus = 0
         self.rebinding = None   
@@ -371,11 +407,16 @@ class MainMenu:
         self.start_y = half_height - total_h // 2 + 60
 
     def _button_rect(self, index):
-        x = half_width - menu_button_w // 2
+        menu_right_margin = 860                                            
+        x = width - menu_button_w - menu_right_margin  
         y = self.start_y + index * (menu_button_h + menu_button_gap)
         return pygame.Rect(x, y, menu_button_w, menu_button_h)
 
     def handle_event(self, event):
+        if self.show_about:                                      
+            return self._handle_about(event)
+        if self.show_credits:
+            return self._handle_credits(event)
         if self.show_settings:
             return self._handle_settings(event)
         return self._handle_main(event)
@@ -404,6 +445,12 @@ class MainMenu:
             return "start"
         if key == "load":
             return "load"
+        if key == "about":                                       
+            self.show_about = True
+            return None
+        if key == "credits":                                    
+            self.show_credits = True
+            return None
         if key == "settings":
             self.show_settings = True
             self.settings_focus = 0
@@ -465,21 +512,86 @@ class MainMenu:
                         self.show_settings = False
                         return "back"
         return None
+    
+    def _handle_about(self, event):                                
+        if event.type == pygame.KEYDOWN:
+            if event.key in (pygame.K_ESCAPE, pygame.K_RETURN):
+                self.show_about = False
+                self.about_scroll = 0
+            elif event.key == pygame.K_UP:
+                self.about_scroll -= 40
+            elif event.key == pygame.K_DOWN:
+                self.about_scroll += 40
+            elif event.key == pygame.K_PAGEUP:
+                self.about_scroll -= 300
+            elif event.key == pygame.K_PAGEDOWN:
+                self.about_scroll += 300
+            self._clamp_about_scroll()
+            return None
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 4:                                  
+                self.about_scroll -= 60
+            elif event.button == 5:                                
+                self.about_scroll += 60
+            elif event.button == 1:
+                track, thumb = self._about_scrollbar()
+                if track.collidepoint(event.pos):                
+                    self.about_dragging = True
+                    self.about_drag_offset = event.pos[1] - thumb.y
+                else:                                              
+                    self.show_about = False
+                    self.about_scroll = 0
+            self._clamp_about_scroll()
+            return None
+
+        if event.type == pygame.MOUSEMOTION and self.about_dragging:
+            track, thumb = self._about_scrollbar()
+            max_scroll = max(0, self.about_total_h - (self.about_area.h - 20))
+            track_h = track.h - thumb.h
+            if max_scroll > 0 and track_h > 0:
+                target = event.pos[1] - self.about_drag_offset - track.y
+                ratio = max(0.0, min(1.0, target / track_h))
+                self.about_scroll = int(ratio * max_scroll)
+            return None
+
+        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            self.about_dragging = False
+        return None
+
+    def _handle_credits(self, event):                           
+        if event.type == pygame.KEYDOWN and event.key in (pygame.K_ESCAPE, pygame.K_RETURN):
+            self.show_credits = False
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            self.show_credits = False
+        return None
 
     def _settings_row_rect(self, index):
         y = 200 + index * 40
         return pygame.Rect(half_width - 300, y - 12, 600, 34)
 
     def draw(self):
-        self.screen.fill(menu_bg)
-        if self.show_settings:
+        if self.background:
+            self.screen.blit(self.background, (0, 0))
+            overlay = pygame.Surface((width, height), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 90))
+            self.screen.blit(overlay, (0, 0))
+        else:
+            self.screen.fill(menu_bg)
+
+        if self.show_about:                                      
+            self._draw_about()
+        elif self.show_credits:
+            self._draw_credits()
+        elif self.show_settings:
             self._draw_settings()
         else:
             self._draw_main()
 
     def _draw_main(self):
-        title = self.title_font.render("Artega's Tower", True, menu_title_color)
-        self.screen.blit(title, title.get_rect(center=(half_width, 120)))
+        title = self.title_font.render("БАШНЯ    АРТЕГИ", True, menu_title_color)
+        title_rect = title.get_rect(center=(half_width, 120))
+        self.screen.blit(title, title_rect)
         for i, btn in enumerate(self.buttons):
             rect = self._button_rect(i)
             color = menu_button_hover if i == self.selected else menu_button_color
@@ -488,8 +600,129 @@ class MainMenu:
             txt = self.button_font.render(btn["text"], True, menu_button_text)
             self.screen.blit(txt, txt.get_rect(center=rect.center))
 
+    def _build_about_text(self):                                           
+        paragraphs = [
+            """
+            Башня Артеги (Artega's Tower) это мой учебный проект, созданый на Python с использованием бибилиотеки PyGame. Это игра про исследование этажей и битву с монстрами.
+            Этот проект одна из разновидностей игр "Башня Артеги", идея которой принадлежит моему брату (он же соавтор (Souls)). Ниже можно прочесть предысторию игры. Наслаждайтесь!
+            """,
+            """
+            В безымянном королевстве из-за одного мага, сошедшего с трудного пути чистой магии и практиковавшего древнее и простое в освоении искусство темного колдовства,
+            появилась гигансткая и невероятно красивая башня. Этого мага, прошлое которого туманно и запутано, звали Артега. Он встал на трибуну, стоявшую на площади главного
+            города королевства, и сказал, что любому человеку, дошедшему до его башни, он даст загадать любое желание, которое тот обязательно исполнит. Желавшим исполнить свои
+            самые сокровенные желания не было конца: кто-то шел за любовью, кто-то за богатствами, кто-то за потерянным любимым человеком, кто-то из-за неутолимой жажды знаний, 
+            а кто то отправлялся за великой силой... Но участь их была незавидной... Хотя, конечно, коварный чародей не врал: он действительно исполнял любые желания приходивших 
+            к нему людей, но он настолько сильно извращал их лицемерные, гнилые желания, что бедолаги либо умирали на месте, либо сходили с ума и навсегда оставались в заточении
+            мрачной башни, либо становились настолько бесчеловечно жестокими или жадными, что оставались в башне по своему собственному желанию, чтобы убивать и грабить бесконечно 
+            приходящих сюда путников. В конце концов башня Артеги превратилась в ужасное зрелище: по этому невероятно огромному и запутанному лабиринту ходили тысячи
+            свирепых не людей, а монстров. Мертвых маг со своими подручными воскрешал, превращая их в тупых и жестоких гулей. Скульпторов, художников и мастеровых Артега сводил
+            с ума, заставляя их вечно ваять страшные скулптуры и горгулий, которых чародей мог оживлять. Тех же, кто выжил и остался в рассудке, Артега уговаривал перейти на его
+            сторону, став его помощниками. Он обещал им великую силу, возможность самим исполнять свои желания и горы золота. Взамен он требовал полной покорности ему в своих 
+            темных делах. Они теряли человеческий облик и становились вампирами. Самые жадные из купцов становились кем-то вроде торговцев для путников, продавая им необходимое
+            снаряжение и припасы втридорога, надеясь на будущую жизнь в достатке.
+            """,
+            """
+            В юношетсве ученик великого магистра магии, Артега, нищий и безродный пытался достичь небывалых высот, отдавая почти все свои сбережения на учебу у маэстро. Но
+            еще с дества он привык срезать углы, говорить больше, чем делать, врать, давать пустые обещания, чтобы просто-напросто выжить. Поэтому в этом непростом мире он выбрал
+            иной путь... Он начал изучать запретные и простые основы темного чародейства первых магов. Эта область оказалась для него легкой, и достаточно быстро он освоил ее в 
+            совершенстве, доказав это созданием своей собственной гексагональной башни Тьерри, древним заклинанием зачинателя темных чар, которого вскоре после его создания в ней 
+            же и замуровали. Но Артега был умнее и хитрее Тьерри... Он хотел завладеть секретами человеческой души и разума, а башня стала его испытательным полигоном.
+            """,
+            """
+            Но в один день король со своей свитой осознали, что башня - не благодать для бедняков, а угроза для всех жителей королевства. Он много раз отправлял свои отряды
+            солдат. Но никто их них не возвращался... В одном из таких походов погиб даже сам король, почти дойдя до покоев мага на пике башни. Его сын, чье королевство
+            ослабло из-за вечных междоусобиц, отправил последнюю экспедицию в башню Артеги, уже ни на что не надеясь. Оскар - один из солдат этого отряда, который, конечно, потерпел
+            поражение. Искушенные своими мерзкими желаниями каждый из людей, входивших в экспедицию, встретил свою гибель. От отряда осталось лишь одно ужасное кровавое месиво -
+            их братская могила... Но наш герой каким то чудом выжили, возможно, потому что он был немым и не мечтал ни о чем великом. Оскару предстоит пройти сквозь
+            все ужасы башни до самого ее пика, чтобы уничтожить Артегу, отомстив тем самым за своих товарищей. Ради этого ему придется многое сделать: сожрать сердца монстров и 
+            легкие вампиров, чтобы стать сильнее обычного человека, найти инструменты умершего здесь мастера Андре и создать оружие невероятной мощи, торгуясь с жадными торговцами
+            и ищя ключи, закрывающие сундуки с вещами Артеги и двери, отделяющие Оскара от осуществления своей цели, которые носят с собой шестерки мага."
+            """
+        ]
+
+        max_w = self.about_area.w - 40
+        y = 0
+        for text in paragraphs:
+            words = text.split()
+            lines, line = [], ""
+            for word in words:
+                test = (line + " " + word).strip()
+                if self.about_font.size(test)[0] <= max_w:
+                    line = test
+                else:
+                    lines.append(line)
+                    line = word
+            if line:
+                lines.append(line)
+
+            for ln in lines:
+                surf = self.about_font.render(ln, True, menu_button_text)
+                self.about_lines.append((surf, y))
+                y += self.about_font.get_height() + 4
+            y += 14                                              
+
+        self.about_total_h = y
+
+    def _draw_about(self):                                       
+        title = self.title_font.render("ОБ ИГРЕ", True, menu_title_color)
+        self.screen.blit(title, title.get_rect(center=(half_width, 120)))
+
+        view_h = self.about_area.h - 20
+        clip = pygame.Rect(self.about_area.x, self.about_area.y + 10,
+                           self.about_area.w - 30, view_h)
+        old_clip = self.screen.get_clip()
+        self.screen.set_clip(clip)                                
+
+        for surf, y in self.about_lines:
+            line_y = self.about_area.y + 10 + y - self.about_scroll
+            if line_y + surf.get_height() < clip.top or line_y > clip.bottom:
+                continue                                           
+            self.screen.blit(surf, (self.about_area.x + 15, line_y))
+        self.screen.set_clip(old_clip)
+
+        track, thumb = self._about_scrollbar()
+        pygame.draw.rect(self.screen, menu_button_color, track, border_radius=5)
+        pygame.draw.rect(self.screen, menu_title_color, thumb, border_radius=5)
+
+    def _clamp_about_scroll(self):                                 
+        max_scroll = max(0, self.about_total_h - (self.about_area.h - 20))
+        self.about_scroll = max(0, min(self.about_scroll, max_scroll))
+
+    def _about_scrollbar(self):                                    
+        view_h = self.about_area.h - 20
+        track = pygame.Rect(self.about_area.right - 14, self.about_area.y + 10,
+                            10, self.about_area.h - 20)
+        max_scroll = max(0, self.about_total_h - view_h)
+        if max_scroll <= 0:
+            return track, pygame.Rect(track.x, track.y, track.w, track.h)
+        thumb_h = max(40, int(track.h * view_h / self.about_total_h))
+        thumb_y = track.y + int((track.h - thumb_h) * self.about_scroll / max_scroll)
+        return track, pygame.Rect(track.x, thumb_y, track.w, thumb_h)
+
+    def _draw_credits(self):                                  
+        title = self.title_font.render("АВТОРЫ", True, menu_title_color)
+        self.screen.blit(title, title.get_rect(center=(half_width, 140)))
+
+        panel = pygame.Rect(half_width - 300, 220, 600, 320)
+        pygame.draw.rect(self.screen, menu_bg, panel, border_radius=10)
+        pygame.draw.rect(self.screen, menu_title_color, panel, 2, border_radius=10)
+
+        authors = [
+            ("Код, геймдизайн, музыка, дизайн уровней", "FobosDS"),
+            ("Визуальная часть, тестирование", "Souls"),
+            ("Музыка (треки Artega, End Soon, Dungeon, Win)", "BogdanOnDaBeat"),
+        ]
+
+        y = panel.y + 40
+        for role, name in authors:
+            role_surf = self.small_font.render(role, True, menu_title_color)
+            self.screen.blit(role_surf, role_surf.get_rect(center=(half_width, y)))
+            name_surf = self.button_font.render(name, True, menu_button_text)
+            self.screen.blit(name_surf, name_surf.get_rect(center=(half_width, y + 30)))
+            y += 80
+
     def _draw_settings(self):
-        title = self.button_font.render("Настройки", True, menu_title_color)
+        title = self.title_font.render("Настройки", True, menu_title_color)
         self.screen.blit(title, title.get_rect(center=(half_width, 120)))
 
         rows = self._settings_rows()
@@ -713,4 +946,52 @@ class PauseMenu:
             pygame.draw.rect(self.screen, menu_title_color, rect, 2, border_radius=6)
             txt = self.small.render(label, True, menu_button_text)
             self.screen.blit(txt, txt.get_rect(center=rect.center))
-    
+
+class Death_Screen:                                                   
+    def __init__(self):
+        self.active = False
+        self.time_over = False
+        self.timer = 0
+        self.duration = 40
+        self.fade = 0
+
+        self.title_font = get_font("demonic", 52)
+
+        self.image = None
+        try:
+            img = pygame.image.load("Assets/Sprites/menu2.png").convert()
+            self.image = pygame.transform.scale(img, (width, height))
+        except Exception:
+            pass                                                      
+
+    def start(self):
+        if self.active:
+            return
+        self.active = True
+        self.timer = 0
+        self.fade = 0
+        self.time_over = False
+
+    def finish(self):
+        self.active = False
+        self.time_over = False
+
+    def update(self, dt):
+        if not self.active:
+            return
+        self.timer += dt
+        if self.fade < 1.0:
+            self.fade = min(1.0, self.fade + dt / 2.0)
+        if self.timer >= self.duration:
+            self.time_over = True
+
+    def draw(self, screen):
+        if self.image:
+            img = self.image.copy()
+            img.set_alpha(int(255 * self.fade))
+            screen.blit(img, (0, 0))
+        else:
+            screen.fill((0, 0, 0))
+
+        text = self.title_font.render("ВЛАДЫКА БАШНИ ОДОЛЕЛ ОСКАРА", True, menu_title_color)
+        screen.blit(text, text.get_rect(center=(half_width, half_height)))    

@@ -21,11 +21,6 @@ save_file = "savegame.json"
 
 #menu settings
 #==================================
-menu_bg = (12, 4, 6)
-menu_title_color = (200, 40, 40)
-menu_button_color = (60, 16, 20)
-menu_button_hover = (140, 30, 36)
-menu_button_text = (240, 210, 205)
 menu_button_w = 320
 menu_button_h = 60
 menu_button_gap = 20
@@ -108,7 +103,7 @@ base_hp = 100
 base_sp = 100 - sp_bonus
 base_durability = 70       
 base_potions = 3
-base_gold = 10 
+base_gold = 500
 base_scrolls = 0
 base_whetstones = 0   
 base_attack_damage = 12       
@@ -298,8 +293,29 @@ paralysis_on = (190, 223, 221)
 enchant_off = (9, 25, 60)
 enchant_on = (19, 165, 236)
 
-#tab overlay
+#tab overlay colors
 panel_bg = (55, 55, 58)
 panel_border = (120, 90, 90)      
 map_wall_color = (120, 120, 130)
+
+#menu colors
+menu_bg = (10, 8, 12)
+menu_title_color = (180, 50, 40)
+menu_button_color = (30, 25, 28)
+menu_button_hover = (90, 35, 30)
+menu_button_text = (220, 210, 195)
+
+#items text colors
+color_dark_shard = (180, 90, 220)
+color_heart = (220, 60, 60)
+color_lungs = (80, 200, 120)
+color_weapon_crate = (200, 160, 60)
+color_ring = (230, 200, 90)
+color_floor_key = (180, 180, 180)
+color_chest_key_base = (200, 140, 80)
+color_chest_key_rare = (150, 200, 240)
+color_gold = (230, 200, 60)
+color_potion = (200, 60, 120)
+color_scroll = (120, 140, 220)
+color_whetstone = (160, 160, 160)
 #==================================

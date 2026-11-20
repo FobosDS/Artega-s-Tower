@@ -474,7 +474,7 @@ class Player_Stats:
             return ""
         if item == "weapon_crate":
             if self.combat.level_up_weapon():
-                return "Оружейный ящик Андре. Инструменты старого кузнеца помогли Оскару улучшить свое оружие!"
+                return "Оружейный ящик Андре. Инструменты помогли Оскару улучшить свое оружие!"
             return ""
         if item == "chest_key_base":
             if not self.is_chest_key1:

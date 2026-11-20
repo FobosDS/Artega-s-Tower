@@ -158,17 +158,23 @@ WSD = {
     "sword_block": sprites_folder + "sword/" + "block.png"
 }
 
+#shelfs dictionary
+SH = [
+    "Assets/Sprites/Levels/Walls/shelfs/shelf1.png",
+    "Assets/Sprites/Levels/Walls/shelfs/shelf2.png",
+    "Assets/Sprites/Levels/Walls/shelfs/shelf3.png",
+    "Assets/Sprites/Levels/Walls/shelfs/shelf4.png",
+    "Assets/Sprites/Levels/Walls/shelfs/shelf5.png",
+    "Assets/Sprites/Levels/Walls/shelfs/shelf6.png"
+]
+
 #walls textures dictionary
 WTD = {
-    #any letters except: C, D, E, F, G, J, M, P, R, S
-    #shelfs
-    "A":"Assets/Sprites/Levels/Walls/shelfs/shelf1.png",
-    "B":"Assets/Sprites/Levels/Walls/shelfs/shelf2.png",
-    "H":"Assets/Sprites/Levels/Walls/shelfs/shelf3.png",
-    "I":"Assets/Sprites/Levels/Walls/shelfs/shelf4.png",
-    "K":"Assets/Sprites/Levels/Walls/shelfs/shelf5.png",
-    "L":"Assets/Sprites/Levels/Walls/shelfs/shelf6.png",
-
+    "H": SH[2],
+    **{f"H{i}": path for i, path in enumerate(SH)},
+    "E":"Assets/Sprites/Levels/Walls/stairs.png",
+    "J":"Assets/Sprites/Levels/Walls/barrier.png",
+    
     #dungeon
     "N":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_grate.png",
     "O":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_simple2.png",
@@ -305,8 +311,8 @@ music = {
    "Archive2":"Assets/Music/Artega Tower Archive2.mp3",
    "Marble_Hall":"Assets/Music/Artega Tower Marble Hall.mp3",
    "We_Not_Lost":"Assets/Music/Artega Tower We Not Lost.mp3",
-   "Artega1":"Assets/Music/Artega Tower Boss 1 phase.mp3",
-   "Artega2":"Assets/Music/Artega Tower Boss 2 phase.mp3",
+   "Artega":"Assets/Music/Artega Artega.mp3",
+   "Artega2":"Assets/Music/Artega Tower End Soon.mp3",
    "Menu":"Assets/Music/Artega Tower Menu.mp3",
    "Death":"Assets/Music/Artega Tower Death.mp3",
    "Win":"Assets/Music/Artega Tower Win.mp3"

@@ -1,6 +1,5 @@
 import random
 from Settings import *
-from Sprites_Archive import RD
 
 #items
 potion = "potion"
@@ -30,6 +29,31 @@ item_names = {
     ring: "Кольцо",
     dark_shard:"Осколок тьмы"
 }
+
+item_colors = {
+    dark_shard: color_dark_shard,
+    heart: color_heart,
+    lungs: color_lungs,
+    weapon_crate: color_weapon_crate,
+    ring: color_ring,
+    floor_key: color_floor_key,
+    chest_key_base: color_chest_key_base,
+    chest_key_rare: color_chest_key_rare,
+    gold: color_gold,
+    potion: color_potion,
+    scroll: color_scroll,
+    whetstone: color_whetstone,
+}
+
+def colored_pickup(prefix, item):
+    name = item_names.get(item, "?")
+    color = item_colors.get(item, white)
+    return [(prefix, white), (name, color)]
+
+def colored_item(item):
+    name = item_names.get(item, "?")
+    color = item_colors.get(item, white)
+    return [(name, color)]
 
 #loot tables
 shelf_loot = [
@@ -134,7 +158,7 @@ ring_effects = {
     "ring_dreamer":   {"type": "hp_fullheal",     "hp_levels": 1},
     "ring_genius":    {"type": "duration_x",      "mult": 2.5},
     "ring_murderer":  {"type": "berserk",         "hp_cost": 0.9, "duration": 12, "cooldown": 480,
-                       "speed": 1.3, "attack_speed": 1.5, "weapon_levels": 1},
+                       "speed": 1.7, "attack_speed": 1.6, "weapon_levels": 1},
     "ring_warrior":   {"type": "flat_levels",     "hp": 1, "sp": 1, "weapon": 1},
     "ring_aristocrat":{"type": "speed_range",     "speed": 1.15, "range": 1.35},
 }

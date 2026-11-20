@@ -1,13 +1,12 @@
 import pygame
 from Settings import *
 from Projectile import ProjectileManager
-import Map
 from Map import drawed_maps, set_floor_map
 from Objects import Rare_Chest, Merchant, Shelf, Decoration, RingPickup, Barrier, Stairs, Altar
-from Sprites_Archive import ISD, WTD, RD, floor_names
+from Sprites_Archive import ISD, WTD, RD, floor_names, SH
 import Items_Hub
 import math                                
-from UI import ToastMessage
+from UI import ToastMessage, Death_Screen
 
 
 class MapManager:
@@ -39,7 +38,11 @@ class MapManager:
         for row, line in enumerate(drawed_map):
             grid_row = []
             for col, ch in enumerate(line):
-                grid_row.append(ch)
+                grid_ch = ch
+                if ch == "H":
+                    idx = (col * 31 + row * 17) % len(SH)   
+                    grid_ch = f"H{idx}" 
+                grid_row.append(grid_ch)
                 
                 x = col * tile
                 y = row * tile
@@ -48,14 +51,20 @@ class MapManager:
                 
                 if ch in WTD:
                     self.walls.append(pygame.Rect(x, y, tile, tile))
-                    if ch in "ABHIKL":
+                    if ch == "H":
                         self.interactive_objects.append(Shelf(center_x, center_y))
+                    elif ch == "E":   
+                        self.interactive_objects.append(Stairs(center_x, center_y))
+                    elif ch == "J":   
+                        b = Barrier(center_x, center_y)
+                        self.barriers.append(b)
+                        self.interactive_objects.append(b)
+
+                #enemies  
                 elif ch == "1":
                     self.enemy_spawns.append(("ghoul", center_x, center_y))
                 elif ch == "2":
                     self.enemy_spawns.append(("gargoyle", center_x, center_y))
-                elif ch == "P":
-                    self.player_spawn = (center_x, center_y)
 
                 #rare chest
                 elif ch == "R":
@@ -81,15 +90,10 @@ class MapManager:
                 elif ch == "p":
                     self.interactive_objects.append(Merchant(center_x, center_y, Items_Hub.ring))
 
+                elif ch == "P":
+                    self.player_spawn = (center_x, center_y)
                 elif ch == "D":
                     self.objects.append(Decoration(center_x, center_y))
-
-                elif ch == "E":   
-                    self.interactive_objects.append(Stairs(center_x, center_y))
-                elif ch == "J":   
-                    b = Barrier(center_x, center_y)
-                    self.barriers.append(b)
-                    self.interactive_objects.append(b)
                 elif ch == "S":  
                     self.interactive_objects.append(Altar(center_x, center_y))
                 
@@ -135,6 +139,7 @@ class Game:
         self.interactive_objects = self.map_manager.interactive_objects
 
         self.toast = ToastMessage(half_width - 420, height - 180)
+        self.death_screen = Death_Screen()
 
         self.rings_to_drop = []
 
@@ -172,6 +177,17 @@ class Game:
         self.player.stats.notify(f"Оскар уронил на пол: {RD[ring_type]['name']}")
 
     def update(self, dt):
+        if self.death_screen.active:                               
+            self.sound_manager.update(dt)
+            self.death_screen.update(dt)
+            return
+
+        if self.player.stats.base.is_dead():                       
+            if not self.death_screen.active:
+                self.death_screen.start()
+                self.sound_manager.play_death_music()              
+            return
+        
         self.sound_manager.update(dt)
         self.interaction_manager.update_prompt(self.player.rect, self.player.stats)
         while self.player.stats.pending_messages:
@@ -330,17 +346,17 @@ class Game:
                 continue
 
             if isinstance(obj, Shelf):
-                obj.is_action_perfomed = s["used"]
+                obj.is_action_perfomed = s.get("used", obj.is_action_perfomed)
             elif isinstance(obj, Rare_Chest):
-                obj.is_open = s["open"]
+                obj.is_open = s.get("open", obj.is_open)
                 if obj.is_open:
                     obj.image = pygame.image.load(ISD["rare_chest"]["open"]).convert_alpha()
             elif isinstance(obj, Merchant):
-                obj.unique_item = s["unique_item"]
-                obj.trades_done = s["trades_done"]
-                obj.price = s["price"]
+                obj.unique_item = s.get("unique_item", obj.unique_item)   
+                obj.trades_done = s.get("trades_done", obj.trades_done)   
+                obj.price = s.get("price", obj.price)
             elif isinstance(obj, Barrier):
-                if s["broken"]:
+                if s.get("broken", False):                                        
                     obj.break_barrier()
             elif isinstance(obj, RingPickup):
                 if s["taken"]:
@@ -372,3 +388,6 @@ class Game:
 
         self.tab_overlay.draw_rings_panel(self.screen)
         self.tab_overlay.draw_map_panel(self.screen)
+
+        if self.death_screen.active:                              
+            self.death_screen.draw(self.screen)

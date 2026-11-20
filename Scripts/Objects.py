@@ -54,7 +54,7 @@ class Rare_Chest(Interactive_Sprite):
         self.image = pygame.image.load(ISD["rare_chest"]["open"]).convert_alpha()
         item = self.unique_item if self.unique_item else Items_Hub.ring
         msg = player_stats.give_item(item, give_ring=give_ring)
-        return f"Оскар нашел в тайнике чародея: {msg}"
+        return Items_Hub.colored_pickup("Оскар нашел в тайнике чародея: ", item)
     
 class Merchant(Interactive_Sprite):
     def __init__(self, x, y, unique_item=None):
@@ -87,10 +87,10 @@ class Merchant(Interactive_Sprite):
         if self.unique_item is not None:
             self.unique_item = None
             self.price = int(Items_Hub.merchant_base_goods[0][1])
-            return f"Оскар купил у жадного торгаша: {msg}"
+            return Items_Hub.colored_pickup("Оскар купил у жадного торгаша: ", item)
         self.trades_done += 1
         self.price = int(self.price * price_buy_growth)
-        return f"Оскар купил у жадного торгаша: {msg}"
+        return Items_Hub.colored_pickup("Оскар купил у жадного торгаша: ", item)
 
     def get_prompt(self, player_stats):
         price = int(self.price * player_stats.get_price_multiplier())
@@ -103,6 +103,7 @@ class Merchant(Interactive_Sprite):
 class Shelf(Interactive_Sprite):
     def __init__(self, x, y):
         super().__init__(x, y, SSD["box"], scale=1.0, collision_radius=14.5)
+        self.hidden = True
 
         self.empty_shelf_msg = [
             "Полка пуста",
@@ -136,8 +137,8 @@ class Shelf(Interactive_Sprite):
             return f"На полке завалялось несколько монет. Оскар получил {amount} золота"
         if item is None:
             return random.choice(self.empty_shelf_msg)
-        msg = player_stats.give_item(item, give_ring=give_ring)
-        return f"Оскар нашел на полке: {msg}" if msg else "Полка пуста"
+        player_stats.give_item(item, give_ring=give_ring)
+        return Items_Hub.colored_pickup("Оскар нашел на полке: ", item)
 
 class RingPickup(Interactive_Sprite):
     def __init__(self, x, y, ring_type):
@@ -175,7 +176,10 @@ class RingPickup(Interactive_Sprite):
             displaced = player_stats.base.add_ring(chosen)
         player_stats.last_displaced_ring = displaced
         self.taken = True
-        return f"Оскар подобрал с пола: {RD[chosen]['name']}"
+        return [
+            ("Оскар подобрал с пола: ", white),
+            (RD[chosen]['name'], color_ring),
+        ]
         
 class Decoration(Sprite):
     def __init__(self, x, y):
@@ -198,7 +202,11 @@ class Altar(Interactive_Sprite):
         player_stats.base.hp -= cost
         player_stats.base.dark_shards -= 1
         player_stats.request_save = True
-        return f"Оскар отдал {cost} здоровья и осколок тьмы."
+        return [
+            ("Оскар отдал ", white),
+            (f"{cost} здоровья", color_heart),
+            (" и осколок тьмы. Прогресс сохранён", white)
+        ]
 
     def get_prompt(self, player_stats):
         if player_stats.base.dark_shards < 1:
@@ -207,7 +215,8 @@ class Altar(Interactive_Sprite):
 
 class Stairs(Interactive_Sprite):
     def __init__(self, x, y):
-        super().__init__(x, y, SSD["cell_break"], scale=1.0, collision_radius=14)
+        super().__init__(x, y, SSD["cell_break"], scale=1.0, collision_radius=16)
+        self.hidden = True
 
     def perform_action(self, player_stats, give_ring=None):
         if not player_stats.is_floor_key:
@@ -216,9 +225,14 @@ class Stairs(Interactive_Sprite):
         player_stats.request_next_floor = True
         return "Оскар поднимается на следующий этаж башни"
 
+    def get_prompt(self, player_stats):
+        if player_stats.is_floor_key:
+            return "Подняться на следующий этаж"
+
 class Barrier(Interactive_Sprite):
     def __init__(self, x, y):
         super().__init__(x, y, SSD["cell_ghoul"], scale=1.0, collision_radius=14)
+        self.hidden = True
         self.broken = False
         self.rect = pygame.Rect(x - tile_size // 2, y - tile_size // 2, tile_size, tile_size)
         self.interactive_rect = pygame.Rect(0, 0, 0, 0)

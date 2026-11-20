@@ -35,8 +35,7 @@ def load_game(player):
     player.stats.is_floor_key = data["is_floor_key"]
     player.stats.current_floor = data["floor"]
 
-def run_game(screen, sound_manager, load_save=False):
-    
+def run_game(screen, sound_manager, load_save=False):  
     player = Player()
     if load_save:
         load_game(player)
@@ -64,15 +63,30 @@ def run_game(screen, sound_manager, load_save=False):
 
     while running:
         dt = min(clock.tick(FPS) / 1000, 0.05)
-        result = input_manager.handle_events(pygame.event.get())
-        if result is False:
-            return "quit"
-        if result == "exit_to_menu":
-            return "menu"
+        events = pygame.event.get()                                     
+
+        if game.death_screen.active:                                   
+            for event in events:
+                if event.type == pygame.KEYDOWN and event.key in (
+                        pygame.K_SPACE, pygame.K_ESCAPE, pygame.K_RETURN):
+                    game.death_screen.finish()
+                    game.sound_manager.stop_death_music()
+                    return "menu_after_death"
+        else:                                                           
+            result = input_manager.handle_events(events)
+            if result is False:
+                return "quit"
+            if result == "exit_to_menu":
+                return "menu"
 
         paused = input_manager.pause_menu.visible
         if not paused:
             game.update(dt)
+
+        if game.death_screen.time_over:                                
+            game.death_screen.finish()
+            game.sound_manager.stop_death_music()
+            return "menu_after_death"
 
         game.draw()
         input_manager.pause_menu.draw()
@@ -139,6 +153,8 @@ def main():
     while True:
         outcome = run_game(screen, sound_manager, load_save=load_save)
         load_save = False
+        if outcome == "menu_after_death":                              
+            outcome = "menu"
         if outcome == "menu":
             sound_manager.set_floor_music(0)
             pygame.mouse.set_visible(True)

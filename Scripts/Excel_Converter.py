@@ -2,7 +2,7 @@ import openpyxl
 
 EXCEL_FILE = "Assets/levels.xlsx"  
 SHEET_NAME = "level2"                  
-OUTPUT_FILE = "Scripts/Map.py"             
+OUTPUT_FILE = "Scripts/map_frame.txt"             
 
 COLORS = {
     "FFFFFFFF": ".",    
@@ -17,7 +17,7 @@ COLORS = {
     "FFFF0000": "E",#level end
     "FFFBE5D5": "P",#start
     "FFDEEBF6": "J",#barier
-    "FF7F6000": "A",#shelf
+    "FF7F6000": "H",#shelf
     "FF00B0F0": "F",#food
     "FFFFFF00": "G",#gold
     "FF002060": "D"#decoration
@@ -35,10 +35,6 @@ MERCHANT_NUMBERS = {
     "2": "n",
     "3": "o",
     "4": "p"
-}
-
-SHELF_NUMBERS = {
-    "1": "A", "2": "B", "3": "H", "4": "I", "5": "K", "6": "L"
 }
 
 WALL_NUMBERS = {
@@ -98,10 +94,7 @@ def color_to_symbol(fill, cell_value=None):
         value_str = None
         if cell_value is not None:
             value_str = str(cell_value).strip()
-        
-        if symbol == "A" and value_str in SHELF_NUMBERS:
-            return SHELF_NUMBERS[value_str]
-        
+                
         if symbol == "O" and value_str in WALL_NUMBERS:
             return WALL_NUMBERS[value_str]
 
@@ -127,7 +120,7 @@ def convert_excel_to_map():
             line += color_to_symbol(cell.fill, cell.value)
         lines.append(line)
     
-    output = "perm_map = [\n"
+    output = "[\n"
     for line in lines:
         output += f'    "{line}",\n'
     output += "]\n"

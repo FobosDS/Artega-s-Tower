@@ -7,7 +7,7 @@ from Sprites_Archive import WTD
 import Items_Hub
 
 class Enemy(Sprite):
-    def __init__(self, x, y, image_path, scale=1.0, collision_radius=12):
+    def __init__(self, x, y, image_path, scale=1.0, collision_radius=14):
         super().__init__(x, y, image_path, scale, collision_radius)
 
         self.hp = 30
@@ -23,6 +23,7 @@ class Enemy(Sprite):
         self.has_dropped = False
 
         self.room_id = None
+        self.barrier_id = None
 
     def update(self, dt, player, all_enemies):
         pass
@@ -84,9 +85,8 @@ class Enemy(Sprite):
 
         item = Items_Hub.roll_enemy_loot(self.enemy_type, self.player.stats.get_loot_bonus())
         if item is not None:
-            msg = self.player.stats.give_item(item)
-            if msg:
-                self.player.stats.notify(msg)
+            self.player.stats.give_item(item)
+            self.player.stats.notify(Items_Hub.colored_pickup("Оскар подобрал: ", item))
 
         if self.room_id is not None and self.player is not None:
             self.player.stats.killed_in_room[self.room_id] = \

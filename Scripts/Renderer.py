@@ -125,6 +125,7 @@ def render_walls(player, screen, walls_grid):
             pygame.draw.rect(screen, color, (wall_x, top, scale + 1, wall_h))
 
 def render_sprites(player, screen, sprites):
+    sprites = [s for s in sprites if not getattr(s, 'hidden', False)]
     sorted_sprites = sorted(sprites, key=lambda s: (s.x - player.x)**2 + (s.y - player.y)**2, reverse=True)
     
     dir_x = math.cos(player.angle)
