@@ -1,0 +1,63 @@
+{
+  "floor": 1,
+  "hp": 50.0,
+  "sp": 100,
+  "gold": 24,
+  "potions": 2,
+  "scrolls": 1,
+  "whetstones": 0,
+  "weapon_level": 2,
+  "durability": 70,
+  "hp_level": 1,
+  "sp_level": 1,
+  "rings": [],
+  "dark_shards": 0,
+  "is_chest_key1": true,
+  "is_chest_key2": true,
+  "is_floor_key": false,
+  "enemies_alive": [],
+  "objects_state": [
+    {
+      "id": 1,
+      "type": "Rare_Chest",
+      "open": true
+    },
+    {
+      "id": 2,
+      "type": "Shelf",
+      "used": true
+    },
+    {
+      "id": 3,
+      "type": "Shelf",
+      "used": true
+    },
+    {
+      "id": 4,
+      "type": "Shelf",
+      "used": true
+    },
+    {
+      "id": 5,
+      "type": "Shelf",
+      "used": true
+    },
+    {
+      "id": 6,
+      "type": "Shelf",
+      "used": true
+    },
+    {
+      "id": 7,
+      "type": "Merchant",
+      "unique_item": "weapon_crate",
+      "trades_done": 0,
+      "price": 120
+    },
+    {
+      "id": 8,
+      "type": "Barrier",
+      "broken": false
+    }
+  ]
+}

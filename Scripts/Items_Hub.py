@@ -14,6 +14,7 @@ chest_key_base = "chest_key_base"
 chest_key_rare = "chest_key_rare"
 floor_key = "floor_key"
 ring = "ring"
+dark_shard = "dark_shard"
 
 item_names = {
     potion:"Зелье жизни",
@@ -26,38 +27,43 @@ item_names = {
     chest_key_base:"Ключ от сундука",
     chest_key_rare:"Ключ от тайника Артеги",
     floor_key:"Ключ от этажа",
-    ring: "Кольцо"
+    ring: "Кольцо",
+    dark_shard:"Осколок тьмы"
 }
 
 #loot tables
 shelf_loot = [
-    (None, 40), (gold, 24), (potion, 14), (scroll, 8), 
-    (whetstone, 6), (chest_key_base, 5), (chest_key_rare, 3)
+    (None, 40), (gold, 26), (potion, 11), (scroll, 7), 
+    (whetstone, 6), (chest_key_base, 5), (chest_key_rare, 3), (dark_shard, 2)
 ]
 
 enemy_loot = {
     "ghoul":[
-        (None, 61), (potion, 18), (scroll, 2), 
+        (None, 60), (potion, 18), (scroll, 2), 
         (whetstone, 3), (chest_key_base, 5),
-        (chest_key_rare, 3),  (floor_key, 8)
+        (chest_key_rare, 3),  (floor_key, 8),
+        (dark_shard, 1)
     ],
 
     "gargoyle":[
-        (None, 40), (potion, 24), (scroll, 4), 
+        (None, 40), (potion, 24), (scroll, 2), 
         (whetstone, 12), (chest_key_base, 6),
-        (chest_key_rare, 4), (floor_key, 10)
+        (chest_key_rare, 4), (floor_key, 10),
+        (dark_shard, 2)
     ],
 
     "vampire":[
-        (None, 20), (potion, 26), (scroll, 26), 
+        (None, 15), (potion, 26), (scroll, 26), 
         (whetstone, 2), (chest_key_base, 7),
-        (chest_key_rare, 5), (floor_key, 14)
+        (chest_key_rare, 5), (floor_key, 14),
+        (dark_shard, 5)
     ]
 }
 
 chest_base_loot = [
     (gold, 40), (potion, 26), 
-    (scroll, 18), (whetstone, 16)
+    (scroll, 18), (whetstone, 10),
+    (dark_shard, 6)
 ]
 
 chest_rare_loot = [

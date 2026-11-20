@@ -22,6 +22,8 @@ class Enemy(Sprite):
         self.enemy_type = "ghoul"
         self.has_dropped = False
 
+        self.room_id = None
+
     def update(self, dt, player, all_enemies):
         pass
 
@@ -85,3 +87,7 @@ class Enemy(Sprite):
             msg = self.player.stats.give_item(item)
             if msg:
                 self.player.stats.notify(msg)
+
+        if self.room_id is not None and self.player is not None:
+            self.player.stats.killed_in_room[self.room_id] = \
+                self.player.stats.killed_in_room.get(self.room_id, 0) + 1

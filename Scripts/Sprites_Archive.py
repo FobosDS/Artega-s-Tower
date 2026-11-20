@@ -130,6 +130,10 @@ ISD = {
     "rare_chest":{
         "close":"Assets/Sprites/Levels/Interactive/chest_close.png",
         "open":"Assets/Sprites/Levels/Interactive/chest_open.png"
+    },
+    "altar":{
+        "altar_stand":"Assets/Sprites/Enemies/Artega/pedestal/pedestal.png",
+        "altar_active":"Assets/Sprites/Enemies/Artega/pedestal/pedestal_cast.png"
     }
 }
 
@@ -300,6 +304,7 @@ music = {
    "Archive1":"Assets/Music/Artega Tower Archive.mp3",
    "Archive2":"Assets/Music/Artega Tower Archive2.mp3",
    "Marble_Hall":"Assets/Music/Artega Tower Marble Hall.mp3",
+   "We_Not_Lost":"Assets/Music/Artega Tower We Not Lost.mp3",
    "Artega1":"Assets/Music/Artega Tower Boss 1 phase.mp3",
    "Artega2":"Assets/Music/Artega Tower Boss 2 phase.mp3",
    "Menu":"Assets/Music/Artega Tower Menu.mp3",
@@ -325,5 +330,8 @@ floor_music = {
         "Assets/Music/Artega Tower Archive2.mp3"
     ],
 
-    4:["Assets/Music/Artega Tower Marble Hall.mp3"]
+    4:[
+        "Assets/Music/Artega Tower Marble Hall.mp3",
+        "Assets/Music/Artega Tower We Not Lost.mp3"
+    ]
 }

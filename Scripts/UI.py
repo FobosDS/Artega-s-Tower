@@ -3,6 +3,8 @@ from Settings import *
 from Sprites_Archive import RD, WTD, floor_names
 import math
 from Settings import bindings, key_labels
+import os
+from Settings import save_file
 
 fonts = {
     "dispater": "Assets/Fonts/DISPATERVF.ttf",
@@ -68,8 +70,8 @@ class Tab_Overlay:
 
     def draw_rings_panel(self, screen):
         if not self.visible:
-            return 
-        
+            return
+
         rect = self.left_rect
         pygame.draw.rect(screen, panel_bg, rect)
         pygame.draw.rect(screen, panel_border, rect, 2)
@@ -84,38 +86,43 @@ class Tab_Overlay:
         if not rings:
             note = self.name_font.render("Кольца не надеты", True, white)
             screen.blit(note, (rect.x + 15, y))
-            return
+        else:
+            for r in rings:
+                data = RD[r]
+                screen.blit(self.ring_icons[r], (rect.x + 15, y - 12))
 
-        for r in rings:
-            data = RD[r]
-            screen.blit(self.ring_icons[r], (rect.x + 15, y - 12))
+                name = self.name_font.render(data["name"], True, white)
+                screen.blit(name, (rect.x + 15 + self.icon_size + 10, y))
 
-            name = self.name_font.render(data["name"], True, white)
-            screen.blit(name, (rect.x + 15 + self.icon_size + 10, y))
+                desc = data.get("desc", "Описание не найдено")
+                ty = y + 36
+                for line in self._wrap_text(desc, self.desc_font, inner_w):
+                    surf = self.desc_font.render(line, True, white)
+                    screen.blit(surf, (rect.x + 15, ty))
+                    ty += 20
+                y = ty + 14
 
-            desc = data.get("desc", "Описание не найдено")
-            ty = y + 36
-            for line in self._wrap_text(desc, self.desc_font, inner_w):
-                surf = self.desc_font.render(line, True, white)
-                screen.blit(surf, (rect.x + 15, ty))
-                ty += 20
-            y = ty + 14   
-
+        shard_font = get_font("gothic", 20)
+        shard_text = f"Осколки тьмы: {self.game.player.stats.base.dark_shards} / {max_dark_shards}"
+        surf = shard_font.render(shard_text, True, white)
+        screen.blit(surf, (rect.x + 15, rect.y + rect.h - 30))
     def draw_map_panel(self, screen):
-        if not self.visible: 
+        if not self.visible:
             return
-        
+
         rect = self.right_rect
         pygame.draw.rect(screen, panel_bg, rect)
         pygame.draw.rect(screen, panel_border, rect, 2)
 
         floor = self.game.player.stats.current_floor
         title = floor_names.get(floor, f"Этаж {floor}")
-
         header = self.header_font.render(title, True, white)
         screen.blit(header, (rect.x + 15, rect.y + 12))
 
         walls_grid = self.game.map_manager.walls_grid
+        if not walls_grid or not walls_grid[0]:
+            return
+
         rows = len(walls_grid)
         cols = len(walls_grid[0])
         cell = min((rect.w - 30) / cols, (rect.h - 50) / rows)
@@ -341,7 +348,7 @@ class MainMenu:
     def __init__(self, screen, sound_manager):
         self.screen = screen
         self.sound_manager = sound_manager
-        self.title_font = get_font("gothic", 64)
+        self.title_font = get_font("demonic", 130)
         self.button_font = get_font("gothic", 32)
         self.small_font = get_font("gothic", 22)
 
@@ -350,6 +357,10 @@ class MainMenu:
             {"key": "settings", "text": "Настройки"},
             {"key": "quit", "text": "Выход"},
         ]
+
+        if os.path.exists(save_file):
+            self.buttons.insert(1, {"key": "load", "text": "Загрузить игру"})
+
         self.selected = 0
         self.show_settings = False
 
@@ -391,6 +402,8 @@ class MainMenu:
     def _activate(self, key):
         if key == "start":
             return "start"
+        if key == "load":
+            return "load"
         if key == "settings":
             self.show_settings = True
             self.settings_focus = 0
@@ -589,4 +602,115 @@ class IntroScene:
         author_surf.set_alpha(alpha)
         rect = author_surf.get_rect(center=(half_width, y + 20))
         self.screen.blit(author_surf, rect)
+
+class PauseMenu:
+    def __init__(self, screen):
+        self.screen = screen
+        self.font = get_font("gothic", 40)
+        self.small = get_font("gothic", 22)
+        self.visible = False
+        self.confirm_exit = False
+        self.selected = 0
+        self.options = [("resume", "Продолжить"), ("exit", "Выйти в меню")]
+
+    def open(self):
+        self.visible = True
+        self.confirm_exit = False
+        self.selected = 0
+
+    def close(self):
+        self.visible = False
+        self.confirm_exit = False
+
+    def _option_rect(self, i):
+        y = half_height - 40 + i * 70
+        return pygame.Rect(half_width - 180, y, 360, 54)
+
+    def handle_event(self, event):
+        if not self.visible:
+            return None
+        if self.confirm_exit:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.confirm_exit = False
+                elif event.key in (pygame.K_RETURN, pygame.K_y):
+                    return "exit"
+                elif event.key in (pygame.K_n,):
+                    self.confirm_exit = False
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                yes = pygame.Rect(half_width - 220, half_height + 20, 200, 54)
+                no = pygame.Rect(half_width + 20, half_height + 20, 200, 54)
+                if yes.collidepoint(event.pos):
+                    return "exit"
+                if no.collidepoint(event.pos):
+                    self.confirm_exit = False
+            return None
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                self.close()
+                return "close"
+            if event.key == pygame.K_UP:
+                self.selected = (self.selected - 1) % len(self.options)
+            elif event.key == pygame.K_DOWN:
+                self.selected = (self.selected + 1) % len(self.options)
+            elif event.key == pygame.K_RETURN:
+                return self._activate(self.options[self.selected][0])
+
+        if event.type == pygame.MOUSEMOTION:
+            for i in range(len(self.options)):
+                if self._option_rect(i).collidepoint(event.pos):
+                    self.selected = i
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            for i, (key, _) in enumerate(self.options):
+                if self._option_rect(i).collidepoint(event.pos):
+                    return self._activate(key)
+        return None
+
+    def _activate(self, key):
+        if key == "resume":
+            self.close()
+            return "close"
+        if key == "exit":
+            self.confirm_exit = True
+            return None
+        return None
+
+    def draw(self):
+        if not self.visible:
+            return
+        overlay = pygame.Surface((width, height), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 160))
+        self.screen.blit(overlay, (0, 0))
+
+        if self.confirm_exit:
+            self._draw_confirm()
+            return
+
+        title = self.font.render("Пауза", True, menu_title_color)
+        self.screen.blit(title, title.get_rect(center=(half_width, 220)))
+
+        for i, (key, label) in enumerate(self.options):
+            rect = self._option_rect(i)
+            color = menu_button_hover if i == self.selected else menu_button_color
+            pygame.draw.rect(self.screen, color, rect, border_radius=6)
+            pygame.draw.rect(self.screen, menu_title_color, rect, 2, border_radius=6)
+            txt = self.small.render(label, True, menu_button_text)
+            self.screen.blit(txt, txt.get_rect(center=rect.center))
+
+    def _draw_confirm(self):
+        box = pygame.Rect(half_width - 300, half_height - 120, 600, 240)
+        pygame.draw.rect(self.screen, menu_bg, box, border_radius=10)
+        pygame.draw.rect(self.screen, menu_title_color, box, 3, border_radius=10)
+
+        q = self.small.render("Выйти в главное меню?", True, menu_button_text)
+        self.screen.blit(q, q.get_rect(center=(half_width, half_height - 50)))
+
+        yes = pygame.Rect(half_width - 220, half_height + 20, 200, 54)
+        no = pygame.Rect(half_width + 20, half_height + 20, 200, 54)
+        for rect, label in ((yes, "Да"), (no, "Нет")):
+            pygame.draw.rect(self.screen, menu_button_hover, rect, border_radius=6)
+            pygame.draw.rect(self.screen, menu_title_color, rect, 2, border_radius=6)
+            txt = self.small.render(label, True, menu_button_text)
+            self.screen.blit(txt, txt.get_rect(center=rect.center))
     

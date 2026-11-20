@@ -1,7 +1,7 @@
 import openpyxl
 
 EXCEL_FILE = "Assets/levels.xlsx"  
-SHEET_NAME = "test_room"                  
+SHEET_NAME = "level2"                  
 OUTPUT_FILE = "Scripts/Map.py"             
 
 COLORS = {
@@ -11,7 +11,7 @@ COLORS = {
     "FF335593": "2",#gargolye 
     "FFC00000": "3",#vampire
     "FF92D050": "M",#merchant
-    "FF7030A0": "S",#pedestal
+    "FF7030A0": "S",#altar
     "FFFFC000": "C",#chest
     "FFBF9000": "R",#rare chest
     "FFFF0000": "E",#level end
@@ -127,7 +127,7 @@ def convert_excel_to_map():
             line += color_to_symbol(cell.fill, cell.value)
         lines.append(line)
     
-    output = "drawed_map = [\n"
+    output = "perm_map = [\n"
     for line in lines:
         output += f'    "{line}",\n'
     output += "]\n"

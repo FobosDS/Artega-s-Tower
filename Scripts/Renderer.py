@@ -24,7 +24,7 @@ def render_background(screen):
     pygame.draw.rect(screen, light_black, (0, 0, width, half_height))
     pygame.draw.rect(screen, dark_gray, (0, half_height, width, half_height))
 
-def render_walls(player, screen):
+def render_walls(player, screen, walls_grid):
     x, y = player.x, player.y
     
     for ray in range(numRays):
@@ -176,10 +176,10 @@ def render_sprites(player, screen, sprites):
             scaled = pygame.transform.scale(sprite.image, (sprite_width, sprite_height))
             screen.blit(scaled, (draw_start_x, draw_start_y))
 
-def render_scene(player, screen, objects, interactive_objects, enemies, projectile_manager):
+def render_scene(player, screen, objects, interactive_objects, enemies, projectile_manager, walls_grid):
     screen.fill(black)
     render_background(screen)
-    render_walls(player, screen)
+    render_walls(player, screen, walls_grid)
     
     all_sprites = objects + interactive_objects + enemies + projectile_manager.projectiles
     

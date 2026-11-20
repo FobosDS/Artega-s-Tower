@@ -183,3 +183,50 @@ class Decoration(Sprite):
         image_path = SSD[random_key]
 
         super().__init__(x, y, image_path, scale=0.7, collision_radius=6)
+
+class Altar(Interactive_Sprite):
+    def __init__(self, x, y):
+        image_path = ISD["altar"]["altar_stand"]
+        super().__init__(x, y, image_path, scale=0.5, collision_radius=10)
+
+    def perform_action(self, player_stats, give_ring=None):
+        if player_stats.base.dark_shards < 1:
+            return "Алтарь требует тьмы и крови"
+        cost = player_stats.base.max_hp // 2
+        if player_stats.base.hp - cost <= 0:
+            return "Оскар слишком слаб"
+        player_stats.base.hp -= cost
+        player_stats.base.dark_shards -= 1
+        player_stats.request_save = True
+        return f"Оскар отдал {cost} здоровья и осколок тьмы."
+
+    def get_prompt(self, player_stats):
+        if player_stats.base.dark_shards < 1:
+            return ""
+        return "Сохранить прогресс"
+
+class Stairs(Interactive_Sprite):
+    def __init__(self, x, y):
+        super().__init__(x, y, SSD["cell_break"], scale=1.0, collision_radius=14)
+
+    def perform_action(self, player_stats, give_ring=None):
+        if not player_stats.is_floor_key:
+            return "Требуется ключ от этажа"
+        player_stats.is_floor_key = False
+        player_stats.request_next_floor = True
+        return "Оскар поднимается на следующий этаж башни"
+
+class Barrier(Interactive_Sprite):
+    def __init__(self, x, y):
+        super().__init__(x, y, SSD["cell_ghoul"], scale=1.0, collision_radius=14)
+        self.broken = False
+        self.rect = pygame.Rect(x - tile_size // 2, y - tile_size // 2, tile_size, tile_size)
+        self.interactive_rect = pygame.Rect(0, 0, 0, 0)
+
+    def perform_action(self, player_stats, give_ring=None):
+        return "Барьер не поддаётся"
+
+    def break_barrier(self):
+        self.broken = True
+        self.rect = pygame.Rect(0, 0, 0, 0)
+

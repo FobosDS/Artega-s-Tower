@@ -10,6 +10,7 @@ class Base_Stats:
         self.gold = base_gold
         self.potions = base_potions
         self.scrolls = base_scrolls
+        self.dark_shards = base_dark_shards
 
         self.hp_level = base_hp_level
         self.sp_level = base_sp_level
@@ -54,6 +55,10 @@ class Base_Stats:
         self.rings.append(ring_type)
         self.on_ring_added(ring_type)
         return displaced  
+
+    def add_dark_shard(self, count=1):
+        self.dark_shards = min(self.dark_shards + count, max_dark_shards)
+        return self.dark_shards
 
     def is_dead(self):
         return self.hp <= 0
@@ -294,6 +299,8 @@ class Player_Stats:
         self.is_chest_key1 = False
         self.is_chest_key2 = False
 
+        
+
         self.current_floor = 1
 
         self.pending_messages = []
@@ -304,6 +311,10 @@ class Player_Stats:
         self.berserk_weapon_gain = 0
 
         self.last_displaced_ring = None
+
+        self.request_save = False
+        self.request_next_floor = False
+        self.killed_in_room = {}
 
     def get_speed_multiplier(self):
         mult = 1.0
@@ -449,6 +460,10 @@ class Player_Stats:
             return "Точильный камень"
         if item == "gold":
             return ""
+        if item == "dark_shard":
+            if self.base.add_dark_shard(amount) >= max_dark_shards:
+                return "Осколок тьмы (макс.)"
+            return "Осколок тьмы"
         if item == "heart":
             if self.base.level_up_hp():
                 return "Сердце монстра. Оскар сожрал его и стал крепче!"
@@ -479,7 +494,7 @@ class Player_Stats:
         if item == "ring":
             return self.give_ring(give_ring)
         return "Кольцо"
-
+    
     def give_ring(self, give_ring):
         chosen = None
         for r in Items_Hub.get_floor_rings(self.current_floor):

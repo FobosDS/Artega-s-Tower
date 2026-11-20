@@ -1,26 +1,41 @@
 import pygame
 from Settings import *
 from Projectile import ProjectileManager
-from Map import drawed_map
-from Objects import Rare_Chest, Merchant, Shelf, Decoration, RingPickup
-from Sprites_Archive import ISD, WTD, RD   
+import Map
+from Map import drawed_maps, set_floor_map
+from Objects import Rare_Chest, Merchant, Shelf, Decoration, RingPickup, Barrier, Stairs, Altar
+from Sprites_Archive import ISD, WTD, RD, floor_names
 import Items_Hub
 import math                                
 from UI import ToastMessage
 
 
 class MapManager:
-    def __init__(self):
+    def __init__(self, floor=1):
         self.walls = []
         self.walls_grid = []
         self.enemy_spawns = []
         self.player_spawn = (half_width, half_height)
         self.objects = []
         self.interactive_objects = []
+        self.barriers = []
+        self.room_barrier_map = {}
         
-        self.create_map()
+        self.create_map(floor)
 
-    def create_map(self, tile=tile_size):
+    def create_map(self, floor, tile=tile_size):
+        self.walls.clear()
+        self.walls_grid.clear()
+        self.enemy_spawns.clear()
+        self.interactive_objects.clear()
+        self.barriers.clear()
+        self.enemy_barrier = {}
+
+        if floor not in drawed_maps or not drawed_maps[floor]:
+            floor = 1
+        set_floor_map(floor)
+        drawed_map = drawed_maps[floor]
+
         for row, line in enumerate(drawed_map):
             grid_row = []
             for col, ch in enumerate(line):
@@ -68,8 +83,20 @@ class MapManager:
 
                 elif ch == "D":
                     self.objects.append(Decoration(center_x, center_y))
+
+                elif ch == "E":   
+                    self.interactive_objects.append(Stairs(center_x, center_y))
+                elif ch == "J":   
+                    b = Barrier(center_x, center_y)
+                    self.barriers.append(b)
+                    self.interactive_objects.append(b)
+                elif ch == "S":  
+                    self.interactive_objects.append(Altar(center_x, center_y))
                 
             self.walls_grid.append(grid_row)
+
+        for i, obj in enumerate(self.interactive_objects):
+            obj.obj_id = i
 
 class EnemyManager:
     def __init__(self):
@@ -98,7 +125,7 @@ class Game:
         self.interface = interface
         self.icons = icons
         
-        self.map_manager = MapManager()
+        self.map_manager = MapManager(self.player.stats.current_floor)
         self.enemy_manager = EnemyManager()
         
         player.x, player.y = self.map_manager.player_spawn
@@ -122,12 +149,15 @@ class Game:
         
         from Ghoul import Ghoul
         from Gargoyle import Gargoyle
-        for enemy_type, ex, ey in self.map_manager.enemy_spawns:
+        for idx, (enemy_type, ex, ey) in enumerate(self.map_manager.enemy_spawns):
+            enemy = None
             if enemy_type == "ghoul":
-                self.enemy_manager.add_enemy(Ghoul(ex, ey, "Assets/Sprites/Enemies/Ghoul/gh_front_stand.png", 0.8, 30))
-
-            if enemy_type == "gargoyle":
-                self.enemy_manager.add_enemy(Gargoyle(ex, ey, "Assets/Sprites/Enemies/Gargoyle/ga_front2.png", 0.8, 30))
+                enemy = Ghoul(ex, ey, "Assets/Sprites/Enemies/Ghoul/gh_front_stand.png", 0.8, 30)
+            elif enemy_type == "gargoyle":
+                enemy = Gargoyle(ex, ey, "Assets/Sprites/Enemies/Gargoyle/ga_front2.png", 0.8, 30)
+            if enemy is not None:
+                enemy.enemy_id = idx
+                self.enemy_manager.add_enemy(enemy)
                 
     def spawn_ring_pickup(self, ring_type, x, y, needs_manual=True):
         pickup = RingPickup(x, y, ring_type)
@@ -184,13 +214,154 @@ class Game:
                 continue
             self.interactive_objects.remove(obj)
 
+        if self.player.stats.request_save:
+            self.player.stats.request_save = False
+            self.save_game()
+
+        if self.player.stats.request_next_floor:
+            self.player.stats.request_next_floor = False
+            self.next_floor()
+
+    def next_floor(self):
+        next_floor_num = self.player.stats.current_floor + 1
+        if next_floor_num not in drawed_maps or not drawed_maps[next_floor_num]:
+            self.toast.set_message("Дальше пути нет. Башня пока не достроена...")
+            return
+
+        self.player.stats.current_floor = next_floor_num
+        self.player.stats.is_chest_key1 = False
+        self.player.stats.is_chest_key2 = False
+        self.player.stats.is_floor_key = False
+
+        self.map_manager = MapManager(self.player.stats.current_floor)
+
+        self.objects = self.map_manager.objects
+        self.interactive_objects = self.map_manager.interactive_objects
+        self.interaction_manager.interactive_objects = self.interactive_objects
+
+        self.player.x, self.player.y = self.map_manager.player_spawn
+        self.player.rect.center = (self.player.x, self.player.y)
+
+        self.enemy_manager.enemies.clear()
+        from Ghoul import Ghoul
+        from Gargoyle import Gargoyle
+        for idx, (enemy_type, ex, ey) in enumerate(self.map_manager.enemy_spawns):
+            enemy = None
+            if enemy_type == "ghoul":
+                enemy = Ghoul(ex, ey, "Assets/Sprites/Enemies/Ghoul/gh_front_stand.png", 0.8, 30)
+            elif enemy_type == "gargoyle":
+                enemy = Gargoyle(ex, ey, "Assets/Sprites/Enemies/Gargoyle/ga_front2.png", 0.8, 30)
+            if enemy is not None:
+                enemy.enemy_id = idx
+                self.enemy_manager.add_enemy(enemy)
+        self.weapon.enemies = self.enemy_manager.enemies
+
+        self.sound_manager.set_floor_music(self.player.stats.current_floor)
+        self.toast.set_message(f"Оскар поднялся на {floor_names[self.player.stats.current_floor]}!")
+
+    def save_game(self):
+        import json
+
+        enemies_alive = [e.enemy_id for e in self.enemy_manager.enemies if not e.is_dead]
+
+        objects_state = []
+
+        for obj in self.interactive_objects:
+            state = {"id": getattr(obj, "obj_id", -1), "type": type(obj).__name__}
+            if isinstance(obj, Shelf):
+                state["used"] = obj.is_action_perfomed
+            elif isinstance(obj, Rare_Chest):
+                state["open"] = obj.is_open
+            elif isinstance(obj, Merchant):
+                state["unique_item"] = obj.unique_item
+                state["trades_done"] = obj.trades_done
+                state["price"] = obj.price
+            elif isinstance(obj, Barrier):
+                state["broken"] = obj.broken
+            else:
+                continue
+            objects_state.append(state)
+
+        data = {
+            "floor": self.player.stats.current_floor,
+            "hp": self.player.stats.base.hp,
+            "sp": self.player.stats.base.sp,
+            "gold": self.player.stats.base.gold,
+            "potions": self.player.stats.base.potions,
+            "scrolls": self.player.stats.base.scrolls,
+            "whetstones": self.player.stats.combat.whetstones,
+            "weapon_level": self.player.stats.combat.weapon_level,
+            "durability": self.player.stats.combat.durability,
+            "hp_level": self.player.stats.base.hp_level,
+            "sp_level": self.player.stats.base.sp_level,
+            "rings": list(self.player.stats.base.rings),
+            "dark_shards": self.player.stats.base.dark_shards,
+            "is_chest_key1": self.player.stats.is_chest_key1,
+            "is_chest_key2": self.player.stats.is_chest_key2,
+            "is_floor_key": self.player.stats.is_floor_key,
+            "enemies_alive": enemies_alive,
+            "objects_state": objects_state,
+        }
+        with open(save_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        self.toast.set_message("Оскар получил благословение хозяина башни. Прогресс сохранен!")
+
+    def apply_world_state(self):
+        import json, os
+        if not os.path.exists(save_file):
+            return
+
+        with open(save_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        alive = set(data.get("enemies_alive", []))
+        self.enemy_manager.enemies[:] = [
+            e for e in self.enemy_manager.enemies
+            if getattr(e, "enemy_id", -1) in alive
+        ]
+        self.weapon.enemies = self.enemy_manager.enemies
+
+        state_by_id = {s["id"]: s for s in data.get("objects_state", [])}
+
+        to_remove = []
+        for obj in self.interactive_objects:
+            s = state_by_id.get(getattr(obj, "obj_id", -1))
+            if s is None:
+                continue
+
+            if isinstance(obj, Shelf):
+                obj.is_action_perfomed = s["used"]
+            elif isinstance(obj, Rare_Chest):
+                obj.is_open = s["open"]
+                if obj.is_open:
+                    obj.image = pygame.image.load(ISD["rare_chest"]["open"]).convert_alpha()
+            elif isinstance(obj, Merchant):
+                obj.unique_item = s["unique_item"]
+                obj.trades_done = s["trades_done"]
+                obj.price = s["price"]
+            elif isinstance(obj, Barrier):
+                if s["broken"]:
+                    obj.break_barrier()
+            elif isinstance(obj, RingPickup):
+                if s["taken"]:
+                    to_remove.append(obj)
+                else:
+                    obj.ring_type = s["ring_type"]
+                    obj.x = s["x"]
+                    obj.y = s["y"]
+                    obj.rect.center = (obj.x, obj.y)
+
+        for obj in to_remove:
+            self.interactive_objects.remove(obj)
+
     def draw(self):
         from Renderer import render_scene
         render_scene(
             self.player, self.screen, 
             self.objects, self.interactive_objects,
             self.enemy_manager.enemies, 
-            self.enemy_manager.projectile_manager
+            self.enemy_manager.projectile_manager,
+            self.map_manager.walls_grid
         )
         self.weapon.draw(self.screen)
         
