@@ -132,12 +132,12 @@ class Tab_Overlay:
 
         for row_i, row in enumerate(walls_grid):
             for col_i, ch in enumerate(row):
-                if ch in WTD:
+                if ch in WTD or ch.startswith("W_"):               
                     pygame.draw.rect(screen, map_wall_color,
                                      (offset_x + col_i * cell,
                                       offset_y + row_i * cell,
                                       max(1, cell - 1), max(1, cell - 1)))
-
+                    
 def draw_prompt(screen, text):
     if not text:
         return
@@ -378,7 +378,7 @@ class MainMenu:
         self._build_about_text()      
 
         try:
-            bg = pygame.image.load("Assets/Sprites/menu2.png").convert()
+            bg = pygame.image.load("Assets/Sprites/menu.png").convert()
             self.background = pygame.transform.scale(bg, (width, height))
         except Exception as e:
             print(f"Не удалось загрузить фон меню: {e}")
@@ -636,7 +636,7 @@ class MainMenu:
             их братская могила... Но наш герой каким то чудом выжили, возможно, потому что он был немым и не мечтал ни о чем великом. Оскару предстоит пройти сквозь
             все ужасы башни до самого ее пика, чтобы уничтожить Артегу, отомстив тем самым за своих товарищей. Ради этого ему придется многое сделать: сожрать сердца монстров и 
             легкие вампиров, чтобы стать сильнее обычного человека, найти инструменты умершего здесь мастера Андре и создать оружие невероятной мощи, торгуясь с жадными торговцами
-            и ищя ключи, закрывающие сундуки с вещами Артеги и двери, отделяющие Оскара от осуществления своей цели, которые носят с собой шестерки мага."
+            и ищя ключи, закрывающие сундуки с вещами Артеги и двери, отделяющие Оскара от осуществления своей цели, которые носят с собой шестерки мага.
             """
         ]
 
@@ -952,14 +952,14 @@ class Death_Screen:
         self.active = False
         self.time_over = False
         self.timer = 0
-        self.duration = 40
+        self.duration = 35
         self.fade = 0
 
         self.title_font = get_font("demonic", 52)
 
         self.image = None
         try:
-            img = pygame.image.load("Assets/Sprites/menu2.png").convert()
+            img = pygame.image.load("Assets/Sprites/death_screen.png").convert()
             self.image = pygame.transform.scale(img, (width, height))
         except Exception:
             pass                                                      

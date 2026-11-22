@@ -45,7 +45,7 @@ class Input_Manager:
                 if event.key == bindings["whetstone"]:
                     self.player.stats.combat.use_whetstone()
                 if event.key == bindings["berserk"]:
-                    self.player.stats.try_activate_berserk()
+                    self.player.stats._try_activate_berserk()
                 if event.key == bindings["inventory"] and self.tab_overlay is not None:
                     self.tab_overlay.toggle()
 

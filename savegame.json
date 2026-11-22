@@ -1,16 +1,19 @@
 {
-  "floor": 1,
-  "hp": 100,
-  "sp": 112,
-  "gold": 275,
-  "potions": 1,
+  "floor": 4,
+  "hp": 22.0,
+  "sp": 70.03699999999829,
+  "gold": 140,
+  "potions": 0,
   "scrolls": 2,
   "whetstones": 0,
   "weapon_level": 1,
-  "durability": 100,
-  "hp_level": 2,
-  "sp_level": 2,
-  "rings": [],
+  "durability": 61,
+  "hp_level": 1,
+  "sp_level": 1,
+  "rings": [
+    "ring_murderer",
+    "ring_dragon"
+  ],
   "dark_shards": 0,
   "is_chest_key1": true,
   "is_chest_key2": true,
@@ -20,7 +23,7 @@
     {
       "id": 1,
       "type": "Rare_Chest",
-      "open": true
+      "open": false
     },
     {
       "id": 3,
@@ -50,9 +53,9 @@
     {
       "id": 8,
       "type": "Merchant",
-      "unique_item": null,
-      "trades_done": 3,
-      "price": 51
+      "unique_item": "ring",
+      "trades_done": 0,
+      "price": 160
     },
     {
       "id": 9,

@@ -2,7 +2,7 @@ import pygame
 import math
 from Settings import *
 from Game_Manager import MapManager
-from Sprites_Archive import WTD
+from Sprites_Archive import WTD, floor_walls
 
 z_buffer = [0.0] * numRays
 
@@ -19,6 +19,17 @@ for symbol, path in WTD.items():
     except Exception as e:
         print(f"Ошибка текстуры {symbol}: {e}")
         textures[symbol] = None
+
+for f, variants in floor_walls.items():                
+    for name, _wgt, path in variants:
+        symbol = f"W_{f}_{name}"
+        try:
+            img = pygame.image.load(path).convert()
+            img = pygame.transform.scale(img, (texture_size, texture_size))
+            textures[symbol] = img
+        except Exception as e:
+            print(f"Ошибка текстуры {symbol}: {e}")
+            textures[symbol] = None
 
 def render_background(screen):
     pygame.draw.rect(screen, light_black, (0, 0, width, half_height))

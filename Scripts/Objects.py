@@ -1,7 +1,7 @@
 import pygame
 from Settings import *
 import random
-from Sprites_Archive import ISD, SSD, RD
+from Sprites_Archive import ISD, DSD, RD, floor_decorations
 import Items_Hub
 
 class Sprite:
@@ -58,7 +58,7 @@ class Rare_Chest(Interactive_Sprite):
     
 class Merchant(Interactive_Sprite):
     def __init__(self, x, y, unique_item=None):
-        super().__init__(x, y, ISD["merchant"]["merchant1"], scale=0.9, collision_radius=10)
+        super().__init__(x, y, ISD["merchant"], scale=0.9, collision_radius=10)
         self.unique_item = unique_item
         self.trades_done = 0
         if unique_item == Items_Hub.ring:
@@ -102,7 +102,7 @@ class Merchant(Interactive_Sprite):
 
 class Shelf(Interactive_Sprite):
     def __init__(self, x, y):
-        super().__init__(x, y, SSD["box"], scale=1.0, collision_radius=14.5)
+        super().__init__(x, y, DSD["box"], scale=1.0, collision_radius=14.5)
         self.hidden = True
 
         self.empty_shelf_msg = [
@@ -182,16 +182,17 @@ class RingPickup(Interactive_Sprite):
         ]
         
 class Decoration(Sprite):
-    def __init__(self, x, y):
-        random_key = random.choice(list(SSD.keys()))
-        image_path = SSD[random_key]
+    def __init__(self, x, y, floor=1):
+        allowed = floor_decorations.get(floor, list(DSD.keys()))
+        random_key = random.choice(allowed)
+        image_path = DSD[random_key]
 
-        super().__init__(x, y, image_path, scale=0.7, collision_radius=6)
+        super().__init__(x, y, image_path, scale=0.6, collision_radius=6)
 
 class Altar(Interactive_Sprite):
     def __init__(self, x, y):
-        image_path = ISD["altar"]["altar_stand"]
-        super().__init__(x, y, image_path, scale=0.5, collision_radius=10)
+        image_path = ISD["altar"]
+        super().__init__(x, y, image_path, scale=0.7, collision_radius=14)
 
     def perform_action(self, player_stats, give_ring=None):
         if player_stats.base.dark_shards < 1:
@@ -215,7 +216,7 @@ class Altar(Interactive_Sprite):
 
 class Stairs(Interactive_Sprite):
     def __init__(self, x, y):
-        super().__init__(x, y, SSD["cell_break"], scale=1.0, collision_radius=16)
+        super().__init__(x, y, DSD["cell_break"], scale=1.0, collision_radius=16)
         self.hidden = True
 
     def perform_action(self, player_stats, give_ring=None):
@@ -231,11 +232,11 @@ class Stairs(Interactive_Sprite):
 
 class Barrier(Interactive_Sprite):
     def __init__(self, x, y):
-        super().__init__(x, y, SSD["cell_ghoul"], scale=1.0, collision_radius=14)
+        super().__init__(x, y, DSD["cell_ghoul"], scale=1.0, collision_radius=14.5)
         self.hidden = True
         self.broken = False
         self.rect = pygame.Rect(x - tile_size // 2, y - tile_size // 2, tile_size, tile_size)
-        self.interactive_rect = pygame.Rect(0, 0, 0, 0)
+        self.interactive_rect = pygame.Rect(x - tile_size // 2, y - tile_size // 2 + 0.5, tile_size, tile_size + 0.5)
 
     def perform_action(self, player_stats, give_ring=None):
         return "Барьер не поддаётся"

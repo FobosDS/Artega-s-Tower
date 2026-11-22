@@ -3,7 +3,7 @@ from Settings import *
 from Projectile import ProjectileManager
 from Map import drawed_maps, set_floor_map
 from Objects import Rare_Chest, Merchant, Shelf, Decoration, RingPickup, Barrier, Stairs, Altar
-from Sprites_Archive import ISD, WTD, RD, floor_names, SH
+from Sprites_Archive import ISD, WTD, RD, floor_names, SH, floor_decorations, floor_walls, floor_walls_default
 import Items_Hub
 import math                                
 from UI import ToastMessage, Death_Screen
@@ -39,6 +39,18 @@ class MapManager:
             grid_row = []
             for col, ch in enumerate(line):
                 grid_ch = ch
+                if ch == "W":                                      
+                    variants = floor_walls.get(floor, floor_walls_default)
+                    if not variants:
+                        variants = floor_walls_default
+                    v = ((col * 31 + row * 17) * 7 + floor * 13) % 100
+                    acc = 0
+                    grid_ch = f"W_{floor}_{variants[-1][0]}"
+                    for name, wgt, _path in variants:
+                        acc += wgt
+                        if v < acc:
+                            grid_ch = f"W_{floor}_{name}"
+                            break
                 if ch == "H":
                     idx = (col * 31 + row * 17) % len(SH)   
                     grid_ch = f"H{idx}" 
@@ -93,7 +105,8 @@ class MapManager:
                 elif ch == "P":
                     self.player_spawn = (center_x, center_y)
                 elif ch == "D":
-                    self.objects.append(Decoration(center_x, center_y))
+                    if floor_decorations.get(floor):
+                        self.objects.append(Decoration(center_x, center_y, floor))
                 elif ch == "S":  
                     self.interactive_objects.append(Altar(center_x, center_y))
                 
@@ -130,6 +143,9 @@ class Game:
         self.icons = icons
         
         self.map_manager = MapManager(self.player.stats.current_floor)
+
+        self._sync_renderer_map()  
+
         self.enemy_manager = EnemyManager()
         
         player.x, player.y = self.map_manager.player_spawn
@@ -250,6 +266,8 @@ class Game:
         self.player.stats.is_floor_key = False
 
         self.map_manager = MapManager(self.player.stats.current_floor)
+
+        self._sync_renderer_map()  
 
         self.objects = self.map_manager.objects
         self.interactive_objects = self.map_manager.interactive_objects
@@ -391,3 +409,9 @@ class Game:
 
         if self.death_screen.active:                              
             self.death_screen.draw(self.screen)
+
+    def _sync_renderer_map(self):
+        import Renderer
+        Renderer.map_manager.walls[:] = self.map_manager.walls
+        Renderer.map_manager.walls_grid[:] = self.map_manager.walls_grid
+        self.player.map[:] = self.map_manager.walls

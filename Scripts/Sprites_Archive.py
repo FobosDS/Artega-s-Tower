@@ -123,28 +123,52 @@ ESD ={
 
 #interactive sprites dictionary
 ISD = {
-    "merchant":{
-        "merchant1":"Assets/Sprites/Levels/Interactive/mercahnt1.png",
-        "merchant2":"Assets/Sprites/Levels/Interactive/mercahnt2.png"
+    "merchant":"Assets/Sprites/Levels/Interactive/merchant.png",
+    "chest":{
+        "close":"Assets/Sprites/Levels/Interactive/Chests/chest_close.png",
+        "open":"Assets/Sprites/Levels/Interactive/Chests/chest_open.png"
     },
     "rare_chest":{
-        "close":"Assets/Sprites/Levels/Interactive/chest_close.png",
-        "open":"Assets/Sprites/Levels/Interactive/chest_open.png"
+        "close":"Assets/Sprites/Levels/Interactive/Chests/rare_chest_close.png",
+        "open":"Assets/Sprites/Levels/Interactive/Chests/rare_chest_open.png"
     },
-    "altar":{
-        "altar_stand":"Assets/Sprites/Enemies/Artega/pedestal/pedestal.png",
-        "altar_active":"Assets/Sprites/Enemies/Artega/pedestal/pedestal_cast.png"
-    }
+    "altar":"Assets/Sprites/Levels/Interactive/altar.png"
 }
 
-#static sprites dictionary
-SSD = {
-    "barrel":"Assets/Sprites/Levels/Objects/barrel.png",
-    "box":"Assets/Sprites/Levels/Objects/box.png",
-    "cell_break":"Assets/Sprites/Levels/Objects/cell_break.png",
-    "cell_ghoul":"Assets/Sprites/Levels/Objects/cell_ghoul.png",
-    "cell":"Assets/Sprites/Levels/Objects/cell.png",
-    "chains":"Assets/Sprites/Levels/Objects/chains.png"
+#decorations sprites dictionary
+DSD = {
+    "barrel":"Assets/Sprites/Levels/Decorations/barrel.png",
+    "box":"Assets/Sprites/Levels/Decorations/box.png",
+    "cell_break":"Assets/Sprites/Levels/Decorations/cell_break.png",
+    "cell_ghoul":"Assets/Sprites/Levels/Decorations/cell_ghoul.png",
+    "cell":"Assets/Sprites/Levels/Decorations/cell.png",
+    "chains":"Assets/Sprites/Levels/Decorations/chains.png",
+    "armor":"Assets/Sprites/Levels/Decorations/armor.png",
+    "brazier":"Assets/Sprites/Levels/Decorations/brazier.png",
+    "candel1":"Assets/Sprites/Levels/Decorations/candel1.png",
+    "candel2":"Assets/Sprites/Levels/Decorations/candel2.png",
+    "candel3":"Assets/Sprites/Levels/Decorations/candel3.png",
+    "candelabrum":"Assets/Sprites/Levels/Decorations/candelabrum.png",
+    "chair":"Assets/Sprites/Levels/Decorations/chair.png",
+    "column_peak":"Assets/Sprites/Levels/Decorations/column_peak.png",
+    "column":"Assets/Sprites/Levels/Decorations/column.png",
+    "grave1":"Assets/Sprites/Levels/Decorations/grave1.png",
+    "grave2":"Assets/Sprites/Levels/Decorations/grave2.png",
+    "grave3":"Assets/Sprites/Levels/Decorations/grave3.png",
+    "king":"Assets/Sprites/Levels/Decorations/king.png",
+    "table":"Assets/Sprites/Levels/Decorations/table.png",
+    "torch":"Assets/Sprites/Levels/Decorations/torch.png",
+    "vase_brown":"Assets/Sprites/Levels/Decorations/vase_brown.png",
+    "vase_gray":"Assets/Sprites/Levels/Decorations/vase_gray.png",
+    "vase_green":"Assets/Sprites/Levels/Decorations/vase_green.png"
+}
+
+floor_decorations = {
+    1:["barrel", "box", "cell_break", "cell_ghoul", "cell", "chains", "table", "brazier"],
+    2:["barrel", "box", "cell", "chains", "brazier", "grave1", "grave2", "grave3", "vase_brown", "candel1", "candel2", "candel3", "torch"],
+    3:["barrel", "vase_green", "candel1", "candel2", "candel3", "candelabrum", "chair", "table"],
+    4:["barrel", "vase_gray", "candelabrum", "chair", "table", "torch", "column"],
+    5:["column_peak", "brazier", "torch", "candelabrum"]
 }
 
 #weapon sprites dictionary
@@ -174,20 +198,56 @@ WTD = {
     **{f"H{i}": path for i, path in enumerate(SH)},
     "E":"Assets/Sprites/Levels/Walls/stairs.png",
     "J":"Assets/Sprites/Levels/Walls/barrier.png",
-    
+    "W": "Assets/Sprites/Levels/Walls/1lv_dungeon/1w_simple1.png"
+}
+
+floor_walls = {
     #dungeon
-    "N":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_grate.png",
-    "O":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_simple2.png",
-    "Q":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_simple1.png",
-    "T":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_ghoul_grate.png",
-    "U":"Assets/Sprites/Levels/Walls/1lv_dungeon/1w_torch.png",
+    1:[
+        ("simple1", 35, "Assets/Sprites/Levels/Walls/1lv_dungeon/1w_simple1.png"),
+        ("simple2", 35, "Assets/Sprites/Levels/Walls/1lv_dungeon/1w_simple2.png"),
+        ("torch", 14, "Assets/Sprites/Levels/Walls/1lv_dungeon/1w_torch.png"),
+        ("grate", 11, "Assets/Sprites/Levels/Walls/1lv_dungeon/1w_grate.png"),
+        ("ghoul_grate", 5, "Assets/Sprites/Levels/Walls/1lv_dungeon/1w_ghoul_grate.png")
+    ],
 
     #mausoleum
-    "V":"Assets/Sprites/Levels/Walls/2lv_mausoleum/2w_simple.png",
-    "W":"Assets/Sprites/Levels/Walls/2lv_mausoleum/2w_decor1.png",
-    "X":"Assets/Sprites/Levels/Walls/2lv_mausoleum/2w_decor2.png",
-    "Y":"Assets/Sprites/Levels/Walls/2lv_mausoleum/2w_statue.png"
+    2:[
+        ("simple", 60, "Assets/Sprites/Levels/Walls/2lv_mausoleum/2w_simple.png"),
+        ("decor1", 16, "Assets/Sprites/Levels/Walls/2lv_mausoleum/2w_decor2.png"),
+        ("decor2", 16, "Assets/Sprites/Levels/Walls/2lv_mausoleum/2w_decor2.png"),
+        ("statue", 8, "Assets/Sprites/Levels/Walls/2lv_mausoleum/2w_statue.png")
+    ],
+
+    #archive
+    3:[
+        ("simple1", 16, "Assets/Sprites/Levels/Walls/3lv_archive/3v_simple1.png"),
+        ("simple2", 16, "Assets/Sprites/Levels/Walls/3lv_archive/3v_simple2.png"),
+        ("simple3", 16, "Assets/Sprites/Levels/Walls/3lv_archive/3v_simple3.png"),
+        ("simple4", 16, "Assets/Sprites/Levels/Walls/3lv_archive/3v_simple4.png"),
+        ("simple5", 16, "Assets/Sprites/Levels/Walls/3lv_archive/3v_simple5.png"),
+        ("simple6", 16, "Assets/Sprites/Levels/Walls/3lv_archive/3v_simple6.png"),
+        ("dark", 4, "Assets/Sprites/Levels/Walls/3lv_archive/3v_simple7.png")
+    ],
+
+    #hall
+    4:[
+        ("simple", 40, "Assets/Sprites/Levels/Walls/4lv_hall/4w_simple.png"),
+        ("column", 20, "Assets/Sprites/Levels/Walls/4lv_hall/4w_column.png"),
+        ("brazier", 18, "Assets/Sprites/Levels/Walls/4lv_hall/4w_brazier.png"),
+        ("statue", 10, "Assets/Sprites/Levels/Walls/4lv_hall/4w_statue.png"),
+        ("flag", 8, "Assets/Sprites/Levels/Walls/4lv_hall/4w_flag.png"),
+        ("shield", 4, "Assets/Sprites/Levels/Walls/4lv_hall/4w_shield.png")
+    ],
+
+    #peak
+    5:[
+        ("glass1", 30, "Assets/Sprites/Levels/Walls/5lv_peak/5w_glass1.png"),
+        ("glass2", 60, "Assets/Sprites/Levels/Walls/5lv_peak/5w_glass2.png"),
+        ("glass4", 5, "Assets/Sprites/Levels/Walls/5lv_peak/5w_glass4.png")
+    ]
 }
+floor_walls_default = floor_walls[1]
 
 #rings dictionary
 RD = {
@@ -249,7 +309,7 @@ RD = {
 
     "ring_murderer":{
         "name":"Кольцо кровожадного убийцы",
-        "sprite":"Assets/Sprites/Rings/cowardly_aristocrat.png",
+        "sprite":"Assets/Sprites/Rings/bloody_murderer.png",
         "desc":"""
         Люди по своей природе жестоки... Жесток и Артега, и его подчиненные, и его враги. Но в этом плане
         всех и каждого превзошел один безумный солдат, прозванный "Берсерком". Он желал мести, для 
@@ -292,7 +352,7 @@ RD = {
 
 floor_names = {
     1:"Первый этаж: Темница",
-    2:"Второй этаж: Мавзолей",
+    2:"Второй этаж: Мавзолей Дракона",
     3:"Третий этаж: Проклятый Архив",
     4:"Четвертый этаж: Мраморный Зал",
     5:"Последний этаж: Пик Башни"

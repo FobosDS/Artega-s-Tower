@@ -6,7 +6,7 @@ OUTPUT_FILE = "Scripts/map_frame.txt"
 
 COLORS = {
     "FFFFFFFF": ".",    
-    "FF7F7F7F": "O",     
+    "FF7F7F7F": "W",#wall    
     "FF385623": "1",#ghoul
     "FF335593": "2",#gargolye 
     "FFC00000": "3",#vampire
@@ -23,6 +23,10 @@ COLORS = {
     "FF002060": "D"#decoration
 }
 
+#1-heart
+#2-lungs
+#3-crate
+#4-ring
 RARE_CHEST_NUMBERS = {
     "1": "r",
     "2": "s",
@@ -35,11 +39,6 @@ MERCHANT_NUMBERS = {
     "2": "n",
     "3": "o",
     "4": "p"
-}
-
-WALL_NUMBERS = {
-    "1": "O", "2": "Q", "3": "N", "4": "T", "5": "U",
-    "6": "V", "7": "W", "8": "X", "9": "Y"
 }
 
 def get_hex_from_color(color):
@@ -95,9 +94,6 @@ def color_to_symbol(fill, cell_value=None):
         if cell_value is not None:
             value_str = str(cell_value).strip()
                 
-        if symbol == "O" and value_str in WALL_NUMBERS:
-            return WALL_NUMBERS[value_str]
-
         if symbol == "R" and value_str in RARE_CHEST_NUMBERS:
             return RARE_CHEST_NUMBERS[value_str]
 
