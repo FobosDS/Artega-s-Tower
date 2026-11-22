@@ -993,5 +993,5 @@ class Death_Screen:
         else:
             screen.fill((0, 0, 0))
 
-        text = self.title_font.render("ВЛАДЫКА БАШНИ ОДОЛЕЛ ОСКАРА", True, menu_title_color)
+        text = self.title_font.render("ОСКАР ПОГИБ", True, menu_title_color)
         screen.blit(text, text.get_rect(center=(half_width, half_height)))    

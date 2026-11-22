@@ -1,64 +1,63 @@
 {
   "floor": 4,
-  "hp": 22.0,
-  "sp": 70.03699999999829,
-  "gold": 140,
-  "potions": 0,
-  "scrolls": 2,
+  "hp": 31,
+  "sp": 85.8109999999998,
+  "gold": 517,
+  "potions": 3,
+  "scrolls": 0,
   "whetstones": 0,
   "weapon_level": 1,
-  "durability": 61,
+  "durability": 67,
   "hp_level": 1,
   "sp_level": 1,
-  "rings": [
-    "ring_murderer",
-    "ring_dragon"
-  ],
+  "rings": [],
   "dark_shards": 0,
-  "is_chest_key1": true,
-  "is_chest_key2": true,
-  "is_floor_key": true,
-  "enemies_alive": [],
+  "is_chest_key1": false,
+  "is_chest_key2": false,
+  "is_floor_key": false,
+  "enemies_alive": [
+    0
+  ],
   "objects_state": [
     {
-      "id": 1,
+      "id": 2,
       "type": "Rare_Chest",
       "open": false
     },
     {
-      "id": 3,
-      "type": "Shelf",
-      "used": true
-    },
-    {
       "id": 4,
       "type": "Shelf",
-      "used": true
+      "used": false
     },
     {
       "id": 5,
       "type": "Shelf",
-      "used": true
+      "used": false
     },
     {
       "id": 6,
       "type": "Shelf",
-      "used": true
+      "used": false
     },
     {
       "id": 7,
       "type": "Shelf",
-      "used": true
+      "used": false
     },
     {
       "id": 8,
+      "type": "Shelf",
+      "used": false
+    },
+    {
+      "id": 9,
       "type": "Merchant",
       "unique_item": "ring",
       "trades_done": 0,
       "price": 160
     },
     {
-      "id": 9,
+      "id": 10,
       "type": "Barrier",
       "broken": false
     }

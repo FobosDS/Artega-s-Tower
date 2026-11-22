@@ -318,4 +318,14 @@ color_gold = (230, 200, 60)
 color_potion = (200, 60, 120)
 color_scroll = (120, 140, 220)
 color_whetstone = (160, 160, 160)
+
+#floor and ceiling colors
+floor_colors = {                                            
+    1: {"floor": (36, 32, 28), "ceiling": (10, 10, 12)},             
+    2: {"floor": (34, 37, 43), "ceiling": (8, 9, 12)},
+    3: {"floor": (58, 46, 38), "ceiling": (22, 20, 18)},
+    4: {"floor": (72, 76, 86), "ceiling": (52, 56, 66)},
+    5: {"floor": (44, 34, 44), "ceiling": (18, 12, 22)}         
+}
+floor_colors_default = floor_colors[1]   
 #==================================

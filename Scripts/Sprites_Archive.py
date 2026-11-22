@@ -233,8 +233,9 @@ floor_walls = {
     #hall
     4:[
         ("simple", 40, "Assets/Sprites/Levels/Walls/4lv_hall/4w_simple.png"),
-        ("column", 20, "Assets/Sprites/Levels/Walls/4lv_hall/4w_column.png"),
-        ("brazier", 18, "Assets/Sprites/Levels/Walls/4lv_hall/4w_brazier.png"),
+        ("column1", 20, "Assets/Sprites/Levels/Walls/4lv_hall/4w_column1.png"),
+        ("column2", 6, "Assets/Sprites/Levels/Walls/4lv_hall/4w_column2.png"),
+        ("brazier", 12, "Assets/Sprites/Levels/Walls/4lv_hall/4w_brazier.png"),
         ("statue", 10, "Assets/Sprites/Levels/Walls/4lv_hall/4w_statue.png"),
         ("flag", 8, "Assets/Sprites/Levels/Walls/4lv_hall/4w_flag.png"),
         ("shield", 4, "Assets/Sprites/Levels/Walls/4lv_hall/4w_shield.png")
@@ -244,7 +245,7 @@ floor_walls = {
     5:[
         ("glass1", 30, "Assets/Sprites/Levels/Walls/5lv_peak/5w_glass1.png"),
         ("glass2", 60, "Assets/Sprites/Levels/Walls/5lv_peak/5w_glass2.png"),
-        ("glass4", 5, "Assets/Sprites/Levels/Walls/5lv_peak/5w_glass4.png")
+        ("glass4", 10, "Assets/Sprites/Levels/Walls/5lv_peak/5w_glass4.png")
     ]
 }
 floor_walls_default = floor_walls[1]

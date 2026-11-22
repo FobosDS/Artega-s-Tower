@@ -31,10 +31,27 @@ for f, variants in floor_walls.items():
             print(f"Ошибка текстуры {symbol}: {e}")
             textures[symbol] = None
 
-def render_background(screen):
-    pygame.draw.rect(screen, light_black, (0, 0, width, half_height))
-    pygame.draw.rect(screen, dark_gray, (0, half_height, width, half_height))
+def render_background(screen, floor=1):
+    colors = floor_colors.get(floor, floor_colors_default)
+    pygame.draw.rect(screen, colors["ceiling"], (0, 0, width, half_height))
 
+    f_r, f_g, f_b = colors["floor"]
+    bands = 10
+    horizon = half_height
+    band_h = max(1, (height - horizon) // bands)
+
+    for i in range(bands):
+        k = 0.35 + (i / (bands - 1)) * 0.65         
+        r = int(f_r * k)
+        g = int(f_g * k)
+        b = int(f_b * k)
+        y = horizon + i * band_h
+        pygame.draw.rect(screen, (r, g, b), (0, y, width, band_h))
+
+    remainder = height - (horizon + bands * band_h)
+    if remainder > 0:
+        pygame.draw.rect(screen, (f_r, f_g, f_b), (0, horizon + bands * band_h, width, remainder))
+        
 def render_walls(player, screen, walls_grid):
     x, y = player.x, player.y
     
@@ -123,6 +140,8 @@ def render_walls(player, screen, walls_grid):
             
             shade = max(0.15, 1.0 - perp_dist / maxDepth)
             if side == 1: shade *= 0.7
+            if hit_symbol.startswith("W_5_"):                        
+                shade = max(shade, 0.5)
             
             if shade < 0.99:
                 dark_surface = pygame.Surface(texture_slice.get_size(), pygame.SRCALPHA)
@@ -188,9 +207,9 @@ def render_sprites(player, screen, sprites):
             scaled = pygame.transform.scale(sprite.image, (sprite_width, sprite_height))
             screen.blit(scaled, (draw_start_x, draw_start_y))
 
-def render_scene(player, screen, objects, interactive_objects, enemies, projectile_manager, walls_grid):
+def render_scene(player, screen, objects, interactive_objects, enemies, projectile_manager, walls_grid, floor=1):
     screen.fill(black)
-    render_background(screen)
+    render_background(screen, floor)
     render_walls(player, screen, walls_grid)
     
     all_sprites = objects + interactive_objects + enemies + projectile_manager.projectiles

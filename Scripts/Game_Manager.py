@@ -2,7 +2,7 @@ import pygame
 from Settings import *
 from Projectile import ProjectileManager
 from Map import drawed_maps, set_floor_map
-from Objects import Rare_Chest, Merchant, Shelf, Decoration, RingPickup, Barrier, Stairs, Altar
+from Objects import Rare_Chest, Merchant, Shelf, Decoration, RingPickup, Barrier, Stairs, Altar, Chest
 from Sprites_Archive import ISD, WTD, RD, floor_names, SH, floor_decorations, floor_walls, floor_walls_default
 import Items_Hub
 import math                                
@@ -109,6 +109,8 @@ class MapManager:
                         self.objects.append(Decoration(center_x, center_y, floor))
                 elif ch == "S":  
                     self.interactive_objects.append(Altar(center_x, center_y))
+                elif ch == "C":
+                    self.interactive_objects.append(Chest(center_x, center_y))
                 
             self.walls_grid.append(grid_row)
 
@@ -395,7 +397,8 @@ class Game:
             self.objects, self.interactive_objects,
             self.enemy_manager.enemies, 
             self.enemy_manager.projectile_manager,
-            self.map_manager.walls_grid
+            self.map_manager.walls_grid,
+            self.player.stats.current_floor
         )
         self.weapon.draw(self.screen)
         

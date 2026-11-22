@@ -38,23 +38,55 @@ class Interactive_Sprite(Sprite):
     def get_prompt(self, player_stats):
         return None
 
+class Chest(Interactive_Sprite):                                  
+    def __init__(self, x, y):
+        y += 50
+        super().__init__(x, y, ISD["chest"]["close"], scale=0.5, collision_radius=14)
+        self.is_open = False
+
+    def perform_action(self, player_stats, give_ring=None):
+        if self.is_open:
+            return "Сундук пуст"
+        if not player_stats.is_chest_key1:                         
+            return "Требуется ключ от сундука"
+        self.is_open = True
+        self.image = pygame.image.load(ISD["chest"]["open"]).convert_alpha()
+        amount = random.randint(*chest_gold_drop)
+        player_stats.base.add_gold(amount)
+        item = Items_Hub.roll_shelf_loot(player_stats.get_loot_bonus())
+        if item is None:
+            return f"В сундуке только золото. Оскар получил {amount} золота"
+        player_stats.give_item(item, give_ring=give_ring)
+        return Items_Hub.colored_pickup(f"Оскар открыл сундук: {amount} золота и ", item)
+
+    def get_prompt(self, player_stats):                            
+        if self.is_open or not player_stats.is_chest_key1:
+            return "Осмотреть"
+        return "Открыть сундук"    
+
 class Rare_Chest(Interactive_Sprite):
     def __init__(self, x, y, unique_item=None):
         image_path = ISD["rare_chest"]["close"]
-        super().__init__(x, y, image_path, scale=0.8, collision_radius=14)
+        super().__init__(x, y, image_path, scale=1, collision_radius=14)
         self.is_open = False
         self.unique_item = unique_item
     
     def perform_action(self, player_stats, give_ring=None):
         if self.is_open:
-            return "Сундук пуст"
+            return "Тайник пуст"
         if not player_stats.is_chest_key2:
             return "Требуется ключ от тайника Артеги"
         self.is_open = True
         self.image = pygame.image.load(ISD["rare_chest"]["open"]).convert_alpha()
         item = self.unique_item if self.unique_item else Items_Hub.ring
         msg = player_stats.give_item(item, give_ring=give_ring)
-        return Items_Hub.colored_pickup("Оскар нашел в тайнике чародея: ", item)
+        return Items_Hub.colored_pickup("Оскар нашел в тайнике Артеги: ", item)
+
+    def get_prompt(self, player_stats):                            
+        if self.is_open or not player_stats.is_chest_key2:
+            return "Осмотреть"
+        return "Открыть тайник"
+         
     
 class Merchant(Interactive_Sprite):
     def __init__(self, x, y, unique_item=None):
@@ -140,6 +172,9 @@ class Shelf(Interactive_Sprite):
         player_stats.give_item(item, give_ring=give_ring)
         return Items_Hub.colored_pickup("Оскар нашел на полке: ", item)
 
+    def get_prompt(self, player_stats):
+        return "Осмотреть"
+
 class RingPickup(Interactive_Sprite):
     def __init__(self, x, y, ring_type):
         image_path = RD[ring_type]["sprite"]
@@ -180,6 +215,9 @@ class RingPickup(Interactive_Sprite):
             ("Оскар подобрал с пола: ", white),
             (RD[chosen]['name'], color_ring),
         ]
+
+    def get_prompt(self, player_stats):
+        return "Подобрать кольцо"
         
 class Decoration(Sprite):
     def __init__(self, x, y, floor=1):
@@ -211,7 +249,7 @@ class Altar(Interactive_Sprite):
 
     def get_prompt(self, player_stats):
         if player_stats.base.dark_shards < 1:
-            return ""
+            return "Осмотреть"
         return "Сохранить прогресс"
 
 class Stairs(Interactive_Sprite):
@@ -227,8 +265,7 @@ class Stairs(Interactive_Sprite):
         return "Оскар поднимается на следующий этаж башни"
 
     def get_prompt(self, player_stats):
-        if player_stats.is_floor_key:
-            return "Подняться на следующий этаж"
+        return "Подняться на следующий этаж"
 
 class Barrier(Interactive_Sprite):
     def __init__(self, x, y):
@@ -236,10 +273,17 @@ class Barrier(Interactive_Sprite):
         self.hidden = True
         self.broken = False
         self.rect = pygame.Rect(x - tile_size // 2, y - tile_size // 2, tile_size, tile_size)
-        self.interactive_rect = pygame.Rect(x - tile_size // 2, y - tile_size // 2 + 0.5, tile_size, tile_size + 0.5)
+        self.interactive_rect = pygame.Rect(x - tile_size // 2 - 10, y - tile_size // 2 - 10, tile_size + 20, tile_size + 20)
 
     def perform_action(self, player_stats, give_ring=None):
+        if self.broken:
+            return "Барьер рассыпался"
         return "Барьер не поддаётся"
+
+    def get_prompt(self, player_stats):                      
+        if self.broken:
+            return None
+        return "Осмотреть"
 
     def break_barrier(self):
         self.broken = True
