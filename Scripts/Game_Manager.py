@@ -2,7 +2,11 @@ import pygame
 from Settings import *
 from Projectile import ProjectileManager, Projectile_View
 from Map import drawed_maps, set_floor_map
-from Objects import Rare_Chest, Merchant, Shelf, Decoration, RingPickup, Barrier, Stairs, Altar, Chest, Gold_Heap, Food
+from Objects import (
+    Rare_Chest, Merchant, Shelf, Decoration, 
+    RingPickup, Barrier, Stairs, Altar, 
+    Chest, Gold_Heap, Food, Dark_Crystal
+    )
 from Sprites_Archive import ISD, WTD, RD, floor_names, SH, floor_decorations, floor_walls, floor_walls_default
 import Items_Hub
 import math                                
@@ -116,6 +120,8 @@ class MapManager:
                     self.interactive_objects.append(Gold_Heap(center_x, center_y))
                 elif ch == "F":
                     self.interactive_objects.append(Food(center_x, center_y))
+                elif ch == "L":
+                    self.interactive_objects.append(Dark_Crystal(center_x, center_y))
                 
             self.walls_grid.append(grid_row)
 
@@ -333,6 +339,8 @@ class Game:
                 state["taken"] = obj.taken
             elif isinstance(obj, Food):
                 state["taken"] = obj.taken
+            elif isinstance(obj, Dark_Crystal):
+                state["taken"] = obj.taken
             else:
                 continue
             objects_state.append(state)
@@ -403,7 +411,9 @@ class Game:
             elif isinstance(obj, Gold_Heap):                     
                 obj.taken = s.get("taken", obj.taken)
             elif isinstance(obj, Food):                     
-                obj.taken = s.get("taken", obj.taken)            
+                obj.taken = s.get("taken", obj.taken)
+            elif isinstance(obj, Dark_Crystal):                     
+                obj.taken = s.get("taken", obj.taken)              
             elif isinstance(obj, RingPickup):
                 if s["taken"]:
                     to_remove.append(obj)

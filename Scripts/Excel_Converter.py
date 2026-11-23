@@ -20,6 +20,7 @@ COLORS = {
     "FF7F6000": "H",#shelf
     "FF00B0F0": "F",#food
     "FFFFFF00": "G",#gold
+    "": "L",#dark crystal
     "FF002060": "D"#decoration
 }
 

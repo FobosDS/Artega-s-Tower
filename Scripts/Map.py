@@ -1,7 +1,7 @@
 drawed_maps = {
     1:[
     "WWWWWWWWWWWW",
-    "W...SCu.E.HW",
+    "W..LSCu.E.HW",
     "W.P.......HW",
     "W...WWWWW..W",
     "WD..WD.HH..W",

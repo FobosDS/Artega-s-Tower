@@ -332,3 +332,21 @@ class Food(Interactive_Sprite):
             return "Осмотреть"
         return "Съесть"
 
+class Dark_Crystal(Interactive_Sprite):                                   
+    def __init__(self, x, y):
+        super().__init__(x, y, ISD["dark_crystal"], scale=1, collision_radius=10)
+        self.taken = False
+        self.on_floor = True                    
+        self.floor_sink = 0.5
+
+    def perform_action(self, player_stats, give_ring=None):
+        if self.taken:
+            return "Кристалл уже разрушен"
+        self.taken = True
+        player_stats.base.add_dark_shard()
+        return f"Оскар сломал кристалл тьмы и получил его осколок"
+
+    def get_prompt(self, player_stats):
+        if self.taken:
+            return "Осмотреть"
+        return "Отколоть осколок"

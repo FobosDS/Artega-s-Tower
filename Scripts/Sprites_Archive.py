@@ -134,7 +134,8 @@ ISD = {
     },
     "altar":"Assets/Sprites/Levels/Interactive/altar.png",
     "gold_heap":"Assets/Sprites/Levels/Interactive/gold.png",
-    "food":"Assets/Sprites/Levels/Interactive/food.png"
+    "food":"Assets/Sprites/Levels/Interactive/food.png",
+    "dark_crystal":"Assets/Sprites/Levels/Interactive/dark_crystal.png"
 }
 
 #decorations sprites dictionary
