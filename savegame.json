@@ -1,13 +1,13 @@
 {
-  "floor": 4,
-  "hp": 31,
-  "sp": 85.8109999999998,
-  "gold": 517,
-  "potions": 3,
+  "floor": 5,
+  "hp": 50,
+  "sp": 100,
+  "gold": 514,
+  "potions": 2,
   "scrolls": 0,
   "whetstones": 0,
   "weapon_level": 1,
-  "durability": 67,
+  "durability": 63,
   "hp_level": 1,
   "sp_level": 1,
   "rings": [],
@@ -61,5 +61,6 @@
       "type": "Barrier",
       "broken": false
     }
-  ]
+  ],
+  "artega_done": true
 }

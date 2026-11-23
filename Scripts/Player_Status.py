@@ -171,6 +171,10 @@ class Combat_Stats:
         self.is_enchanted = False
         self.enchantment_time_left = 0
 
+        self.magic_shots_loaded = 0        
+        self.magic_shots_damage = 0        
+        self.magic_shot_timer = 0
+
     def get_attack_damage(self):
         factor = self.durability / max_durability
         if factor > 0.94:
@@ -298,8 +302,6 @@ class Player_Stats:
         self.is_floor_key = False
         self.is_chest_key1 = False
         self.is_chest_key2 = False
-
-        
 
         self.current_floor = 1
 

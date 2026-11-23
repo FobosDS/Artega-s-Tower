@@ -132,7 +132,9 @@ ISD = {
         "close":"Assets/Sprites/Levels/Interactive/Chests/rare_chest_close.png",
         "open":"Assets/Sprites/Levels/Interactive/Chests/rare_chest_open.png"
     },
-    "altar":"Assets/Sprites/Levels/Interactive/altar.png"
+    "altar":"Assets/Sprites/Levels/Interactive/altar.png",
+    "gold_heap":"Assets/Sprites/Levels/Interactive/gold.png",
+    "food":"Assets/Sprites/Levels/Interactive/food.png"
 }
 
 #decorations sprites dictionary
@@ -372,6 +374,7 @@ music = {
    "Archive2":"Assets/Music/Artega Tower Archive2.mp3",
    "Marble_Hall":"Assets/Music/Artega Tower Marble Hall.mp3",
    "We_Not_Lost":"Assets/Music/Artega Tower We Not Lost.mp3",
+   "You_Are_Ridiculous":"Assets/Music/Artega Tower You Are Ridiculous.mp3",
    "Artega":"Assets/Music/Artega Artega.mp3",
    "Artega2":"Assets/Music/Artega Tower End Soon.mp3",
    "Menu":"Assets/Music/Artega Tower Menu.mp3",
@@ -400,5 +403,7 @@ floor_music = {
     4:[
         "Assets/Music/Artega Tower Marble Hall.mp3",
         "Assets/Music/Artega Tower We Not Lost.mp3"
-    ]
+    ],
+
+    5:["Assets/Music/Artega Tower You Are Ridiculous.mp3"]
 }

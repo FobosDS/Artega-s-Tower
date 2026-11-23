@@ -44,6 +44,11 @@ class Tab_Overlay:
             img = pygame.image.load(data["sprite"]).convert_alpha()
             self.ring_icons[r] = pygame.transform.scale(img, (self.icon_size, self.icon_size))
 
+        self.magic_shard_icon = None                                    
+        if os.path.exists("Assets/Sprites/Icons/dark_shard.png"):
+            img = pygame.image.load("Assets/Sprites/Icons/dark_shard.png").convert_alpha()
+            self.magic_shard_icon = pygame.transform.scale(img, (self.icon_size * 0.5, self.icon_size * 0.7))
+
     def toggle(self):
         self.visible = not self.visible
 
@@ -104,8 +109,15 @@ class Tab_Overlay:
 
         shard_font = get_font("gothic", 20)
         shard_text = f"Осколки тьмы: {self.game.player.stats.base.dark_shards} / {max_dark_shards}"
-        surf = shard_font.render(shard_text, True, white)
-        screen.blit(surf, (rect.x + 15, rect.y + rect.h - 30))
+
+        if self.magic_shard_icon:                                       
+            screen.blit(self.magic_shard_icon, (rect.x + 15, rect.y + rect.h - 34))
+            text_x = rect.x + self.icon_size + 8
+        else:
+            text_x = rect.x + 15
+    
+        surf = shard_font.render(shard_text, True, color_dark_shard)
+        screen.blit(surf, (text_x, rect.y + rect.h - 30))
 
     def draw_map_panel(self, screen):
         if not self.visible:
@@ -995,3 +1007,120 @@ class Death_Screen:
 
         text = self.title_font.render("ОСКАР ПОГИБ", True, menu_title_color)
         screen.blit(text, text.get_rect(center=(half_width, half_height)))    
+
+class Artega_Scene:
+    def __init__(self):
+        self.active = False
+        self.done = False
+        self.notified = False
+        self.phase = "idle"                 
+        self.alpha = 0
+        self.phase_timer = 0
+        self.line_index = 0
+        self.char_timer = 0
+
+        self.font = get_font("gothic", 40)
+        self.text_color = (180, 50, 40)
+
+        self.fade_in = 2                    
+        self.fade_out = 2                    
+        self.line_time = 3                  
+        self.char_speed = 20
+
+        self.phrases = [
+            "Оскар...Вот ты и добрался сюда, на ПИК БАШНИ!",
+            "Ты первый, кому это удалось, поздравляю, ХАХАХА!",
+            "Даже ваш глупый король-трус полег ниже по этой лестнице...",
+            "Вероятно, из-за твоей глухоты ты просто не смог выразить словами свое желание.",
+            "И оно воплотилось в форме пустоты...",
+            "nihil...",
+            "ТЬМЫ!",
+            "Знаешь, ты мог бы стать для меня хорошим другом благодаря твоему таланту...",
+            "Таланту владения тьмой.",
+            "Но, вероятно, ты жаждешь отомстить за своих товарищей, хоть ни разу и не слышал их слов...",
+            "Итак, в знак моего уважения к тебе, немой воин, я устрою для тебя теплый прием!",
+            "И без подарка ты не остался.",
+            "Помнишь то кольцо?",
+            "Жаль, что ты не умеешь читать...А ведь в нем будет покоиться твоя душа!",
+            "ВЕЧНО!",
+            "ХАХАХА ХАХАХА ХАХАХА!"
+        ]
+
+    def maybe_trigger(self, stats):
+        if not self.done and not self.active and stats.current_floor == 5:
+            self.trigger()
+
+    def trigger(self):
+        self.active = True
+        self.done = False
+        self.notified = False
+        self.phase = "fade_in"
+        self.alpha = 0
+        self.line_index = 0
+        self.char_timer = 0
+
+    def skip(self):                                           
+            if not self.active:
+                return
+            self.active = False
+            self.done = True
+
+    def update(self, dt):
+        if not self.active:
+            return
+        if self.phase == "fade_in":
+            self.alpha = min(255, self.alpha + int(255 * dt / self.fade_in))
+            if self.alpha >= 255:
+                self.phase = "talk"
+                self.phase_timer = self.line_time
+                self.char_timer = 0
+        elif self.phase == "talk":
+            self.char_timer += dt * self.char_speed
+            if self.char_timer >= len(self.phrases[self.line_index]):
+                self.phase_timer -= dt
+                self.char_timer = min(self.char_timer, float(len(self.phrases[self.line_index])))
+                if self.phase_timer <= 0:
+                    self.line_index += 1
+                    self.char_timer = 0
+                    self.phase_timer = self.line_time
+                    if self.line_index >= len(self.phrases):
+                        self.phase = "fade_out"
+        elif self.phase == "fade_out":
+            self.alpha = max(0, self.alpha - int(255 * dt / self.fade_out))
+            if self.alpha <= 0:
+                self.active = False
+                self.done = True
+
+    def draw(self, screen):
+        if not self.active:
+            return
+        if self.alpha > 0:
+            veil = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+            veil.fill((0, 0, 0, self.alpha))
+            screen.blit(veil, (0, 0))
+        if self.phase == "talk":
+            text = self.phrases[self.line_index][:int(self.char_timer)]
+            self._draw_centered(screen, text)
+
+    def _draw_centered(self, screen, text):
+        max_w = screen.get_width() - 160
+        words = text.split()
+        lines, line = [], ""
+        for word in words:
+            test = (line + " " + word).strip()
+            if self.font.size(test)[0] <= max_w:
+                line = test
+            else:
+                if line:
+                    lines.append(line)
+                line = word
+        if line:
+            lines.append(line)
+
+        line_h = self.font.get_height() + 12
+        y = screen.get_height() // 2 - len(lines) * line_h // 2
+        for l in lines:
+            surf = self.font.render(l, True, self.text_color)
+            rect = surf.get_rect(center=(screen.get_width() // 2, y))
+            screen.blit(surf, rect)
+            y += line_h

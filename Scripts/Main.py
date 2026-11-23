@@ -54,6 +54,8 @@ def run_game(screen, sound_manager, load_save=False):
     input_manager.tab_overlay = game.tab_overlay
     input_manager.pause_menu = PauseMenu(screen)
     weapon.enemies = game.enemy_manager.enemies
+    input_manager.magic = game.magic_system
+    input_manager.cutscene = game.cutscene
 
     if load_save:
         game.apply_world_state()

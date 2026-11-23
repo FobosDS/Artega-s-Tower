@@ -74,6 +74,18 @@ sprint_speed_multiplier = 1.4
 animation_duration = 0.1
 reload_time = 0.35
 block_duration = 0.3
+
+#magic
+magic_shots_per_shard = 3         
+magic_shots_at_max = 4             
+magic_base_multiplier = 0.5       
+magic_shard_bonus = 6              
+magic_projectile_speed = 120    
+magic_projectile_scale = 0.7      
+magic_shot_cooldown = 0.35         
+magic_projectile_lifetime = 6 
+magic_projectile_image = "Assets/Sprites/Enemies/Projectiles/death_pr.png" 
+magic_overlay_max_alpha = 130 
 #==================================
 
 
@@ -152,6 +164,7 @@ chest_gold_drop = (25, 50)
 ghoul_gold_drop = (2, 7)
 gargoyle_gold_drop = (18, 36)
 vampire_gold_drop = (40, 70)
+gold_heap_drop_gold = (3, 40)
 
 #merchant
 price_buy_growth = 1.2
@@ -254,6 +267,7 @@ default_keys = {
     "whetstone":pygame.K_r,
     "berserk":pygame.K_g,
     "inventory":pygame.K_TAB,
+    "magic":pygame.K_LCTRL
 }
 
 bindings = dict(default_keys)
@@ -265,6 +279,7 @@ key_labels = {
     "whetstone":"Использовать точильный камень",
     "berserk":"Впасть в кровавую ярость (при наличии нужного кольца)",
     "inventory":"Кольца и мини карта",
+    "magic":"Поглотить осколок тьмы"
 }
 #==================================
 
@@ -284,6 +299,7 @@ light_gray = (220, 220, 220)
 gray = (138, 138, 138)
 dark_gray = (50, 50, 50)
 light_black = (22, 22, 22)
+magic_overlay_color = (45, 5, 75)
 
 #indicators colors
 poison_off = (8, 46, 17)

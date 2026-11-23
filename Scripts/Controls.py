@@ -7,14 +7,9 @@ class Input_Manager:
         self.interaction_manager = interaction_manager
         self.weapon = weapon
         self.tab_overlay = None
-
-class Input_Manager:
-    def __init__(self, player, interaction_manager, weapon):
-        self.player = player
-        self.interaction_manager = interaction_manager
-        self.weapon = weapon
-        self.tab_overlay = None
         self.pause_menu = None
+        self.magic = None
+        self.cutscene = None
 
     def handle_events(self, events):
         for event in events:
@@ -24,11 +19,17 @@ class Input_Manager:
                     return "exit_to_menu"
                 continue
 
-            if self.tab_overlay is not None and self.tab_overlay.handle_event(event):
-                continue
-
             if event.type == pygame.QUIT:
                 return False
+
+            if self.cutscene is not None and self.cutscene.active:   
+                if event.type == pygame.KEYDOWN and event.key in (
+                        pygame.K_ESCAPE, pygame.K_SPACE, pygame.K_RETURN):
+                    self.cutscene.skip()
+                return True
+
+            if self.tab_overlay is not None and self.tab_overlay.handle_event(event):
+                continue
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -48,11 +49,27 @@ class Input_Manager:
                     self.player.stats._try_activate_berserk()
                 if event.key == bindings["inventory"] and self.tab_overlay is not None:
                     self.tab_overlay.toggle()
+                if event.key == bindings["magic"]:          
+                    if getattr(self.weapon, "is_blocking", False):
+                        self.weapon.is_blocking = False          
+                    self.notify(self.magic.try_cast(self.player.stats))
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    self.weapon.attack()
+                    if self.magic.is_loaded(self.player.stats): 
+                        self.magic.fire(self.player)
+                    else:
+                        self.weapon.attack()
                 elif event.button == 3:
-                    self.weapon.block()
+                    if self.magic.is_loaded(self.player.stats):  
+                        self.notify("Оскара поглощает тьма. Он не в силах использовать меч!")
+                    else:
+                        self.weapon.block()
 
         return True
+
+    def notify(self, msg):
+        if not msg:
+            return
+        if hasattr(self.player.stats, "notify"):
+            self.player.stats.notify(msg)

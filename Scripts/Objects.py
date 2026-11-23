@@ -40,9 +40,11 @@ class Interactive_Sprite(Sprite):
 
 class Chest(Interactive_Sprite):                                  
     def __init__(self, x, y):
-        y += 50
-        super().__init__(x, y, ISD["chest"]["close"], scale=0.5, collision_radius=14)
+        super().__init__(x, y, ISD["chest"]["close"], scale=0.6, collision_radius=14)
         self.is_open = False
+        self.on_floor = True                    
+        self.floor_sink = 0.5
+        
 
     def perform_action(self, player_stats, give_ring=None):
         if self.is_open:
@@ -67,7 +69,7 @@ class Chest(Interactive_Sprite):
 class Rare_Chest(Interactive_Sprite):
     def __init__(self, x, y, unique_item=None):
         image_path = ISD["rare_chest"]["close"]
-        super().__init__(x, y, image_path, scale=1, collision_radius=14)
+        super().__init__(x, y, image_path, scale=1.2, collision_radius=14)
         self.is_open = False
         self.unique_item = unique_item
     
@@ -288,4 +290,45 @@ class Barrier(Interactive_Sprite):
     def break_barrier(self):
         self.broken = True
         self.rect = pygame.Rect(0, 0, 0, 0)
+
+class Gold_Heap(Interactive_Sprite):                                   
+    def __init__(self, x, y):
+        super().__init__(x, y, ISD["gold_heap"], scale=0.7, collision_radius=10)
+        self.taken = False
+        self.on_floor = True                    
+        self.floor_sink = 0.5
+
+    def perform_action(self, player_stats, give_ring=None):
+        if self.taken:
+            return "Ничего ценного не осталось"
+        self.taken = True
+        amount = random.randint(*gold_heap_drop_gold)
+        player_stats.base.add_gold(amount)
+        return f"Оскар собрал {amount} золота"
+
+    def get_prompt(self, player_stats):
+        if self.taken:
+            return "Осмотреть"
+        return "Собрать золото"
+
+class Food(Interactive_Sprite):                                   
+    def __init__(self, x, y):
+        super().__init__(x, y, ISD["food"], scale=0.7, collision_radius=10)
+        self.taken = False
+        self.on_floor = True                    
+        self.floor_sink = 0.5
+        self.heal_amount = (10, 60)
+
+    def perform_action(self, player_stats, give_ring=None):
+        if self.taken:
+            return "Все уже съеденно"
+        self.taken = True
+        amount = random.randint(*self.heal_amount)
+        player_stats.base.heal(amount)
+        return f"Оскар с жадностью съел пищу и вылечил {amount} здоровья!"
+
+    def get_prompt(self, player_stats):
+        if self.taken:
+            return "Осмотреть"
+        return "Съесть"
 

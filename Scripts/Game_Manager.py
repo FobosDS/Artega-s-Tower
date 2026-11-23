@@ -1,12 +1,13 @@
 import pygame
 from Settings import *
-from Projectile import ProjectileManager
+from Projectile import ProjectileManager, Projectile_View
 from Map import drawed_maps, set_floor_map
-from Objects import Rare_Chest, Merchant, Shelf, Decoration, RingPickup, Barrier, Stairs, Altar, Chest
+from Objects import Rare_Chest, Merchant, Shelf, Decoration, RingPickup, Barrier, Stairs, Altar, Chest, Gold_Heap, Food
 from Sprites_Archive import ISD, WTD, RD, floor_names, SH, floor_decorations, floor_walls, floor_walls_default
 import Items_Hub
 import math                                
-from UI import ToastMessage, Death_Screen
+from UI import ToastMessage, Death_Screen, Artega_Scene
+from Magic import Magic_System 
 
 
 class MapManager:
@@ -111,6 +112,10 @@ class MapManager:
                     self.interactive_objects.append(Altar(center_x, center_y))
                 elif ch == "C":
                     self.interactive_objects.append(Chest(center_x, center_y))
+                elif ch == "G":
+                    self.interactive_objects.append(Gold_Heap(center_x, center_y))
+                elif ch == "F":
+                    self.interactive_objects.append(Food(center_x, center_y))
                 
             self.walls_grid.append(grid_row)
 
@@ -149,6 +154,8 @@ class Game:
         self._sync_renderer_map()  
 
         self.enemy_manager = EnemyManager()
+        self.magic_system = Magic_System() 
+        self.cutscene = Artega_Scene()
         
         player.x, player.y = self.map_manager.player_spawn
         player.rect.center = (player.x, player.y)
@@ -195,6 +202,14 @@ class Game:
         self.player.stats.notify(f"Оскар уронил на пол: {RD[ring_type]['name']}")
 
     def update(self, dt):
+        if self.cutscene.active:                                
+            self.cutscene.update(dt)
+            if self.cutscene.done and not self.cutscene.notified:
+                self.cutscene.notified = True
+                self.player.stats.notify(
+                    "Оскар, будучи глухонемым, понял речь Артеги...Он дрожит от ужаса!")
+            return
+        
         if self.death_screen.active:                               
             self.sound_manager.update(dt)
             self.death_screen.update(dt)
@@ -220,6 +235,7 @@ class Game:
         self.enemy_manager.update(dt, self.player)
         self.enemy_manager.projectile_manager.update(dt, self.player, self.weapon)
         self.weapon.update(dt, (self.player.x, self.player.y), self.player.angle, self.player.is_sprinting)
+        self.magic_system.update(dt, self.player, self.enemy_manager.enemies)
 
         if prev_alive > 0 and len(self.enemy_manager.enemies) == 0:
             if not self.player.stats.is_floor_key:
@@ -258,11 +274,10 @@ class Game:
 
     def next_floor(self):
         next_floor_num = self.player.stats.current_floor + 1
-        if next_floor_num not in drawed_maps or not drawed_maps[next_floor_num]:
-            self.toast.set_message("Дальше пути нет. Башня пока не достроена...")
-            return
 
         self.player.stats.current_floor = next_floor_num
+        self.cutscene.maybe_trigger(self.player.stats)
+
         self.player.stats.is_chest_key1 = False
         self.player.stats.is_chest_key2 = False
         self.player.stats.is_floor_key = False
@@ -314,6 +329,10 @@ class Game:
                 state["price"] = obj.price
             elif isinstance(obj, Barrier):
                 state["broken"] = obj.broken
+            elif isinstance(obj, Gold_Heap):
+                state["taken"] = obj.taken
+            elif isinstance(obj, Food):
+                state["taken"] = obj.taken
             else:
                 continue
             objects_state.append(state)
@@ -337,6 +356,7 @@ class Game:
             "is_floor_key": self.player.stats.is_floor_key,
             "enemies_alive": enemies_alive,
             "objects_state": objects_state,
+            "artega_done": self.cutscene.done
         }
         with open(save_file, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
@@ -349,6 +369,8 @@ class Game:
 
         with open(save_file, "r", encoding="utf-8") as f:
             data = json.load(f)
+
+        self.cutscene.done = data.get("artega_done", False)
 
         alive = set(data.get("enemies_alive", []))
         self.enemy_manager.enemies[:] = [
@@ -378,6 +400,10 @@ class Game:
             elif isinstance(obj, Barrier):
                 if s.get("broken", False):                                        
                     obj.break_barrier()
+            elif isinstance(obj, Gold_Heap):                     
+                obj.taken = s.get("taken", obj.taken)
+            elif isinstance(obj, Food):                     
+                obj.taken = s.get("taken", obj.taken)            
             elif isinstance(obj, RingPickup):
                 if s["taken"]:
                     to_remove.append(obj)
@@ -393,14 +419,22 @@ class Game:
     def draw(self):
         from Renderer import render_scene
         render_scene(
-            self.player, self.screen, 
+            self.player, self.screen,
             self.objects, self.interactive_objects,
-            self.enemy_manager.enemies, 
-            self.enemy_manager.projectile_manager,
+            self.enemy_manager.enemies,
+            Projectile_View(self.enemy_manager.projectile_manager,
+                            self.magic_system.projectile_manager),  
             self.map_manager.walls_grid,
             self.player.stats.current_floor
         )
         self.weapon.draw(self.screen)
+        
+        loaded = getattr(self.player.stats.combat, "magic_shots_loaded", 0)   
+        if loaded > 0:
+            alpha = int(magic_overlay_max_alpha * loaded / magic_shots_at_max)
+            veil = pygame.Surface((width, height), pygame.SRCALPHA)
+            veil.fill((*magic_overlay_color, alpha))
+            self.screen.blit(veil, (0, 0))
         
         from UI import draw_hud, draw_prompt
         draw_hud(self.screen, self.player.stats, self.icons, self.interface)
@@ -412,6 +446,8 @@ class Game:
 
         if self.death_screen.active:                              
             self.death_screen.draw(self.screen)
+
+        self.cutscene.draw(self.screen) 
 
     def _sync_renderer_map(self):
         import Renderer
