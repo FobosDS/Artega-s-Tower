@@ -1,7 +1,7 @@
 import openpyxl
 
 EXCEL_FILE = "Assets/levels.xlsx"  
-SHEET_NAME = "level2"                  
+SHEET_NAME = "test_room"                  
 OUTPUT_FILE = "Scripts/map_frame.txt"             
 
 COLORS = {
@@ -20,7 +20,7 @@ COLORS = {
     "FF7F6000": "H",#shelf
     "FF00B0F0": "F",#food
     "FFFFFF00": "G",#gold
-    "": "L",#dark crystal
+    "FFFF3BF4": "L",#dark crystal
     "FF002060": "D"#decoration
 }
 

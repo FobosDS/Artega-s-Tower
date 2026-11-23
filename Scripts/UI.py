@@ -1018,6 +1018,7 @@ class Artega_Scene:
         self.phase_timer = 0
         self.line_index = 0
         self.char_timer = 0
+        self.wobble_time = 0
 
         self.font = get_font("gothic", 40)
         self.text_color = (180, 50, 40)
@@ -1027,6 +1028,9 @@ class Artega_Scene:
         self.line_time = 3                  
         self.char_speed = 20
 
+        self.wobble_amp = 1.5
+        self.wobble_speed = 4 
+
         self.phrases = [
             "Оскар...Вот ты и добрался сюда, на ПИК БАШНИ!",
             "Ты первый, кому это удалось, поздравляю, ХАХАХА!",
@@ -1035,7 +1039,7 @@ class Artega_Scene:
             "И оно воплотилось в форме пустоты...",
             "nihil...",
             "ТЬМЫ!",
-            "Знаешь, ты мог бы стать для меня хорошим другом благодаря твоему таланту...",
+            "Знаешь, ты мог бы стать для меня хорошим другом благодаря своему таланту...",
             "Таланту владения тьмой.",
             "Но, вероятно, ты жаждешь отомстить за своих товарищей, хоть ни разу и не слышал их слов...",
             "Итак, в знак моего уважения к тебе, немой воин, я устрою для тебя теплый прием!",
@@ -1068,6 +1072,7 @@ class Artega_Scene:
     def update(self, dt):
         if not self.active:
             return
+        self.wobble_time += dt
         if self.phase == "fade_in":
             self.alpha = min(255, self.alpha + int(255 * dt / self.fade_in))
             if self.alpha >= 255:
@@ -1119,8 +1124,17 @@ class Artega_Scene:
 
         line_h = self.font.get_height() + 12
         y = screen.get_height() // 2 - len(lines) * line_h // 2
+        char_index = 0 
         for l in lines:
-            surf = self.font.render(l, True, self.text_color)
-            rect = surf.get_rect(center=(screen.get_width() // 2, y))
-            screen.blit(surf, rect)
+            widths = [self.font.size(c)[0] for c in l]
+            x = (screen.get_width() - sum(widths)) // 2
+            for c, w in zip(l, widths):
+                phase = char_index * 0.7                        
+                dx = math.sin(self.wobble_time * self.wobble_speed + phase) * self.wobble_amp
+                dy = math.cos(self.wobble_time * self.wobble_speed * 0.8 + phase * 1.3) \
+                     * self.wobble_amp * 0.7                  
+                surf = self.font.render(c, True, self.text_color)
+                screen.blit(surf, (x + dx, y + dy))
+                x += w
+                char_index += 1
             y += line_h

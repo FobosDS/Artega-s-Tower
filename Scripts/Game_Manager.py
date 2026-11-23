@@ -34,6 +34,7 @@ class MapManager:
         self.interactive_objects.clear()
         self.barriers.clear()
         self.enemy_barrier = {}
+        self.pending_barriers = []
 
         if floor not in drawed_maps or not drawed_maps[floor]:
             floor = 1
@@ -74,7 +75,10 @@ class MapManager:
                         self.interactive_objects.append(Stairs(center_x, center_y))
                     elif ch == "J":   
                         b = Barrier(center_x, center_y)
-                        self.barriers.append(b)
+                        b.bind_wall(self.walls[-1])         
+                        b.grid_row, b.grid_col = row, col  
+                        self.barriers.append(b)                       
+                        self.pending_barriers.append((b, row, col))   
                         self.interactive_objects.append(b)
 
                 #enemies  
@@ -124,6 +128,10 @@ class MapManager:
                     self.interactive_objects.append(Dark_Crystal(center_x, center_y))
                 
             self.walls_grid.append(grid_row)
+
+        for b, brow, bcol in self.pending_barriers:         
+            b.compute_zone(drawed_map, brow, bcol, tile)
+        self.pending_barriers.clear()
 
         for i, obj in enumerate(self.interactive_objects):
             obj.obj_id = i
@@ -242,6 +250,25 @@ class Game:
         self.enemy_manager.projectile_manager.update(dt, self.player, self.weapon)
         self.weapon.update(dt, (self.player.x, self.player.y), self.player.angle, self.player.is_sprinting)
         self.magic_system.update(dt, self.player, self.enemy_manager.enemies)
+
+        for b in self.map_manager.barriers[:]:             
+            if not b.broken:
+                msg = b.update(dt, self.enemy_manager.enemies)   
+                if msg:
+                    self.toast.set_message(msg)
+            if b.broken:                                    
+                import Renderer
+                if b.wall_rect in self.map_manager.walls:
+                    self.map_manager.walls.remove(b.wall_rect)
+                if b.wall_rect in Renderer.map_manager.walls:
+                    Renderer.map_manager.walls.remove(b.wall_rect)
+                if b.wall_rect in self.player.map:
+                    self.player.map.remove(b.wall_rect)
+                if b.grid_row is not None and 0 <= b.grid_row < len(self.map_manager.walls_grid):
+                    self.map_manager.walls_grid[b.grid_row][b.grid_col] = barrier_floor_char
+                if b in self.interactive_objects:
+                    self.interactive_objects.remove(b)
+                self.map_manager.barriers.remove(b)       
 
         if prev_alive > 0 and len(self.enemy_manager.enemies) == 0:
             if not self.player.stats.is_floor_key:
@@ -406,8 +433,16 @@ class Game:
                 obj.trades_done = s.get("trades_done", obj.trades_done)   
                 obj.price = s.get("price", obj.price)
             elif isinstance(obj, Barrier):
-                if s.get("broken", False):                                        
+                if s.get("broken", False):                                      
                     obj.break_barrier()
+                    import Renderer
+                    for wl in (self.map_manager.walls, Renderer.map_manager.walls, self.player.map):
+                        if obj.wall_rect is not None and obj.wall_rect in wl:   
+                            wl.remove(obj.wall_rect)                                    
+                    if obj.grid_row is not None and 0 <= obj.grid_row < len(self.map_manager.walls_grid):
+                        self.map_manager.walls_grid[obj.grid_row][obj.grid_col] = barrier_floor_char
+                    if obj in self.interactive_objects:                                          
+                        self.interactive_objects.remove(obj)  
             elif isinstance(obj, Gold_Heap):                     
                 obj.taken = s.get("taken", obj.taken)
             elif isinstance(obj, Food):                     
@@ -437,6 +472,8 @@ class Game:
             self.map_manager.walls_grid,
             self.player.stats.current_floor
         )
+        for b in self.map_manager.barriers:                
+            b.draw_overlay(self.screen, 0, 0)
         self.weapon.draw(self.screen)
         
         loaded = getattr(self.player.stats.combat, "magic_shots_loaded", 0)   

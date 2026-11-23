@@ -10,6 +10,7 @@ half_height = height // 2
 FPS = 60
 tile_size = 25
 texture_size = 64
+barrier_floor_char = "."
 #==================================
 
 

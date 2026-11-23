@@ -1,7 +1,7 @@
 import pygame
 from Settings import *
 import random
-from Sprites_Archive import ISD, DSD, RD, floor_decorations
+from Sprites_Archive import ISD, DSD, RD, floor_decorations, WTD
 import Items_Hub
 
 class Sprite:
@@ -276,13 +276,85 @@ class Barrier(Interactive_Sprite):
         self.broken = False
         self.rect = pygame.Rect(x - tile_size // 2, y - tile_size // 2, tile_size, tile_size)
         self.interactive_rect = pygame.Rect(x - tile_size // 2 - 10, y - tile_size // 2 - 10, tile_size + 20, tile_size + 20)
+        
+        self.barrier_zone_depth = 4
+        self.barrier_zone_width = 4
+
+        self.wall_rect = None
+        self.pulse = 0.0
+        self.cooldown = 0.0
+        self.guardians = set()
+        self.armed = False
+        self.zone = pygame.Rect(0, 0, 0, 0) 
+
+        self.grid_row = None                               
+        self.grid_col = None             
+
+    def bind_wall(self, rect):
+        self.wall_rect = rect
+
+    def compute_zone(self, drawed_map, row, col, tile=tile_size):
+        
+        dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]        
+        h = len(drawed_map)
+        w = len(drawed_map[0]) if h else 0
+
+        best = None
+        for dy, dx in dirs:
+            r, c = row + dy, col + dx
+            if not (0 <= r < h and 0 <= c < w):
+                continue
+            if drawed_map[r][c] in WTD:                  
+                continue
+            r2, c2 = row + dy * 2, col + dx * 2
+            open_ahead = 0 <= r2 < h and 0 <= c2 < w and drawed_map[r2][c2] not in WTD
+            if best is None or (open_ahead and not best[0]):
+                best = (open_ahead, dy, dx)
+        if best is None:                                 
+            self.zone = pygame.Rect(0, 0, 0, 0)
+            return
+
+        _, dy, dx = best
+        depth = self.barrier_zone_depth * tile
+        width = self.barrier_zone_width * tile
+        cx, cy = (col + 0.5) * tile + dx * tile // 2 + dx * depth // 2, \
+                 (row + 0.5) * tile + dy * tile // 2 + dy * depth // 2
+        if dx != 0:                                      
+            self.zone = pygame.Rect(int(cx - depth // 2), int(cy - width // 2), depth, width)
+        else:                                            
+            self.zone = pygame.Rect(int(cx - width // 2), int(cy - depth // 2), width, depth)
+
+    def update(self, dt, enemies):
+        
+        if self.broken:
+            return None
+        self.pulse += dt
+        self.cooldown = max(0.0, self.cooldown - dt)
+
+        for e in enemies:                                
+            if self.zone.width > 0 and self.zone.colliderect(e.rect) and e not in self.guardians:
+                self.guardians.add(e)
+                if not self.armed:
+                    self.armed = True
+                    return "Барьер Артеги блокирует проход! Нужно убить его хранителей!"
+
+        self.guardians.intersection_update(enemies)      
+
+        if self.armed and not self.guardians:        
+            self.break_barrier()
+            return "Барьер рассеялся!"
+        return None
 
     def perform_action(self, player_stats, give_ring=None):
         if self.broken:
-            return "Барьер рассыпался"
-        return "Барьер не поддаётся"
+            return "Барьер рассеялся!"
+        if self.cooldown <= 0:
+            if not self.armed:
+                return "Барьер не поддается"
+            return f"Хранителей барьера осталось: {len(self.guardians)}"
+        return None
 
-    def get_prompt(self, player_stats):                      
+    def get_prompt(self, player_stats):
         if self.broken:
             return None
         return "Осмотреть"
@@ -290,6 +362,16 @@ class Barrier(Interactive_Sprite):
     def break_barrier(self):
         self.broken = True
         self.rect = pygame.Rect(0, 0, 0, 0)
+        self.interactive_rect = pygame.Rect(0, 0, 0, 0)
+
+    def draw_overlay(self, screen, cam_x, cam_y):
+        if self.broken:
+            return
+        wave = 90 + int(40 * math.sin(self.pulse * 4))
+        r = self.wall_rect if self.wall_rect else self.rect
+        tile_veil = pygame.Surface((r.w, r.h), pygame.SRCALPHA)
+        tile_veil.fill((90, 20, 140, wave))
+        screen.blit(tile_veil, (r.x - cam_x, r.y - cam_y))
 
 class Gold_Heap(Interactive_Sprite):                                   
     def __init__(self, x, y):
@@ -334,7 +416,7 @@ class Food(Interactive_Sprite):
 
 class Dark_Crystal(Interactive_Sprite):                                   
     def __init__(self, x, y):
-        super().__init__(x, y, ISD["dark_crystal"], scale=1, collision_radius=10)
+        super().__init__(x, y, ISD["dark_crystal"], scale=1.4, collision_radius=14)
         self.taken = False
         self.on_floor = True                    
         self.floor_sink = 0.5
