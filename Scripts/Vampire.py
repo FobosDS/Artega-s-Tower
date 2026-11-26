@@ -11,6 +11,8 @@ class Vampire(Enemy):
     def __init__(self, x, y, image_path, scale=1.0, collision_radius=14):
         super().__init__(x, y, image_path, scale, collision_radius)
 
+        self.collision_radius = collision_radius
+
         self.hp = 120
         self.max_hp = self.hp
         self.speed = 14
@@ -81,7 +83,8 @@ class Vampire(Enemy):
         self.rest_time = 0.5               
         self.combo_damage_mult = 1.0       
 
-        self.spheres = []                   
+        self.spheres = []  
+        self.sphere_sprites = []                 
         self.sphere_max = 3
         self.sphere_spawn_interval = 0.35   
         self.sphere_spawn_timer = 0
@@ -150,20 +153,6 @@ class Vampire(Enemy):
         self.anim_timer = 0.0
         self.anim_speed = 0.22
         self.hit_timer = 0.0
-
-    def _compose_with_spheres(self, base):
-        if not self.spheres:
-            return base
-        sph_w = self.sphere_img_lev.get_width()
-        sph_h = self.sphere_img_lev.get_height()
-        n = len(self.spheres)
-        total_w = max(base.get_width(), n * sph_w)
-        surf = pygame.Surface((total_w, base.get_height() + sph_h), pygame.SRCALPHA)
-        surf.blit(base, ((total_w - base.get_width()) // 2, sph_h))
-        start_x = (total_w - n * sph_w) // 2
-        for i, s in enumerate(self.spheres):
-            surf.blit(s["img"], (start_x + i * sph_w, 0))
-        return surf
 
     def update(self, dt, player, all_enemies):
         if self.dying:                                     
@@ -291,9 +280,9 @@ class Vampire(Enemy):
                 return
 
             if 120 < distance < 400 and self.attack_timer <= 0 and random.random() < 0.02:
-                self.warning_message = "Кровавые сферы кружат над вампиром!"
                 self.state = "cast"
                 self.spheres.clear()
+                self.sphere_sprites.clear()
                 self.sphere_spawn_timer = 0
                 self.attack_direction = target_angle
                 return
@@ -314,21 +303,23 @@ class Vampire(Enemy):
                 self.state = "attack_hit"
                 self.state_timer = 0.22
 
-        elif self.state == "quick_dash":                   
+        elif self.state == "quick_dash":
             self.image = sprites["dash"]
             step = self.quick_dash_speed * dt
             moved = 0.0
             nx = self.x + self.dash_dx * step
-            if not self.is_wall(nx, self.y):
+            if (not self.is_wall(nx, self.y)
+                    and math.hypot(nx - player.x, self.y - player.y) > self.collision_radius + 18):
                 self.x = nx
                 moved = step
             ny = self.y + self.dash_dy * step
-            if not self.is_wall(self.x, ny):
+            if (not self.is_wall(self.x, ny)
+                    and math.hypot(self.x - player.x, ny - player.y) > self.collision_radius + 18):
                 self.y = ny
                 moved = step
             self.rect.center = (self.x, self.y)
             self.dash_left -= moved
-            if self.dash_left <= 0 or moved == 0:
+            if self.dash_left <= 0 or moved == 0:            
                 self.state = "strike_pre"
                 self.state_timer = self.quick_windup
 
@@ -344,19 +335,21 @@ class Vampire(Enemy):
                 self.combo_damage_mult = self.lunge_damage_mult
                 self.state = "lunge_fly"
 
-        elif self.state == "lunge_fly":                     
+        elif self.state == "lunge_fly":
             self.image = sprites["dash"]
-            if distance > 1:                                
+            if distance > 1:
                 self.dash_dx = dx / distance
                 self.dash_dy = dy / distance
             step = self.lunge_speed * dt
             moved = 0.0
             nx = self.x + self.dash_dx * step
-            if not self.is_wall(nx, self.y):
+            if (not self.is_wall(nx, self.y)
+                    and math.hypot(nx - player.x, self.y - player.y) > self.collision_radius + 18):
                 self.x = nx
                 moved = step
             ny = self.y + self.dash_dy * step
-            if not self.is_wall(self.x, ny):
+            if (not self.is_wall(self.x, ny)
+                    and math.hypot(self.x - player.x, ny - player.y) > self.collision_radius + 18):
                 self.y = ny
                 moved = step
             self.rect.center = (self.x, self.y)
@@ -378,9 +371,9 @@ class Vampire(Enemy):
                 self.state = "chase"
                 self.attack_timer = 0.8
 
-
-        elif self.state == "cast":                           
-            self.image = self._compose_with_spheres(sprites["cast"])
+        elif self.state == "cast":
+            self.image = sprites["cast"]                       
+            self._sync_sphere_sprites(player, distance)        
             if self.sphere_spawn_timer > 0: self.sphere_spawn_timer -= dt
             if len(self.spheres) < self.sphere_max and self.sphere_spawn_timer <= 0:
                 self.spheres.append({"img": self.sphere_img_lev, "t": 0.0})
@@ -389,19 +382,21 @@ class Vampire(Enemy):
                 self.state = "sphere_hold"
                 self.state_timer = self.sphere_hold_time
 
-        elif self.state == "sphere_hold":                   
-            self.image = self._compose_with_spheres(sprites["cast"])
+        elif self.state == "sphere_hold":
+            self.image = sprites["cast"]
+            self._sync_sphere_sprites(player, distance)
             if self.state_timer <= 0:
                 self.state = "sphere_launch"
                 self.launch_gap = 0.2
 
-        elif self.state == "sphere_launch":                  
-            self.image = self._compose_with_spheres(sprites["cast"])
+        elif self.state == "sphere_launch":
+            self.image = sprites["cast"]
+            self._sync_sphere_sprites(player, distance)
             if self.launch_gap > 0:
                 self.launch_gap -= dt
             elif self.spheres:
                 s = self.spheres[0]
-                if s["img"] is self.sphere_img_lev:         
+                if s["img"] is self.sphere_img_lev:
                     s["img"] = self.sphere_img_atk
                     s["t"] = 0.2
                 else:
@@ -412,11 +407,12 @@ class Vampire(Enemy):
                         proj.speed = 220
                         self.projectiles.append(proj)
                         self.spheres.pop(0)
+                        self.sphere_sprites.pop(0)             
                         self.launch_gap = self.sphere_launch_interval
             else:
+                self.sphere_sprites = []
                 self.state = "chase"
                 self.attack_timer = 1.2
-
 
         elif self.state == "teleport_out":
             self.image = self.tp_frames[0] if self.state_timer > 0.15 else self.tp_frames[1]
@@ -468,11 +464,13 @@ class Vampire(Enemy):
             step = self.dash_speed * dt
             moved = 0.0
             nx = self.x + self.dash_dx * step
-            if not self.is_wall(nx, self.y):
+            if (not self.is_wall(nx, self.y)
+                    and math.hypot(nx - player.x, self.y - player.y) > self.collision_radius + 18):
                 self.x = nx
                 moved = step
             ny = self.y + self.dash_dy * step
-            if not self.is_wall(self.x, ny):
+            if (not self.is_wall(self.x, ny)
+                    and math.hypot(self.x - player.x, ny - player.y) > self.collision_radius + 18):
                 self.y = ny
                 moved = step
             self.rect.center = (self.x, self.y)
@@ -589,3 +587,31 @@ class Vampire(Enemy):
 
     def try_reflect_magic(self):
         return random.random() < self.reflect_chance
+
+    def _sync_sphere_sprites(self, player, distance):
+        if not self.spheres:
+            self.sphere_sprites = []
+            return
+        sh = height * self.scale * sprites_scale / max(1.0, distance)
+        sph_w, sph_h = self.sphere_img_lev.get_size()
+        gap = 2.0 * height * self.scale * sprites_scale * (sph_w / max(1, sph_h)) / width
+        perp_x = math.sin(player.angle)     
+        perp_y = -math.cos(player.angle)
+        while len(self.sphere_sprites) < len(self.spheres):
+            self.sphere_sprites.append(Sphere_Sprite(self.x, self.y, self.sphere_img_lev, self.scale))
+        for i, (s, sp) in enumerate(zip(self.spheres, self.sphere_sprites)):
+            offset = (i - (len(self.spheres) - 1) / 2) * gap
+            sp.x = self.x + perp_x * offset
+            sp.y = self.y + perp_y * offset
+            sp.image = s["img"]            
+            sp.flight_height = int(sh * 0.55)
+
+class Sphere_Sprite:
+    def __init__(self, x, y, img, scale):
+        self.x = x
+        self.y = y
+        self.image = img
+        self.scale = scale
+        self.img_w, self.img_h = img.get_size()
+        self.aspect = self.img_w / self.img_h
+        self.flight_height = 0

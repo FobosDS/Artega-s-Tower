@@ -220,7 +220,10 @@ def render_scene(player, screen, objects, interactive_objects, enemies, projecti
     screen.fill(black)
     render_background(screen, floor)
     render_walls(player, screen, walls_grid)
-    
-    all_sprites = objects + interactive_objects + enemies + projectile_manager.projectiles
-    
+
+    extras = []
+    for e in enemies:
+        extras.extend(getattr(e, "sphere_sprites", []))
+
+    all_sprites = objects + interactive_objects + enemies + extras + projectile_manager.projectiles
     render_sprites(player, screen, all_sprites)
