@@ -114,18 +114,18 @@ sp_regen_delay_bonus = 0.11
 #base stats
 base_hp = 100         
 base_sp = 100 - sp_bonus
-base_durability = 70       
+base_durability = 100       
 base_potions = 3
 base_gold = 500
 base_scrolls = 0
 base_whetstones = 0   
-base_attack_damage = 100       
+base_attack_damage = 12      
 potion_heal_percent = 0.5 
 base_sp_regen = 14 - sp_regen_bonus
 base_sp_regen_delay = 0.45 + sp_regen_delay_bonus
-base_hp_level = 1
+base_hp_level = 3
 base_sp_level = 1
-base_weapon_level = 1
+base_weapon_level = 2
 base_dark_shards = 1
 
 #weapon

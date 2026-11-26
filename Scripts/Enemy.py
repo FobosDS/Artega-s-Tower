@@ -18,10 +18,8 @@ class Enemy(Sprite):
         self.speed = 10
         
         self.player = None 
-
         self.enemy_type = "ghoul"
         self.has_dropped = False
-
         self.room_id = None
         self.barrier_id = None
 
@@ -52,11 +50,21 @@ class Enemy(Sprite):
         if not self.is_wall(new_x, self.y) and not self.collides_with_enemies(new_x, self.y, all_enemies):
             self.x = new_x
             self.rect.center = (self.x, self.y)
+        else:
+            side_x = new_x + move_y
+            if not self.is_wall(side_x, self.y) and not self.collides_with_enemies(side_x, self.y, all_enemies):
+                self.x = side_x
+                self.rect.center = (self.x, self.y)
 
         new_y = self.y + move_y
         if not self.is_wall(self.x, new_y) and not self.collides_with_enemies(self.x, new_y, all_enemies):
             self.y = new_y
             self.rect.center = (self.x, self.y)
+        else:
+            side_y = new_y + move_x
+            if not self.is_wall(self.x, side_y) and not self.collides_with_enemies(self.x, side_y, all_enemies):
+                self.y = side_y
+                self.rect.center = (self.x, self.y)
 
     def collides_with_enemies(self, x, y, all_enemies):
         for other in all_enemies:
@@ -91,3 +99,18 @@ class Enemy(Sprite):
         if self.room_id is not None and self.player is not None:
             self.player.stats.killed_in_room[self.room_id] = \
                 self.player.stats.killed_in_room.get(self.room_id, 0) + 1
+
+    def try_attack_player(self, player, damage, angle_tolerance=math.pi/3):
+        dx = player.x - self.x
+        dy = player.y - self.y
+        distance = math.hypot(dx, dy)
+
+        angle_to_player = math.atan2(dy, dx)
+        angle_diff = abs(self.attack_direction - angle_to_player)
+        if angle_diff > math.pi:
+            angle_diff = 2 * math.pi - angle_diff
+
+        if distance <= self.attack_range + 15 and angle_diff < angle_tolerance:
+            player.stats.base.take_damage(damage)
+            return True
+        return False

@@ -117,7 +117,82 @@ ESD ={
 
         #projectile
         "proj":
-        "Assets/Sprites/Enemies/Projectiles/paralich_pr.png"    
+        "Assets/Sprites/Enemies/Projectiles/paralich_pr.png"
+    },
+
+    "vampire":{
+        #front
+        "f_stand":
+        "Assets/Sprites/Enemies/Vampire/v_front_stand.png",
+        "f_move1":
+        "Assets/Sprites/Enemies/Vampire/v_front_walk1.png",
+        "f_move2":
+        "Assets/Sprites/Enemies/Vampire/v_front_walk2.png",
+        "f_take_rapier":
+        "Assets/Sprites/Enemies/Vampire/v_take_rapier.png",
+        "f_attack_pre":
+        "Assets/Sprites/Enemies/Vampire/v_attack_rapier1.png",
+        "f_attack":
+        "Assets/Sprites/Enemies/Vampire/v_attack_rapier2.png",
+        "f_cast":
+        "Assets/Sprites/Enemies/Vampire/v_cast.png",
+        "f_dash":
+        "Assets/Sprites/Enemies/Vampire/v_attack_rapier3.png",
+
+        #side
+        "s_stand":
+        "Assets/Sprites/Enemies/Vampire/v_side_walk2.png",
+        "s_move1":
+        "Assets/Sprites/Enemies/Vampire/v_side_walk1.png",
+        "s_move2":
+        "Assets/Sprites/Enemies/Vampire/v_side_walk2.png",
+        "s_take_rapier":
+        "Assets/Sprites/Enemies/Vampire/v_take_rapier.png",
+        "s_attack_pre":
+        "Assets/Sprites/Enemies/Vampire/v_attack_rapier1.png",
+        "s_attack":
+        "Assets/Sprites/Enemies/Vampire/v_attack_rapier2.png",
+        "s_cast":
+        "Assets/Sprites/Enemies/Vampire/v_cast.png",
+        "s_dash":
+        "Assets/Sprites/Enemies/Vampire/v_attack_rapier3.png",
+
+        #back
+        "b_stand":
+        "Assets/Sprites/Enemies/Vampire/v_back_stand.png",
+        "b_move1":
+        "Assets/Sprites/Enemies/Vampire/v_back_walk1.png",
+        "b_move2":
+        "Assets/Sprites/Enemies/Vampire/v_back_walk2.png",
+        "b_take_rapier":
+        "Assets/Sprites/Enemies/Vampire/v_take_rapier.png",
+        "b_attack_pre":
+        "Assets/Sprites/Enemies/Vampire/v_attack_rapier1.png",
+        "b_attack":
+        "Assets/Sprites/Enemies/Vampire/v_attack_rapier2.png",
+        "b_cast":
+        "Assets/Sprites/Enemies/Vampire/v_cast.png",
+        "b_dash":
+        "Assets/Sprites/Enemies/Vampire/v_attack_rapier3.png",
+
+        #hit, teleport and death
+        "hit":
+        "Assets/Sprites/Enemies/Vampire/v_hit.png",
+        "tp1":
+        "Assets/Sprites/Enemies/Vampire/v_tp1.png",
+        "tp2":
+        "Assets/Sprites/Enemies/Vampire/v_tp2.png",
+        "tp3":
+        "Assets/Sprites/Enemies/Vampire/v_tp3.png",
+        "death":
+        "Assets/Sprites/Enemies/Vampire/v_tp1.png",
+
+        #projectile
+        "proj":{
+            "levitating":"Assets/Sprites/Enemies/Projectiles/blood_pr_stand.png",
+            "attack":"Assets/Sprites/Enemies/Projectiles/blood_pr_attack.png",
+            "throwed":"Assets/Sprites/Enemies/Projectiles/blood_pr.png"
+        }    
     }
 }
 

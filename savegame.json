@@ -1,21 +1,23 @@
 {
-  "floor": 4,
-  "hp": 31,
-  "sp": 75.27000000000037,
-  "gold": 515,
+  "floor": 2,
+  "hp": 50,
+  "sp": 30.524999999998943,
+  "gold": 503,
   "potions": 3,
   "scrolls": 0,
   "whetstones": 0,
   "weapon_level": 1,
-  "durability": 66,
+  "durability": 69,
   "hp_level": 1,
   "sp_level": 1,
   "rings": [],
   "dark_shards": 0,
-  "is_chest_key1": true,
+  "is_chest_key1": false,
   "is_chest_key2": false,
-  "is_floor_key": true,
-  "enemies_alive": [],
+  "is_floor_key": false,
+  "enemies_alive": [
+    0
+  ],
   "objects_state": [
     {
       "id": 2,

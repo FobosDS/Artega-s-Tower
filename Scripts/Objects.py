@@ -281,8 +281,8 @@ class Barrier(Interactive_Sprite):
         self.barrier_zone_width = 4
 
         self.wall_rect = None
-        self.pulse = 0.0
-        self.cooldown = 0.0
+        self.pulse = 0
+        self.cooldown = 0
         self.guardians = set()
         self.armed = False
         self.zone = pygame.Rect(0, 0, 0, 0) 

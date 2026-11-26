@@ -6,6 +6,8 @@ from Sprites_Archive import WTD, floor_walls
 
 z_buffer = [0.0] * numRays
 
+barrier_cells = {} 
+
 map_manager = MapManager()
 walls_rects = map_manager.walls
 walls_grid = map_manager.walls_grid
@@ -153,6 +155,13 @@ def render_walls(player, screen, walls_grid):
             shade = max(0.15, 1.0 - perp_dist / maxDepth)
             color = (int(light_gray[0] * shade), int(light_gray[1] * shade), int(light_gray[2] * shade))
             pygame.draw.rect(screen, color, (wall_x, top, scale + 1, wall_h))
+
+        if (map_y, map_x) in barrier_cells:            
+            pulse = barrier_cells[(map_y, map_x)]
+            wave = 90 + int(40 * math.sin(pulse * 4))
+            tint = pygame.Surface((int(scale) + 1, int(wall_h)), pygame.SRCALPHA)
+            tint.fill((160, 128, 240, int(wave * shade)))
+            screen.blit(tint, (wall_x, top))
 
 def render_sprites(player, screen, sprites):
     sprites = [s for s in sprites if not getattr(s, 'hidden', False)]

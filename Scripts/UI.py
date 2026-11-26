@@ -1138,3 +1138,60 @@ class Artega_Scene:
                 x += w
                 char_index += 1
             y += line_h
+
+class Blink_Effect:
+    def __init__(self):
+        self.active = False
+        self.phase = "closing"          
+        self.timer = 0
+        self.progress = 0         
+        self.close_duration = 0.15
+        self.hold_duration = 0.08
+        self.open_duration = 0.22
+        self.on_closed = None        
+
+    def trigger(self, on_closed=None):
+        self.active = True
+        self.phase = "closing"
+        self.timer = 0
+        self.progress = 0
+        self.on_closed = on_closed
+        
+    def trigger_fade_in(self):
+        self.active = True
+        self.phase = "hold"
+        self.timer = 0
+        self.progress = 1
+        self.on_closed = None
+
+    def update(self, dt):
+        if not self.active:
+            return
+        self.timer += dt
+
+        if self.phase == "closing":
+            self.progress = min(1, self.timer / self.close_duration)
+            if self.progress >= 1:
+                self.phase = "hold"
+                self.timer = 0
+                if self.on_closed:
+                    cb = self.on_closed
+                    self.on_closed = None
+                    cb()
+        elif self.phase == "hold":
+            self.progress = 1
+            if self.timer >= self.hold_duration:
+                self.phase = "opening"
+                self.timer = 0
+        elif self.phase == "opening":
+            self.progress = max(0, 1 - self.timer / self.open_duration)
+            if self.progress <= 0:
+                self.active = False
+                self.phase = "idle"
+
+    def draw(self, screen):
+        if not self.active or self.progress <= 0:
+            return
+        cover_h = int(self.progress * half_height) + 1
+        pygame.draw.rect(screen, (0, 0, 0), (0, 0, width, cover_h))
+        pygame.draw.rect(screen, (0, 0, 0), (0, height - cover_h, width, cover_h))

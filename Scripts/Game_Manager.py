@@ -10,7 +10,7 @@ from Objects import (
 from Sprites_Archive import ISD, WTD, RD, floor_names, SH, floor_decorations, floor_walls, floor_walls_default
 import Items_Hub
 import math                                
-from UI import ToastMessage, Death_Screen, Artega_Scene
+from UI import ToastMessage, Death_Screen, Artega_Scene, Blink_Effect
 from Magic import Magic_System 
 
 
@@ -86,6 +86,8 @@ class MapManager:
                     self.enemy_spawns.append(("ghoul", center_x, center_y))
                 elif ch == "2":
                     self.enemy_spawns.append(("gargoyle", center_x, center_y))
+                elif ch == "3":
+                    self.enemy_spawns.append(("vampire", center_x, center_y))
 
                 #rare chest
                 elif ch == "R":
@@ -147,6 +149,11 @@ class EnemyManager:
     def update(self, dt, player):
         for enemy in self.enemies:
             enemy.update(dt, player, self.enemies)
+
+            msg = getattr(enemy, "warning_message", None)
+            if msg:
+                self.game_toast.set_message(msg)   
+                enemy.warning_message = None
             
             if hasattr(enemy, 'projectiles'):
                 for proj in enemy.projectiles:
@@ -170,6 +177,7 @@ class Game:
         self.enemy_manager = EnemyManager()
         self.magic_system = Magic_System() 
         self.cutscene = Artega_Scene()
+        self.blink = Blink_Effect()
         
         player.x, player.y = self.map_manager.player_spawn
         player.rect.center = (player.x, player.y)
@@ -178,6 +186,8 @@ class Game:
         self.interactive_objects = self.map_manager.interactive_objects
 
         self.toast = ToastMessage(half_width - 420, height - 180)
+        self.enemy_manager.game_toast = self.toast
+        
         self.death_screen = Death_Screen()
 
         self.rings_to_drop = []
@@ -193,15 +203,21 @@ class Game:
         
         from Ghoul import Ghoul
         from Gargoyle import Gargoyle
+        from Vampire import Vampire
         for idx, (enemy_type, ex, ey) in enumerate(self.map_manager.enemy_spawns):
             enemy = None
             if enemy_type == "ghoul":
                 enemy = Ghoul(ex, ey, "Assets/Sprites/Enemies/Ghoul/gh_front_stand.png", 0.8, 30)
             elif enemy_type == "gargoyle":
                 enemy = Gargoyle(ex, ey, "Assets/Sprites/Enemies/Gargoyle/ga_front2.png", 0.8, 30)
+            elif enemy_type == "vampire":
+                enemy = Vampire(ex, ey, "Assets/Sprites/Enemies/Vampire/v_front_stand.png", 0.8, 30)
             if enemy is not None:
                 enemy.enemy_id = idx
                 self.enemy_manager.add_enemy(enemy)
+
+        if self.player.stats.current_floor != 5:
+            self.blink.trigger_fade_in()
                 
     def spawn_ring_pickup(self, ring_type, x, y, needs_manual=True):
         pickup = RingPickup(x, y, ring_type)
@@ -232,8 +248,11 @@ class Game:
         if self.player.stats.base.is_dead():                       
             if not self.death_screen.active:
                 self.death_screen.start()
-                self.sound_manager.play_death_music()              
+                self.sound_manager.play_death_music()
+                self.blink.active = False               
             return
+
+        self.blink.update(dt)
         
         self.sound_manager.update(dt)
         self.interaction_manager.update_prompt(self.player.rect, self.player.stats)
@@ -301,9 +320,17 @@ class Game:
             self.player.stats.request_save = False
             self.save_game()
 
-        if self.player.stats.request_next_floor:
+        if self.player.stats.request_next_floor and not self.blink.active:
             self.player.stats.request_next_floor = False
-            self.next_floor()
+            next_floor_num = self.player.stats.current_floor + 1
+
+            if next_floor_num not in drawed_maps or not drawed_maps[next_floor_num]:
+                self.toast.set_message("Дальше пути нет. Башня пока не достроена...")
+            elif next_floor_num == 5:
+                self.next_floor()
+            else:
+                self.blink.on_closed = self.next_floor
+                self.blink.trigger(on_closed=self.next_floor)
 
     def next_floor(self):
         next_floor_num = self.player.stats.current_floor + 1
@@ -463,6 +490,7 @@ class Game:
 
     def draw(self):
         from Renderer import render_scene
+        import Renderer 
         render_scene(
             self.player, self.screen,
             self.objects, self.interactive_objects,
@@ -472,8 +500,13 @@ class Game:
             self.map_manager.walls_grid,
             self.player.stats.current_floor
         )
-        for b in self.map_manager.barriers:                
-            b.draw_overlay(self.screen, 0, 0)
+
+        now = pygame.time.get_ticks() / 1000.0            
+        Renderer.barrier_cells = {                        
+            (b.grid_row, b.grid_col): now
+            for b in self.map_manager.barriers if not b.broken
+        }
+
         self.weapon.draw(self.screen)
         
         loaded = getattr(self.player.stats.combat, "magic_shots_loaded", 0)   
@@ -494,7 +527,9 @@ class Game:
         if self.death_screen.active:                              
             self.death_screen.draw(self.screen)
 
-        self.cutscene.draw(self.screen) 
+        self.cutscene.draw(self.screen)
+
+        self.blink.draw(self.screen) 
 
     def _sync_renderer_map(self):
         import Renderer

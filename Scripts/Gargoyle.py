@@ -11,6 +11,7 @@ class Gargoyle(Enemy):
         super().__init__(x, y, image_path, scale, collision_radius)
         
         self.hp = 80
+        self.max_hp = self.hp
         self.speed = 18
         self.attack_range = 25
         self.attack_damage = 11
@@ -34,7 +35,7 @@ class Gargoyle(Enemy):
         
         self.dive_cooldown = 10
         self.dive_timer = 0
-        self.dive_prep_time = 0.4
+        self.dive_prep_time = 0.6
         self.dive_duration = 0.8
         self.dive_time_left = 0
         self.dive_speed = 250
@@ -45,8 +46,9 @@ class Gargoyle(Enemy):
         self.echo_timer = 0
         self.echo_waves_left = 0
         self.echo_wave_timer = 0
-        self.echo_projectile_count = 8
+        self.echo_projectile_count = 12
         self.echo_spread = 2 * math.pi / self.echo_projectile_count
+        self.echo_wave_interval = 0.4
         
         self.is_statue = False
         self.statue_trigger_hp = self.max_hp * 0.2
@@ -54,9 +56,15 @@ class Gargoyle(Enemy):
         self.fall_damage = 100
         self.fall_radius = 100
         
-        self.aggro_range = 150
+        self.aggro_range = 140
         self.is_aggro = False
         self.flight_height = 90
+
+        self.warning_message = None 
+
+        self.dying = False                                  
+        self.dying_timer = 0
+        self.death_duration = 0.9
         
         g_data = ESD["gargoyle"]
         
@@ -103,6 +111,17 @@ class Gargoyle(Enemy):
         self.hit_timer = 0
 
     def update(self, dt, player, all_enemies):
+        if self.dying:                                      
+            self.dying_timer -= dt
+            img = self.img_death.copy()
+            img.set_alpha(max(0, int(255 * self.dying_timer / self.death_duration)))
+            self.image = img
+            if self.dying_timer <= 0:
+                self.drop_loot()
+                self.has_dropped = True
+                self.is_dead = True
+            return
+        
         if self.is_dead:
             self.drop_loot()
             self.image = self.img_death
@@ -193,7 +212,7 @@ class Gargoyle(Enemy):
                     self.state_timer = self.dive_prep_time
                     self.dive_timer = self.dive_cooldown
                     self.attack_direction = target_angle
-                elif distance <= self.attack_range and self.attack_timer <= 0:
+                elif distance <= self.attack_range + 15 and self.attack_timer <= 0:
                     self.state = "windup"
                     self.state_timer = self.windup_time
                     self.attack_direction = target_angle
@@ -213,17 +232,7 @@ class Gargoyle(Enemy):
 
         elif self.state == "attack":
             if self.state_timer <= 0:
-                dx_attack = player.x - self.x
-                dy_attack = player.y - self.y
-                angle_to_player = math.atan2(dy_attack, dx_attack)
-                
-                angle_diff_attack = abs(self.attack_direction - angle_to_player)
-                if angle_diff_attack > math.pi:
-                    angle_diff_attack = 2 * math.pi - angle_diff_attack
-                
-                if distance <= self.attack_range + 10 and angle_diff_attack < math.pi / 4:
-                    player.stats.base.take_damage(self.attack_damage)
-                    
+                self.try_attack_player(player, self.attack_damage)
                 self.state = "recovery"
                 self.state_timer = self.recovery_time
 
@@ -272,6 +281,7 @@ class Gargoyle(Enemy):
                 self.state_timer = self.recovery_time
 
         elif self.state == "echo_prep":
+            self.warning_message = "Оскар чувствует легкие вибрации в водухе..."
             self.image = sprites["echo"]
             if self.state_timer <= 0:
                 for i in range(self.echo_projectile_count):
@@ -281,11 +291,11 @@ class Gargoyle(Enemy):
                                       self.y + math.sin(angle) * 100, 
                                       self.projectile_img)
                     proj.effect = "paralysis"
-                    proj.speed = 180
+                    proj.speed = 160
                     self.projectiles.append(proj)
                 
                 self.echo_waves_left -= 1
-                self.echo_wave_timer = 0.5
+                self.echo_wave_timer = self.echo_wave_interval
                 self.state = "echo_attack"
 
         elif self.state == "echo_attack":
@@ -293,17 +303,17 @@ class Gargoyle(Enemy):
             if self.echo_wave_timer <= 0:
                 if self.echo_waves_left > 0:
                     for i in range(self.echo_projectile_count):
-                        angle = self.echo_spread * i + (self.echo_waves_left * 0.2)
+                        angle = self.echo_spread * i + (self.echo_waves_left * 0.15)
                         proj = Projectile(self.x, self.y, 
                                           self.x + math.cos(angle) * 100, 
                                           self.y + math.sin(angle) * 100, 
                                           self.projectile_img)
                         proj.effect = "paralysis"
-                        proj.speed = 180
+                        proj.speed = 160
                         self.projectiles.append(proj)
                     
                     self.echo_waves_left -= 1
-                    self.echo_wave_timer = 0.5
+                    self.echo_wave_timer = self.echo_wave_interval
                 else:
                     self.state = "recovery"
                     self.state_timer = self.recovery_time
@@ -344,9 +354,16 @@ class Gargoyle(Enemy):
 
     def take_damage(self, amount):
         if self.state in ["windup", "attack"]:
-            amount = int(amount * 0) 
+            amount = int(amount * 0.5) 
         
         super().take_damage(amount)
         
         if not self.is_dead:
             self.hit_timer = 0.2
+
+        if self.is_dead and not self.dying:                 
+            self.is_dead = False
+            self.dying = True
+            self.dying_timer = self.death_duration
+            self.state = "dying"
+            self.image = self.img_death

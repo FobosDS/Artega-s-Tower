@@ -10,7 +10,7 @@ drawed_maps = {
     "W........W.W",
     "W.WWWWW..W.W",
     "W.D..D...W.W",
-    "W......1.J.W",
+    "W......3.J.W",
     "WWWWWWWWWWWW",
     ],
 
