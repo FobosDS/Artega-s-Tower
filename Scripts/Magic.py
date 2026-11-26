@@ -23,7 +23,9 @@ class Magic_System:
 
         stats.base.dark_shards -= 1
         combat.magic_shots_loaded = shots
-        combat.magic_shots_damage = int(combat.attack_damage * magic_base_multiplier + stats.base.dark_shards * magic_shard_bonus)
+        ess = getattr(stats, "essences", None)                       
+        magic_mult = 1.25 if (ess is not None and ess.has("darkness")) else 1
+        combat.magic_shots_damage = int((combat.attack_damage * magic_base_multiplier + stats.base.dark_shards * magic_shard_bonus) * magic_mult)
         return f"Оскара поглощает тьма!"
 
     def fire(self, player):                                     

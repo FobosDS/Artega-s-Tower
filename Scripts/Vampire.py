@@ -14,7 +14,7 @@ class Vampire(Enemy):
         self.collision_radius = collision_radius
 
         self.hp = 120
-        self.max_hp = self.hp
+        self.max_hp = 120
         self.speed = 14
         self.attack_range = 40
         self.attack_damage = 22

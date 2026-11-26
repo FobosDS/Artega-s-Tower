@@ -10,7 +10,7 @@ drawed_maps = {
     "W........W.W",
     "W.WWWWW..W.W",
     "W.D..D...W.W",
-    "W......3.J.W",
+    "W......1.J.W",
     "WWWWWWWWWWWW",
     ],
 
@@ -36,7 +36,7 @@ drawed_maps = {
     "W...WWWWW..W",
     "WD..WD.HH..W",
     "W...W......W",
-    "W.H.1..p.W.W",
+    "W.H.2..p.W.W",
     "W........W.W",
     "W.WWWWW..W.W",
     "W.D..D...W.W",
@@ -51,7 +51,7 @@ drawed_maps = {
     "W...WWWWW..W",
     "WD..WD.HH..W",
     "W...W......W",
-    "W.H..1.p.W.W",
+    "W.H..3.p.W.W",
     "W........W.W",
     "W.WWWWW..W.W",
     "W.D..D...W.W",
@@ -61,7 +61,7 @@ drawed_maps = {
 
     5:[
     "WWWWWWWWWWWW",
-    "W...SCu.E.HW",
+    "W...SCR.E.HW",
     "W.P.......HW",
     "W...WWWWW..W",
     "WD..WD.HH..W",

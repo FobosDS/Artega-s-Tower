@@ -34,6 +34,10 @@ class Base_Stats:
         self.hp = min(self.hp + amount, self.max_hp)
 
     def take_damage(self, damage):
+        ess = getattr(self, "essences", None)                
+        if ess is not None and ess.try_darkness_save(self):  
+            self.hp = 1
+            return
         self.hp = max(self.hp - damage, 0)
 
     def add_potion(self, count):
@@ -244,14 +248,18 @@ class Effects:
     def try_apply_poison(self, stats):
         if self._status_shield_block(stats):
             return False
-        self.apply_poison()
+        self.apply_poison(stats)                             
         return True
 
     def try_apply_paralysis(self, stats):
         if self._status_shield_block(stats):
             return False
-        self.apply_paralysis()
+        self.apply_paralysis(stats)                          
         return True
+
+    def _ghoul_mult(self, stats):                            
+        ess = getattr(stats, "essences", None) if stats is not None else None
+        return 0.5 if (ess is not None and ess.has("ghoul")) else 1.0
 
     def _status_shield_block(self, stats):
         if not any(Items_Hub.ring_effects.get(r, {}).get("type") == "status_shield" for r in stats.base.rings):
@@ -261,21 +269,26 @@ class Effects:
         stats.ring_shield_cd = Items_Hub.ring_effects["ring_dragon"]["recharge"]
         return True
 
-    def apply_poison(self):
+    def apply_poison(self, stats=None):                      
+        mult = self._ghoul_mult(stats)
         self.is_poisoned = True
-        self.poison_time_left = poison_duration
+        self.poison_time_left = poison_duration * mult
         self.poison_tick_timer = poison_interval
 
-    def apply_paralysis(self):
+    def apply_paralysis(self, stats=None):                  
+        mult = self._ghoul_mult(stats)
         self.is_paralyzed = True
-        self.paralysis_time_left = paralysis_duration
+        self.paralysis_time_left = paralysis_duration * mult
 
-    def update(self, dt, base_stats):
+    def update(self, dt, stats):                             
+        base_stats = stats.base
+        ess = getattr(stats, "essences", None)
+        ghoul = ess is not None and ess.has("ghoul")
         if self.is_poisoned:
             self.poison_time_left -= dt
             self.poison_tick_timer -= dt
             if self.poison_tick_timer <= 0:
-                damage = int(base_stats.max_hp * poison_damage_percent)
+                damage = int(base_stats.max_hp * poison_damage_percent * (0.5 if ghoul else 1.0))
                 base_stats.take_damage(damage)
                 self.poison_tick_timer = poison_interval
             if self.poison_time_left <= 0:
@@ -317,6 +330,10 @@ class Player_Stats:
         self.request_save = False
         self.request_next_floor = False
         self.killed_in_room = {}
+
+        self.pending_messages = []
+        self.essences = None   
+        self.base.essences = None  
 
     def get_speed_multiplier(self):
         mult = 1.0
@@ -432,7 +449,7 @@ class Player_Stats:
         return False
 
     def update_effects(self, dt):
-        self.effects.update(dt, self.base)
+        self.effects.update(dt, self)
         self.combat.update_enchantment(dt)
         self.base.regen_sp(dt)
         if self.ring_shield_cd > 0:

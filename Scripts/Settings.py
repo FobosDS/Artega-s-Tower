@@ -119,14 +119,14 @@ base_potions = 8
 base_gold = 500
 base_scrolls = 0
 base_whetstones = 0   
-base_attack_damage = 40      
+base_attack_damage = 100     
 potion_heal_percent = 0.5 
 base_sp_regen = 14 - sp_regen_bonus
 base_sp_regen_delay = 0.45 + sp_regen_delay_bonus
 base_hp_level = 3
 base_sp_level = 1
 base_weapon_level = 2
-base_dark_shards = 1
+base_dark_shards = 4
 
 #weapon
 durability_loss = 1

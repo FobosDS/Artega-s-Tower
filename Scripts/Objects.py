@@ -80,14 +80,20 @@ class Rare_Chest(Interactive_Sprite):
             return "Требуется ключ от тайника Артеги"
         self.is_open = True
         self.image = pygame.image.load(ISD["rare_chest"]["open"]).convert_alpha()
-        item = self.unique_item if self.unique_item else Items_Hub.ring
-        msg = player_stats.give_item(item, give_ring=give_ring)
-        return Items_Hub.colored_pickup("Оскар нашел в тайнике Артеги: ", item)
 
-    def get_prompt(self, player_stats):                            
-        if self.is_open or not player_stats.is_chest_key2:
-            return "Осмотреть"
-        return "Открыть тайник"
+        essence_msg = None                                  
+        if getattr(self, "essence", None):
+            ess = getattr(player_stats, "essences", None)
+            if ess is not None and ess.grant(self.essence):
+                from Essences import ESSENCES
+                info = ESSENCES[self.essence]
+                essence_msg = [("Сущность тьмы проникает в Оскара: ", white), (info["name"], info["color"])]
+
+        item = self.unique_item if self.unique_item else Items_Hub.ring
+        player_stats.give_item(item, give_ring=give_ring)
+        if essence_msg is not None:                        
+            return essence_msg
+        return Items_Hub.colored_pickup("Оскар нашел в тайнике Артеги: ", item)
          
     
 class Merchant(Interactive_Sprite):

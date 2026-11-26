@@ -1,4 +1,5 @@
 import pygame
+import random
 from Settings import *
 from Projectile import ProjectileManager, Projectile_View
 from Map import drawed_maps, set_floor_map
@@ -12,10 +13,11 @@ import Items_Hub
 import math                                
 from UI import ToastMessage, Death_Screen, Artega_Scene, Blink_Effect
 from Magic import Magic_System 
-
+from Essences import Essence_Hub, floor_elite
 
 class MapManager:
     def __init__(self, floor=1):
+        self.floor = floor 
         self.walls = []
         self.walls_grid = []
         self.enemy_spawns = []
@@ -138,6 +140,12 @@ class MapManager:
         for i, obj in enumerate(self.interactive_objects):
             obj.obj_id = i
 
+        if floor == 5:
+            rare = [o for o in self.interactive_objects
+                    if type(o).__name__ == "Rare_Chest" and getattr(o, "item", None) is None]
+            if rare:
+                random.choice(rare).essence = "darkness"
+
 class EnemyManager:
     def __init__(self):
         self.enemies = []
@@ -159,9 +167,22 @@ class EnemyManager:
                 for proj in enemy.projectiles:
                     self.projectile_manager.add_projectile(proj)
                 enemy.projectiles.clear()
-                
-        self.enemies[:] = [e for e in self.enemies if not e.is_dead]
 
+        for e in self.enemies:
+            if e.is_dead and not getattr(e, "kill_counted", False):
+                e.kill_counted = True
+                if self.game.essences.has("vampire") and e.enemy_type in ("ghoul", "vampire"):
+                    player.stats.base.heal(20)
+                    self.game_toast.set_message("Оскар испил крови монстра!")
+
+                if getattr(e, "is_elite", False) and not getattr(e, "essence_granted", False):
+                    e.essence_granted = True
+                    from Essences import ESSENCES
+                    if self.game.essences.grant(e.enemy_type):
+                        self.game_toast.set_message(f"Оскар сожрал плоть сильного монстра! Он осознал {ESSENCES[e.enemy_type]['name']}")
+
+        self.enemies[:] = [e for e in self.enemies if not e.is_dead]
+                
 class Game:
     def __init__(self, screen, player, weapon, interface, icons, interaction_manager, sound_manager):
         self.screen = screen
@@ -176,6 +197,7 @@ class Game:
 
         self.enemy_manager = EnemyManager()
         self.magic_system = Magic_System() 
+
         self.cutscene = Artega_Scene()
         self.blink = Blink_Effect()
         
@@ -187,6 +209,13 @@ class Game:
 
         self.toast = ToastMessage(half_width - 420, height - 180)
         self.enemy_manager.game_toast = self.toast
+
+        self.essences = Essence_Hub()
+        self.enemy_manager.game = self    
+        self.player.essences = self.essences
+        self.player.stats.essences = self.essences
+        self.player.stats.base.essences = self.essences 
+
         
         self.death_screen = Death_Screen()
 
@@ -218,6 +247,8 @@ class Game:
 
         if self.player.stats.current_floor != 5:
             self.blink.trigger_fade_in()
+
+        self._apply_floor_elite()  
                 
     def spawn_ring_pickup(self, ring_type, x, y, needs_manual=True):
         pickup = RingPickup(x, y, ring_type)
@@ -324,13 +355,22 @@ class Game:
             self.player.stats.request_next_floor = False
             next_floor_num = self.player.stats.current_floor + 1
 
-            if next_floor_num not in drawed_maps or not drawed_maps[next_floor_num]:
-                self.toast.set_message("Дальше пути нет. Башня пока не достроена...")
-            elif next_floor_num == 5:
+            if next_floor_num == 5:
                 self.next_floor()
             else:
                 self.blink.on_closed = self.next_floor
                 self.blink.trigger(on_closed=self.next_floor)
+
+    def _apply_floor_elite(self):
+        if self.map_manager.floor not in floor_elite:
+            return
+        elite_type = floor_elite[self.map_manager.floor]
+        candidates = [e for e in self.enemy_manager.enemies
+                      if e.enemy_type == elite_type]
+        if candidates:
+            elite = random.choice(candidates)
+            elite.make_elite()
+            elite.warning_message = "На этаже бродит невероятно сильный враг!"
 
     def next_floor(self):
         next_floor_num = self.player.stats.current_floor + 1
@@ -356,16 +396,21 @@ class Game:
         self.enemy_manager.enemies.clear()
         from Ghoul import Ghoul
         from Gargoyle import Gargoyle
+        from Vampire import Vampire
         for idx, (enemy_type, ex, ey) in enumerate(self.map_manager.enemy_spawns):
             enemy = None
             if enemy_type == "ghoul":
                 enemy = Ghoul(ex, ey, "Assets/Sprites/Enemies/Ghoul/gh_front_stand.png", 0.8, 30)
             elif enemy_type == "gargoyle":
                 enemy = Gargoyle(ex, ey, "Assets/Sprites/Enemies/Gargoyle/ga_front2.png", 0.8, 30)
+            elif enemy_type == "vampire":                   
+                enemy = Vampire(ex, ey, "Assets/Sprites/Enemies/Vampire/v_front_stand.png", 0.8, 30)
             if enemy is not None:
                 enemy.enemy_id = idx
                 self.enemy_manager.add_enemy(enemy)
         self.weapon.enemies = self.enemy_manager.enemies
+
+        self._apply_floor_elite()
 
         self.sound_manager.set_floor_music(self.player.stats.current_floor)
         self.toast.set_message(f"Оскар поднялся на {floor_names[self.player.stats.current_floor]}!")

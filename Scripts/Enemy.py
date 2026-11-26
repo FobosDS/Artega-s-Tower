@@ -11,7 +11,7 @@ class Enemy(Sprite):
         super().__init__(x, y, image_path, scale, collision_radius)
 
         self.hp = 30
-        self.max_hp = self.hp
+        self.max_hp = 30
         self.gold_drop = (1, 2)
         self.is_dead = False
         self.radius = collision_radius
@@ -114,3 +114,13 @@ class Enemy(Sprite):
             player.stats.base.take_damage(damage)
             return True
         return False
+
+    def make_elite(self):                                    
+        self.is_elite = True
+        self.hp = int(self.max_hp * 2)
+        self.max_hp = self.hp
+        for attr in ("windup_time", "attack_time", "recovery_time",
+                     "quick_windup", "lunge_windup",
+                     "dash_cooldown", "shoot_cooldown", "echo_cooldown"):
+            if hasattr(self, attr):
+                setattr(self, attr, getattr(self, attr) * 0.6)

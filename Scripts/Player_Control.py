@@ -16,6 +16,7 @@ class Player:
         self.dash_dir = pygame.Vector2(0, 0)
         self.stats = Player_Stats()
         self.is_sprinting = False
+        self.second_dash_ready = False 
 
     def collides(self, test_rect, objects):
         return check_collision(test_rect, self.map, objects)
@@ -44,15 +45,24 @@ class Player:
         self.angle %= 2 * math.pi
 
     def dash(self, dt, move, forward):
-
         keys = pygame.key.get_pressed()
-        
+        ess = getattr(self, "essences", None)                    
+        has_double = ess is not None and ess.has("gargoyle")     
+
         #start dash
         if keys[pygame.K_SPACE] and self.dash_cooldown_left <= 0 and self.dash_time_left <= 0:
+            chain_second = has_double and self.second_dash_ready 
             if self.stats.base.use_sp(sp_cost_dash):
                 self.dash_dir = move if move.length_squared() > 0 else forward
                 self.dash_time_left = dash_duration
-                self.dash_cooldown_left = dash_cooldown
+                if chain_second:                                 
+                    self.second_dash_ready = False
+                    self.dash_cooldown_left = dash_cooldown
+                elif has_double:                                 
+                    self.second_dash_ready = True
+                    self.dash_cooldown_left = 0
+                else:
+                    self.dash_cooldown_left = dash_cooldown
 
         #active dash
         if self.dash_time_left > 0:

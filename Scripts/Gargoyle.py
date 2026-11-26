@@ -11,7 +11,7 @@ class Gargoyle(Enemy):
         super().__init__(x, y, image_path, scale, collision_radius)
         
         self.hp = 80
-        self.max_hp = self.hp
+        self.max_hp = 80
         self.speed = 18
         self.attack_range = 25
         self.attack_damage = 11

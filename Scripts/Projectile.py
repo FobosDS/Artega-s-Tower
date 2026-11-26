@@ -58,7 +58,7 @@ class ProjectileManager:
                         player.stats.effects.try_apply_poison(player.stats)
                         player.stats.effects.try_apply_paralysis(player.stats)
                     elif proj.effect == "death":
-                        player.stats.base.hp = 0
+                        player.stats.base.take_damage(99999)
                     
                     player.stats.base.take_damage(5)
                     self.projectiles.remove(proj)

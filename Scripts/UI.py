@@ -5,6 +5,7 @@ import math
 from Settings import bindings, key_labels
 import os
 from Settings import save_file
+from Essences import ESSENCES
 
 fonts = {
     "dispater": "Assets/Fonts/DISPATERVF.ttf",
@@ -133,14 +134,18 @@ class Tab_Overlay:
         screen.blit(header, (rect.x + 15, rect.y + 12))
 
         walls_grid = self.game.map_manager.walls_grid
+
+        owned = self.game.essences.owned_list() if hasattr(self.game, "essences") else []
+
         if not walls_grid or not walls_grid[0]:
             return
 
         rows = len(walls_grid)
         cols = len(walls_grid[0])
-        cell = min((rect.w - 30) / cols, (rect.h - 50) / rows)
+        ess_reserve = 46 * len(owned) + (34 if owned else 0)     
+        cell = min((rect.w - 30) / cols, (rect.h - 60 - ess_reserve) / rows)   
         offset_x = rect.x + (rect.w - cell * cols) // 2
-        offset_y = rect.y + 40 + (rect.h - 50 - cell * rows) // 2
+        offset_y = rect.y + 40 + (rect.h - 50 - ess_reserve - cell * rows) // 2
 
         for row_i, row in enumerate(walls_grid):
             for col_i, ch in enumerate(row):
@@ -149,6 +154,21 @@ class Tab_Overlay:
                                      (offset_x + col_i * cell,
                                       offset_y + row_i * cell,
                                       max(1, cell - 1), max(1, cell - 1)))
+
+        y = rect.bottom - ess_reserve + 20
+        for key in owned:
+            info = ESSENCES[key]
+            cx = rect.x + 26
+            pygame.draw.circle(screen, info["color"], (cx, y), 9)
+            pygame.draw.circle(screen, panel_border, (cx, y), 9, 2)
+            name_surf = self.desc_font.render(info["name"], True, white)
+            screen.blit(name_surf, (cx + 16, y - 10))
+            dy = y + 13
+            for line in self._wrap_text(info["desc"], self.desc_font, rect.w - 60):
+                surf = self.desc_font.render(line, True, (200, 190, 170))
+                screen.blit(surf, (cx + 16, dy))
+                dy += 19
+            y = dy + 8
                     
 def draw_prompt(screen, text):
     if not text:
