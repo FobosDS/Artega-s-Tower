@@ -50,7 +50,7 @@ class Interactive_Sprite(Sprite):
 
 class Chest(Interactive_Sprite):                                  
     def __init__(self, x, y):
-        super().__init__(x, y, ISD["chest"]["close"], scale=0.7)
+        super().__init__(x, y, ISD["chest"]["close"], scale=0.5)
         self.is_open = False
         self.on_floor = True                    
         self.floor_sink = 0.5
@@ -78,7 +78,7 @@ class Chest(Interactive_Sprite):
 class Rare_Chest(Interactive_Sprite):
     def __init__(self, x, y, unique_item=None):
         image_path = ISD["rare_chest"]["close"]
-        super().__init__(x, y, image_path, scale=2)
+        super().__init__(x, y, image_path, scale=0.8)
         self.is_open = False
         self.unique_item = unique_item
         self.on_floor = True
@@ -437,7 +437,7 @@ class Food(Interactive_Sprite):
 
 class Dark_Crystal(Interactive_Sprite):                                   
     def __init__(self, x, y):
-        super().__init__(x, y, ISD["dark_crystal"], scale=1.4)
+        super().__init__(x, y, ISD["dark_crystal"], scale=0.6)
         self.taken = False
         self.on_floor = True                    
         self.floor_sink = 0.5

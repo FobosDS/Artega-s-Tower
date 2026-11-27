@@ -417,7 +417,7 @@ class MainMenu:
             self.background = None
 
         self.buttons = [
-            {"key": "start", "text": "Начать игру"},
+            {"key": "start", "text": "Новая игра"},
             {"key": "settings", "text": "Настройки"},
             {"key": "about", "text": "Об игре"},
             {"key": "credits", "text": "Авторы"},

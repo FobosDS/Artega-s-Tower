@@ -44,7 +44,7 @@ music_gap_sec = 12
 rings_panel_x = 20
 rings_panel_y = 20
 rings_panel_w = 500
-rings_panel_h = 560
+rings_panel_h = 600
 
 map_panel_x = width - 540         
 map_panel_y = 20
