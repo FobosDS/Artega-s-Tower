@@ -47,10 +47,10 @@ class Essence_Hub:
     def owned_list(self):
         return [k for k in ESSENCE_ORDER if k in self.owned]
 
-    def try_darkness_save(self, base_stats):     
+    def try_darkness_save(self, base_stats, damage):
         if self.darkness_save_used or "darkness" not in self.owned:
             return False
-        if base_stats.hp <= 1:                 
+        if base_stats.hp - damage > 0:
             return False
         self.darkness_save_used = True
         return True

@@ -281,7 +281,6 @@ class Gargoyle(Enemy):
                 self.state_timer = self.recovery_time
 
         elif self.state == "echo_prep":
-            self.warning_message = "Оскар чувствует легкие вибрации в водухе..."
             self.image = sprites["echo"]
             if self.state_timer <= 0:
                 for i in range(self.echo_projectile_count):

@@ -17,7 +17,7 @@ class Base_Stats:
 
         self.max_hp = base_hp * self.hp_level
         self.max_sp = base_sp + self.sp_level * sp_bonus
-        self.max_potions = base_potions * self.hp_level
+        self.max_potions = base_potions + self.hp_level
         self.amount = self.max_hp * potion_heal_percent
 
         self.sp_regen = base_sp_regen + self.sp_level * sp_regen_bonus
@@ -35,7 +35,7 @@ class Base_Stats:
 
     def take_damage(self, damage):
         ess = getattr(self, "essences", None)                
-        if ess is not None and ess.try_darkness_save(self):  
+        if ess is not None and ess.try_darkness_save(self, damage):  
             self.hp = 1
             return
         self.hp = max(self.hp - damage, 0)
@@ -72,7 +72,7 @@ class Base_Stats:
             return False
         self.hp_level += 1
         self.max_hp = base_hp * self.hp_level
-        self.max_potions = base_potions * self.hp_level
+        self.max_potions = base_potions + self.hp_level
         self.amount = self.max_hp * potion_heal_percent
         self.hp = self.max_hp
         self.recalc_limits()
@@ -116,7 +116,7 @@ class Base_Stats:
             if eff.get("type") == "flat_levels":
                 bonus_hp += eff.get("hp", 0)
         self.max_hp = base_hp * (self.hp_level + bonus_hp)
-        self.max_potions = base_potions * (self.hp_level + bonus_hp)
+        self.max_potions = base_potions + (self.hp_level + bonus_hp)
         self.amount = self.max_hp * potion_heal_percent
         self.hp = min(self.hp, self.max_hp)
 

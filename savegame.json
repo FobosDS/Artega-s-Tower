@@ -1,14 +1,14 @@
 {
-  "floor": 2,
-  "hp": 50,
-  "sp": 30.524999999998943,
-  "gold": 503,
-  "potions": 3,
+  "floor": 5,
+  "hp": 150,
+  "sp": 100,
+  "gold": 596,
+  "potions": 4,
   "scrolls": 0,
   "whetstones": 0,
-  "weapon_level": 1,
-  "durability": 69,
-  "hp_level": 1,
+  "weapon_level": 2,
+  "durability": 95,
+  "hp_level": 3,
   "sp_level": 1,
   "rings": [],
   "dark_shards": 0,
@@ -62,5 +62,5 @@
       "broken": false
     }
   ],
-  "artega_done": false
+  "artega_done": true
 }

@@ -49,7 +49,7 @@ rings_panel_h = 560
 map_panel_x = width - 540         
 map_panel_y = 20
 map_panel_w = 520
-map_panel_h = 480
+map_panel_h = 600
 #==================================
 
 

@@ -146,6 +146,9 @@ class MapManager:
             if rare:
                 random.choice(rare).essence = "darkness"
 
+        for o in self.interactive_objects:
+            print(type(o).__name__, o.collision_radius)
+
 class EnemyManager:
     def __init__(self):
         self.enemies = []
@@ -294,8 +297,10 @@ class Game:
 
         prev_alive = len(self.enemy_manager.enemies)
 
-        self.player.movement(dt, self.objects + self.interactive_objects)
+        live_enemies = [e for e in self.enemy_manager.enemies if not e.is_dead]
+        self.player.movement(dt, self.objects + self.interactive_objects + live_enemies)
         self.player.stats.update_effects(dt)
+        
         self.enemy_manager.update(dt, self.player)
         self.enemy_manager.projectile_manager.update(dt, self.player, self.weapon)
         self.weapon.update(dt, (self.player.x, self.player.y), self.player.angle, self.player.is_sprinting)

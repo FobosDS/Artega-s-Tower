@@ -14,7 +14,16 @@ class Enemy(Sprite):
         self.max_hp = 30
         self.gold_drop = (1, 2)
         self.is_dead = False
-        self.radius = collision_radius
+        auto = self.auto_collision_radius()                      
+        if auto > self.collision_radius:                        
+            self.collision_radius = auto
+            self.rect = pygame.Rect(
+                self.x - self.collision_radius,
+                self.y - self.collision_radius,
+                self.collision_radius * 2,
+                self.collision_radius * 2
+            )
+        self.radius = self.collision_radius   
         self.speed = 10
         
         self.player = None 
@@ -22,6 +31,9 @@ class Enemy(Sprite):
         self.has_dropped = False
         self.room_id = None
         self.barrier_id = None
+
+        self.on_floor = True                                
+        self.floor_sink = 0.4  
 
     def update(self, dt, player, all_enemies):
         pass
@@ -38,8 +50,11 @@ class Enemy(Sprite):
         dx = target_x - self.x
         dy = target_y - self.y
         dist = math.hypot(dx, dy)
-        
-        min_dist = self.radius + 15
+
+        player_r = 15
+        if self.player is not None:                         
+            player_r = max(self.player.rect.w, self.player.rect.h) // 2   
+        min_dist = self.radius + player_r                   
         if dist < min_dist:
             return
 

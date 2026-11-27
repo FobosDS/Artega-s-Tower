@@ -238,15 +238,24 @@ DSD = {
     "torch":"Assets/Sprites/Levels/Decorations/torch.png",
     "vase_brown":"Assets/Sprites/Levels/Decorations/vase_brown.png",
     "vase_gray":"Assets/Sprites/Levels/Decorations/vase_gray.png",
-    "vase_green":"Assets/Sprites/Levels/Decorations/vase_green.png"
+    "vase_green":"Assets/Sprites/Levels/Decorations/vase_green.png",
+    "bones":"Assets/Sprites/Levels/Decorations/bones.png",
+    "books":"Assets/Sprites/Levels/Decorations/books.png",
+    "coffin":"Assets/Sprites/Levels/Decorations/coffin.png",
+    "curse":"Assets/Sprites/Levels/Decorations/curse.png",
+    "fontain":"Assets/Sprites/Levels/Decorations/fontain.png",
+    "fontain_blood":"Assets/Sprites/Levels/Decorations/fontain_blood.png",
+    "globe":"Assets/Sprites/Levels/Decorations/globe.png",
+    "statue_man":"Assets/Sprites/Levels/Decorations/statue_man.png",
+    "statue_women":"Assets/Sprites/Levels/Decorations/statue_women.png"
 }
 
 floor_decorations = {
-    1:["barrel", "box", "cell_break", "cell_ghoul", "cell", "chains", "table", "brazier"],
-    2:["barrel", "box", "cell", "chains", "brazier", "grave1", "grave2", "grave3", "vase_brown", "candel1", "candel2", "candel3", "torch"],
-    3:["barrel", "vase_green", "candel1", "candel2", "candel3", "candelabrum", "chair", "table"],
-    4:["barrel", "vase_gray", "candelabrum", "chair", "table", "torch", "column"],
-    5:["column_peak", "brazier", "torch", "candelabrum"]
+    1:["barrel", "box", "cell_break", "cell_ghoul", "cell", "chains", "table", "brazier", "bones"],
+    2:["barrel", "box", "cell", "chains", "brazier", "grave1", "grave2", "grave3", "vase_brown", "candel1", "candel2", "candel3", "torch", "bones", "coffin"],
+    3:["barrel", "vase_green", "candel1", "candel2", "candel3", "candelabrum", "chair", "table", "books", "curse", "globe"],
+    4:["barrel", "vase_gray", "candelabrum", "chair", "table", "torch", "column", "fontain", "statue_man", "statue_women"],
+    5:["column_peak", "brazier", "torch", "candelabrum", "bones", "books", "curse", "fontain_blood"]
 }
 
 #weapon sprites dictionary
@@ -321,9 +330,10 @@ floor_walls = {
 
     #peak
     5:[
-        ("glass1", 30, "Assets/Sprites/Levels/Walls/5lv_peak/5w_glass1.png"),
-        ("glass2", 60, "Assets/Sprites/Levels/Walls/5lv_peak/5w_glass2.png"),
-        ("glass4", 10, "Assets/Sprites/Levels/Walls/5lv_peak/5w_glass4.png")
+        ("simple", 40, "Assets/Sprites/Levels/Walls/5lv_peak/5w_simple.png"),
+        ("glass1", 40, "Assets/Sprites/Levels/Walls/5lv_peak/5w_glass1.png"),
+        ("glass2", 14, "Assets/Sprites/Levels/Walls/5lv_peak/5w_glass2.png"),
+        ("glass3", 6, "Assets/Sprites/Levels/Walls/5lv_peak/5w_glass3.png")
     ]
 }
 floor_walls_default = floor_walls[1]
@@ -442,12 +452,11 @@ sfx = {
 }
 
 music = {
-   "Dungeon_ND":"Assets/Music/Artega Tower Dungeon no drums.mp3",
    "Dungeon":"Assets/Music/Artega Tower Dungeon.mp3",
-   "Mausoleum_ND":"Assets/Music/Artega Tower Mausoleum No Drums.mp3",
    "Mausoleum":"Assets/Music/Artega Tower Mausoleum.mp3",
-   "Archive1":"Assets/Music/Artega Tower Archive.mp3",
-   "Archive2":"Assets/Music/Artega Tower Archive2.mp3",
+   "Dark_Dragon_Corpse":"Assets/Music/Artega Tower Dark Dragon Corpse.mp3",
+   "Archive":"Assets/Music/Artega Tower Archive.mp3",
+   "Darkness_Approaching":"Assets/Music/Artega Tower Darkness Approaching.mp3",
    "Marble_Hall":"Assets/Music/Artega Tower Marble Hall.mp3",
    "We_Not_Lost":"Assets/Music/Artega Tower We Not Lost.mp3",
    "You_Are_Ridiculous":"Assets/Music/Artega Tower You Are Ridiculous.mp3",
@@ -459,27 +468,26 @@ music = {
 }
 
 floor_music = {
-    0:["Assets/Music/Artega Tower Menu.mp3"],
+    0:[music["Menu"]],
     
     1:[
-        "Assets/Music/Artega Tower Dungeon no drums.mp3",
-        "Assets/Music/Artega Tower Dungeon.mp3"
+        music["Dungeon"]
     ],
 
     2:[
-        "Assets/Music/Artega Tower Mausoleum No Drums.mp3",
-        "Assets/Music/Artega Tower Mausoleum.mp3"
+        music["Mausoleum"],
+        music["Dark_Dragon_Corpse"]
     ],
 
     3:[
-        "Assets/Music/Artega Tower Archive.mp3",
-        "Assets/Music/Artega Tower Archive2.mp3"
+        music["Archive"],
+        music["Darkness_Approaching"]
     ],
 
     4:[
-        "Assets/Music/Artega Tower Marble Hall.mp3",
-        "Assets/Music/Artega Tower We Not Lost.mp3"
+        music["Marble_Hall"],
+        music["We_Not_Lost"]
     ],
 
-    5:["Assets/Music/Artega Tower You Are Ridiculous.mp3"]
+    5:[music["You_Are_Ridiculous"]]
 }

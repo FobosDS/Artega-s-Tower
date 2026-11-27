@@ -5,30 +5,40 @@ from Sprites_Archive import ISD, DSD, RD, floor_decorations, WTD
 import Items_Hub
 
 class Sprite:
-    def __init__(self, x, y, image_path, scale=1, collision_radius=0):
+    def __init__(self, x, y, image_path, scale=1, collision_radius=None):
         self.x = x
         self.y = y
         self.image = pygame.image.load(image_path).convert_alpha()
         self.scale = scale
         self.img_w, self.img_h = self.image.get_size()
         self.aspect = self.img_w / self.img_h
+        self.collision_radius = self.auto_collision_radius() if collision_radius is None \
+            else collision_radius
         self.rect = pygame.Rect(
-            self.x - collision_radius,
-            self.y - collision_radius,
-            collision_radius * 2,
-            collision_radius * 2
+            self.x - self.collision_radius,
+            self.y - self.collision_radius,
+            self.collision_radius * 2,
+            self.collision_radius * 2
         )
 
+    def auto_collision_radius(self, solid_fraction=0.8):
+        mask = pygame.mask.from_surface(self.image, 127)        
+        rects = mask.get_bounding_rects()
+        solid_w = max((r.w for r in rects), default=self.img_w)  
+        world_w = self.scale * sprites_scale * solid_w / self.img_h
+        return max(10, int(world_w * 0.5 * solid_fraction))
+
 class Interactive_Sprite(Sprite):
-    def __init__(self, x, y, image_path, scale=1.0, collision_radius=0, interactive_zone_scale=1.2):
+    def __init__(self, x, y, image_path, scale=1.0, collision_radius=None, interactive_zone_scale=1.2):  
         super().__init__(x, y, image_path, scale, collision_radius)
 
         #interaction zone
+        r = self.collision_radius                    
         self.interactive_rect = pygame.Rect(
-            self.x - collision_radius * interactive_zone_scale,
-            self.y - collision_radius * interactive_zone_scale,
-            collision_radius * 2 * interactive_zone_scale,
-            collision_radius * 2 * interactive_zone_scale
+            self.x - r * interactive_zone_scale,
+            self.y - r * interactive_zone_scale,
+            r * 2 * interactive_zone_scale,
+            r * 2 * interactive_zone_scale
         )
         self.is_action_perfomed = False
 
@@ -40,12 +50,11 @@ class Interactive_Sprite(Sprite):
 
 class Chest(Interactive_Sprite):                                  
     def __init__(self, x, y):
-        super().__init__(x, y, ISD["chest"]["close"], scale=0.6, collision_radius=14)
+        super().__init__(x, y, ISD["chest"]["close"], scale=0.7)
         self.is_open = False
         self.on_floor = True                    
         self.floor_sink = 0.5
         
-
     def perform_action(self, player_stats, give_ring=None):
         if self.is_open:
             return "Сундук пуст"
@@ -69,9 +78,11 @@ class Chest(Interactive_Sprite):
 class Rare_Chest(Interactive_Sprite):
     def __init__(self, x, y, unique_item=None):
         image_path = ISD["rare_chest"]["close"]
-        super().__init__(x, y, image_path, scale=1.2, collision_radius=14)
+        super().__init__(x, y, image_path, scale=2)
         self.is_open = False
         self.unique_item = unique_item
+        self.on_floor = True
+        self.floor_sink = 0.5
     
     def perform_action(self, player_stats, give_ring=None):
         if self.is_open:
@@ -94,11 +105,15 @@ class Rare_Chest(Interactive_Sprite):
         if essence_msg is not None:                        
             return essence_msg
         return Items_Hub.colored_pickup("Оскар нашел в тайнике Артеги: ", item)
+
+    def get_prompt(self, player_stats):                            
+            if self.is_open or not player_stats.is_chest_key1:
+                return "Осмотреть"
+            return "Открыть тайник"    
          
-    
 class Merchant(Interactive_Sprite):
     def __init__(self, x, y, unique_item=None):
-        super().__init__(x, y, ISD["merchant"], scale=0.9, collision_radius=10)
+        super().__init__(x, y, ISD["merchant"], scale=0.9)
         self.unique_item = unique_item
         self.trades_done = 0
         if unique_item == Items_Hub.ring:
@@ -233,12 +248,12 @@ class Decoration(Sprite):
         random_key = random.choice(allowed)
         image_path = DSD[random_key]
 
-        super().__init__(x, y, image_path, scale=0.6, collision_radius=6)
+        super().__init__(x, y, image_path, scale=0.6)
 
 class Altar(Interactive_Sprite):
     def __init__(self, x, y):
         image_path = ISD["altar"]
-        super().__init__(x, y, image_path, scale=0.7, collision_radius=14)
+        super().__init__(x, y, image_path, scale=0.7)
 
     def perform_action(self, player_stats, give_ring=None):
         if player_stats.base.dark_shards < 1:
@@ -381,7 +396,7 @@ class Barrier(Interactive_Sprite):
 
 class Gold_Heap(Interactive_Sprite):                                   
     def __init__(self, x, y):
-        super().__init__(x, y, ISD["gold_heap"], scale=0.7, collision_radius=10)
+        super().__init__(x, y, ISD["gold_heap"], scale=0.7)
         self.taken = False
         self.on_floor = True                    
         self.floor_sink = 0.5
@@ -401,7 +416,7 @@ class Gold_Heap(Interactive_Sprite):
 
 class Food(Interactive_Sprite):                                   
     def __init__(self, x, y):
-        super().__init__(x, y, ISD["food"], scale=0.7, collision_radius=10)
+        super().__init__(x, y, ISD["food"], scale=0.7)
         self.taken = False
         self.on_floor = True                    
         self.floor_sink = 0.5
@@ -422,7 +437,7 @@ class Food(Interactive_Sprite):
 
 class Dark_Crystal(Interactive_Sprite):                                   
     def __init__(self, x, y):
-        super().__init__(x, y, ISD["dark_crystal"], scale=1.4, collision_radius=14)
+        super().__init__(x, y, ISD["dark_crystal"], scale=1.4)
         self.taken = False
         self.on_floor = True                    
         self.floor_sink = 0.5

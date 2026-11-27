@@ -186,32 +186,36 @@ def render_sprites(player, screen, sprites):
         transform_y_cells = transform_y / tile_size
 
         sprite_screen_x = int((width / 2) * (1 + transform_x / transform_y))
-        
-        sprite_height = abs(int((height * sprite.scale * sprites_scale) / transform_y))
-        if sprite_height > height: 
-            sprite_height = height
-        if sprite_height < 2: 
+
+        min_render_dist = tile_size * 0.8
+        render_dist = max(transform_y, min_render_dist)
+
+        sprite_height = abs(int((height * sprite.scale * sprites_scale) / render_dist))
+        max_sprite_h = int(height * 1.5)
+        if sprite_height > max_sprite_h:
+            sprite_height = max_sprite_h
+        if sprite_height < 2:
             continue
-            
+
         sprite_width = int(sprite_height * sprite.aspect)
 
         draw_start_y = half_height - sprite_height // 2
         draw_start_y += int(sprite_height * 0.2)
 
         if getattr(sprite, 'on_floor', False):
-            floor_y = half_height + int(height * tile_size / (2 * transform_y))
+            floor_y = half_height + int(height * tile_size / (2 * render_dist))
             sink = int(sprite_height * getattr(sprite, 'floor_sink', 0))
             draw_start_y = floor_y - sprite_height + sink
             draw_start_y += int(getattr(sprite, 'bob_offset', 0))
 
         if hasattr(sprite, 'flight_height'):
             draw_start_y -= sprite.flight_height
-            
+
         draw_start_x = -sprite_width // 2 + sprite_screen_x
 
         center_stripe = max(0, min(width - 1, sprite_screen_x))
         ray_index = int(center_stripe / scale)
-        
+
         if 0 <= ray_index < numRays and transform_y_cells < z_buffer[ray_index]:
             scaled = pygame.transform.scale(sprite.image, (sprite_width, sprite_height))
             screen.blit(scaled, (draw_start_x, draw_start_y))
